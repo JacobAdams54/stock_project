@@ -1,12 +1,7 @@
-Here’s a **PR template** you can drop into your repo under `.github/pull_request_template.md` so that every pull request automatically enforces your documentation & testing standards:
-
----
-
-```markdown
 # Pull Request Template
 
 ## 📌 Summary
-<!-- Describe the changes you are making. What problem does this PR solve? -->
+Describe the changes you are making. What problem does this PR solve? 
 
 ---
 
@@ -44,19 +39,9 @@ Here’s a **PR template** you can drop into your repo under `.github/pull_reque
 ---
 
 ## 📸 Screenshots (if UI changes)
-<!-- Attach before/after screenshots or GIFs for visual components -->
+Attach before/after screenshots or GIFs for visual components 
 
 ---
 
 ## 🔗 Related Issues
 Closes #<issue-number>
-```
-
----
-
-This ensures:
-
-* Every PR requires **tests + docs**.
-* Firebase schema updates don’t get forgotten.
-* Visual/UI changes are validated with screenshots.
-* Lint, coverage, and review are mandatory.
