@@ -1,73 +1,96 @@
-# React + TypeScript + Vite
+# 🌱 Stalk.ai – AI-Powered Stock Predictions
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Stalk.ai is a web application that helps investors make smarter decisions by combining **real-time market data** with **machine learning–driven predictions**. Users can build custom portfolios, explore predictive stock insights, and manage their investments through an intuitive and modern interface.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## 🚀 Features
 
-## React Compiler
+### For Guest Users
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+* Browse the homepage with trending stocks and company info.
+* View **About Us** with mission and contact details.
+* Create an account or log in using secure Firebase authentication.
 
-## Expanding the ESLint configuration
+### For Registered Users
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+* **Personal Portfolio**: Add and track your favorite stocks.
+* **Stock Predictions**: View price history, AI-driven predictions, and buy/sell indicators.
+* **Watchlist Management**: Save, update, and remove stocks easily.
+* **Search & Filters**: Find stocks with keyword search and filtering options.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+### For Admins
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+* Access the admin dashboard with site analytics.
+* Manage stock data and oversee prediction algorithms via Firebase.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🛠️ Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+* **Frontend:** React + Tailwind CSS + Material UI
+* **Backend/Hosting:** Firebase (Authentication, Firestore, Hosting)
+* **Machine Learning:** Camber Cloud AI Server with Linear Regression Model
+* **Version Control:** GitHub
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## 📊 System Overview
+
+* **Deployment Diagram:** The app connects a React frontend with Firebase (hosting, Firestore, auth) and an AI server that handles prediction requests (*see diagram in SRS, p.8*).
+* **Data Updates:** Predictions refresh automatically at stock market open/close; users may request up to 5 manual updates per day.
+* **Performance:** Firebase ensures real-time data sync, while the AI engine provides timely predictions with high reliability.
+
+---
+
+## 👤 User Roles
+
+* **Guest** → View homepage, login/signup, about page.
+* **Member** → Manage portfolio & watchlist, access AI-powered predictions.
+* **Admin** → Modify stock data, oversee prediction algorithms, view analytics.
+
+---
+
+## 🔒 Key Attributes
+
+* **Reliability:** Always-available Firebase servers with secure data handling.
+* **Ease of Use:** Simple navigation, responsive UI, clear error messages.
+* **Security:** Firebase Authentication with UID-based account management.
+
+---
+
+## 📚 Documentation
+
+* [Software Requirement Specification (SRS)](./documentation/SRS%20-%20Software%20Requirement%20Specification.pdf)
+* [Development Standards](./documentation/dev-standards.md)
+* [Firebase Schema](./documentation/firebase-schema.md)
+
+---
+
+## 👥 Team
+
+* **Project Manager:** Canaan Wilhelmsson-Haack
+* **Assistant PM:** Jack Sadler
+* **Software Engineers:** Anthony Ramirez, Jacob Adams, Jacob Otero, Jason Floyd, Julian Vara, Ryan Carroll
+
+---
+
+## 🚦 Getting Started
+
+1. Clone the repo:
+
+   ```bash
+   git clone https://github.com/<your-org>/stalk.ai.git
+   cd stalk.ai
+   ```
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+3. Start development server:
+
+   ```bash
+   npm run dev
+   ```
+4. Open [http://localhost:5173](http://localhost:5173) in your browser.
