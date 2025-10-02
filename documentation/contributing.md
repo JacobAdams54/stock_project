@@ -1,125 +1,99 @@
-Here’s a **team-wide Documentation & Testing Best Practices guide** you can drop into your repo (e.g., as `CONTRIBUTING.md` or `docs/dev-standards.md`). It ensures that every issue, PR, and feature aligns with the same expectations.
+# 📄 CONTRIBUTING.md
+
+# Contributing to Stalk.ai
+
+Thank you for contributing to **Stalk.ai – AI-Powered Stock Predictions**!  
+We follow consistent standards for **code, documentation, and testing** to keep the project clean and reliable.
 
 ---
 
-# Development Standards: Documentation & Testing
+## 🛠️ Project Structure
 
-This document defines **mandatory practices** for documentation and testing across our React + Tailwind + Firebase project.
-Every feature, component, and service must meet these requirements before being merged.
-
----
-
-## 1. Documentation Standards
-
-### Component Documentation
-
-* Each React component must include:
-
-  * **File-level JSDoc comment** describing purpose, props, and usage.
-  * Clear prop types (TypeScript or PropTypes).
-  * Inline comments for complex logic.
-* Example:
-
-  ```tsx
-  /**
-   * StockChart Component
-   * Renders a responsive line chart for a given ticker and time range.
-   * Props:
-   * - ticker (string): Stock ticker symbol (e.g., "AAPL").
-   * - range (string): Time range ("1D" | "1W" | "1M" | "1Y" | "5Y").
-   */
-  ```
-
-### Firebase Data & API Documentation
-
-* All Firebase collections, fields, and query patterns must be documented in `docs/firebase-schema.md`.
-* Every function that interacts with Firebase should describe:
-
-  * The collection(s) it touches.
-  * Expected input/output shape.
-  * Security/validation rules (if relevant).
-
-### Usage Examples
-
-* Each reusable component/service must have a usage example in `docs/examples.md` or Storybook.
-* Example snippets should show:
-
-  * Basic usage.
-  * Edge cases (empty states, loading, error).
-
----
-
-## 2. Testing Standards
-
-### Unit Tests
-
-* All components and utility functions require unit tests with **Jest + React Testing Library**.
-* Minimum coverage thresholds:
-
-  * **80% statements**
-  * **80% branches**
-  * **80% functions**
-  * **80% lines**
-* Tests should validate:
-
-  * Rendering with required/optional props.
-  * Event handling (clicks, navigation, Firebase fetch success/error).
-  * Edge states (empty data, loading, error).
-
-### Integration Tests
-
-* Complex flows (e.g., Firebase queries feeding charts) must have integration tests that:
-
-  * Mock Firebase responses.
-  * Validate correct rendering of UI states for each range (1D, 1W, etc.).
-
-### Accessibility Tests
-
-* Every component must be tested for basic accessibility:
-
-  * Elements have appropriate `aria-*` attributes.
-  * Interactive elements are keyboard-accessible.
-  * Use `axe-core` or `jest-axe` to catch violations.
-
-### Visual Regression (Optional)
-
-* Key UI components (e.g., Hero, Header, Sidebar, Charts) should be tracked with visual regression testing (e.g., Chromatic or Percy) if available.
-
----
-
-## 3. Pull Request Checklist
-
-Every PR must:
-
-* [ ] Include updated **tests** for new/changed code.
-* [ ] Include updated **documentation** (component comments, schema docs, usage examples).
-* [ ] Pass linting (`eslint`, `prettier`) and type checks (if TS).
-* [ ] Meet coverage thresholds (`npm run test:coverage`).
-* [ ] Be reviewed by at least one other team member.
-
----
-
-## 4. Tools & Libraries
-
-* **Testing**: Jest, React Testing Library, jest-axe (accessibility).
-* **Docs**: JSDoc, Markdown (`docs/` folder).
-* **Linting/Formatting**: ESLint, Prettier.
-* **CI**: GitHub Actions (lint, test, build).
-
----
-
-## 5. Example Folder Structure
-
-```
 src/
-  components/
-    StockChart/
-      StockChart.tsx
-      StockChart.test.tsx
-      README.md   // local usage + props
-  firebase/
-    schema.md    // schema reference
-docs/
-  dev-standards.md
-  examples.md
-```
+components/        # Shared + domain components
+auth/            # Login, Signup, etc.
+charts/          # StockChart, StockChartWithData
+stocks/          # StockCard, StockList
+watchlist/       # Watchlist-related components
+layout/          # Header, Footer, Sidebar, Hero
+pages/             # Route-level pages (Dashboard, About, Predictions, etc.)
+hooks/             # Custom hooks (useAuth, useStockData, etc.)
+lib/               # Firebase config, API utils
+styles/            # Tailwind + global CSS
+tests/               # (optional) e2e tests
+documentation/       # Standards, SRS, schema, usage examples
+
+---
+
+## ✅ Contribution Workflow
+
+1. **Fork & Clone**  
+   - Fork the repo and clone it locally.  
+   - Add the upstream remote:  
+     ```bash
+     git remote add upstream https://github.com/<org>/stalk.ai.git
+     ```
+
+2. **Branching**  
+   - Use feature branches:  
+     ```
+     git checkout -b feature/<short-description>
+     ```
+   - Example: `feature/add-stock-chart`
+
+3. **Code Standards**  
+   - Use **React + TSX** with **Tailwind + Material UI**.  
+   - Follow existing **component vs page separation**.  
+   - Keep Firebase logic isolated in `lib/` or `hooks/`.
+
+4. **Testing**  
+   - Co-locate unit tests with components (`Component.test.tsx`).  
+   - Ensure minimum **80% coverage** across statements, branches, functions, and lines.  
+   - Use:  
+     - Jest + React Testing Library for unit tests.  
+     - jest-axe for accessibility.  
+     - Cypress/Playwright for e2e (if in `tests/e2e/`).  
+
+5. **Documentation**  
+   - Every component and function must have **JSDoc comments**.  
+   - Update or add **usage examples** in `documentation/examples.md`.  
+   - Update **Firebase schema** docs if data changes.
+
+6. **Commit Messages**  
+   - Use clear, imperative style:  
+     - `feat: add StockChart component`  
+     - `fix: resolve Firebase query bug`  
+     - `docs: update contributing guide`  
+
+7. **Pull Requests**  
+   - Open PRs against `main`.  
+   - Fill out the PR template (see below).  
+   - Ensure CI checks (lint, tests, build) pass.
+
+---
+
+## 🔍 Coding Style
+
+- **Linting:** Run `npm run lint` before committing.  
+- **Formatting:** Run `npm run format` (Prettier).  
+- **Imports:** Group imports (`react`, `lib`, `components`, `styles`).  
+- **Naming:**  
+  - Components: `PascalCase`  
+  - Hooks: `useCamelCase`  
+  - Variables/functions: `camelCase`
+
+---
+
+## 🚦 PR Review Process
+
+- At least **1 reviewer approval** is required.  
+- All **tests & docs must be updated** before merge.  
+- PRs should remain **under 400 lines** when possible — split into smaller PRs if larger.
+
+---
+
+## 📚 References
+
+- [SRS – Software Requirement Specification](./documentation/SRS%20-%20Software%20Requirement%20Specification.pdf)  
+- [Development Standards](./documentation/dev-standards.md)  
+- [Firebase Schema](./documentation/firebase-schema.md)  
