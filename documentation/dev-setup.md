@@ -1,8 +1,10 @@
-Developer setup & recommendations
+# Developer Setup & Recommendations
 
-This file summarizes how to get the repo ready for development, how to run tests, and a few recommended small fixes for a smooth team workflow.
+This file summarizes how to get the repo ready for development, how to run tests, and team workflow recommendations.
 
-1. Install dependencies (recommended)
+> 📘 **For detailed information about development tools, configurations, and recent optimizations, see [dev-tools.md](./dev-tools.md)**
+
+## 1. Install dependencies (recommended)
 
 Use a fresh install on a machine with Node 18+ (LTS recommended). If you see peer dep conflicts, use the `--legacy-peer-deps` flag or align versions (React 18 is pinned in package.json):
 
@@ -14,58 +16,163 @@ npm install
 npm install --legacy-peer-deps
 ```
 
-2. Build & dev server
+## 2. Available Commands
 
 ```bash
-# start development server
+# Development
+npm run dev          # Start Vite dev server (hot reload)
+npm run build        # Build for production (TypeScript check + Vite build)
+npm run preview      # Preview production build
+
+# Code Quality
+npm run lint         # Run ESLint on all files
+npm run format       # Auto-format all code with Prettier
+npm run format:check # Check if code is formatted (CI/CD)
+
+# Testing
+npm run test         # Run Jest test suite
+```
+
+## 3. Quick Start
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Start development server
 npm run dev
 
-# build for production (compiles TS and bundles)
+# 3. Open http://localhost:5173 in your browser
+```
+
+## 4. Development Workflow
+
+### Before Committing
+
+```bash
+npm run lint          # Check for code issues
+npm run format        # Auto-format code
+npm run test          # Run tests
+npm run build         # Ensure it builds
+```
+
+### Creating a Feature
+
+1. Create a new branch: `git checkout -b feature/your-feature-name`
+2. Make your changes
+3. Run quality checks (lint, format, test)
+4. Commit with a descriptive message
+5. Push and create a Pull Request
+6. Address review comments
+7. Merge after approval
+
+## 5. Tech Stack Summary
+
+| Tool           | Purpose                 | Configuration       |
+| -------------- | ----------------------- | ------------------- |
+| **Vite**       | Build tool & dev server | `vite.config.ts`    |
+| **TypeScript** | Type checking           | `tsconfig.*.json`   |
+| **ESLint**     | Code linting            | `eslint.config.js`  |
+| **Prettier**   | Code formatting         | `.prettierrc`       |
+| **Jest**       | Testing framework       | `jest.config.cjs`   |
+| **Babel**      | Test transformation     | `babel.config.json` |
+
+> 📘 **See [dev-tools.md](./dev-tools.md) for detailed configuration information**
+
+## 6. Project Structure
+
+```
+stock_project/
+├── src/
+│   ├── components/     # React components
+│   ├── pages/          # Page components
+│   ├── hooks/          # Custom React hooks
+│   ├── lib/            # Utilities & API clients
+│   ├── styles/         # Global styles
+│   ├── types/          # TypeScript type definitions
+│   ├── App.tsx         # Root component
+│   └── main.tsx        # Application entry point
+├── documentation/      # Project documentation
+├── public/             # Static assets
+└── [config files]      # Various tool configurations
+```
+
+## 7. Key Features & Configurations
+
+### TypeScript
+
+- ✅ Strict mode enabled
+- ✅ JSX support with `react-jsx`
+- ✅ Project references for faster builds
+- ✅ Separate configs for app code and build tools
+
+### ESLint
+
+- ✅ ESLint v9 flat config format
+- ✅ TypeScript support with `typescript-eslint`
+- ✅ React Hooks rules
+- ✅ Prettier integration (no conflicts)
+- ⚠️ Warns on `console.log` statements
+
+### Prettier
+
+- ✅ Configured with team standards
+- ✅ Single quotes, 2-space tabs
+- ✅ Automatic formatting available
+- ✅ Git-ignored files excluded
+
+### Testing
+
+- ✅ Jest with jsdom environment
+- ✅ React Testing Library
+- ✅ Custom DOM matchers (jest-dom)
+- ✅ Coverage reports enabled
+
+## 8. Troubleshooting
+
+### Common Issues
+
+**Build fails with TypeScript errors**
+
+```bash
+# Run TypeScript check to see detailed errors
 npm run build
 ```
 
-3. Run tests
-
-We configure Jest with babel-jest and jsdom. After installing dependencies run:
+**ESLint errors**
 
 ```bash
-npm test
+# Auto-fix many issues
+npm run lint -- --fix
+
+# Format code
+npm run format
 ```
 
-Notes: If tests fail with transformer errors, ensure `@babel/preset-react`, `@babel/preset-typescript`, and `babel-jest` are installed (they're listed in devDependencies after recent updates).
+**Tests failing**
 
-4. Quick checklist (audit summary)
+```bash
+# Clear Jest cache
+npx jest --clearCache
 
-- TypeScript
-  - `tsconfig.json` is set to `strict: true` with `jsx: react-jsx`. Good for catching errors early.
-  - `noEmit: true` is used and `tsc -b` is run in `build` script; good practice.
+# Run tests with verbose output
+npm test -- --verbose
+```
 
-- Vite
-  - `vite.config.ts` uses `@vitejs/plugin-react`. Good default for React + TS.
+**Port already in use**
 
-- ESLint
-  - `eslint.config.js` is present and includes recommended configs + Prettier. One potential issue: it imports `typescript-eslint` as a package name — the canonical packages are `@typescript-eslint/parser` and `@typescript-eslint/eslint-plugin` (both already in devDependencies). The import line in the config uses `import tseslint from "typescript-eslint";` which will likely fail. Recommend changing that import to either:
-    - `import tseslint from '@typescript-eslint/eslint-plugin';` (for plugin) and use `@typescript-eslint/parser` in languageOptions or specify parser in the extends config.
+```bash
+# Kill process on port 5173
+lsof -ti:5173 | xargs kill -9
 
-- Testing
-  - Added `jest.config.ts` to use `jest-environment-jsdom`, transform via `babel-jest`, and `setupFilesAfterEnv` points to `src/setupTests.ts`.
-  - `src/setupTests.ts` contains `@testing-library/jest-dom` import (devDependency added). Good.
+# Or change port in vite.config.ts
+```
 
-- Formatting & Prettier
-  - `prettier` is included and ESLint config extends `prettier`. Consider adding a `.prettierrc` and an `.editorconfig` for team consistency.
+> 📘 **For more troubleshooting, see [dev-tools.md](./dev-tools.md#troubleshooting)**
 
-5. Recommended small improvements (low risk)
+## 9. CI/CD Workflow
 
-- Fix ESLint imports: update `eslint.config.js` to import `@typescript-eslint/eslint-plugin` correctly and/or add `parser` from `@typescript-eslint/parser` for TS files.
-- Add `lint-staged` + `husky` to run ESLint and Prettier on staged files. Example devDeps: `husky`, `lint-staged`.
-- Add a `test` GitHub Actions workflow to run `npm ci`, `npm run lint`, and `npm test` on PRs (example snippet below).
-- Add an `.env.example` with required Firebase-related keys (do NOT commit secrets).
-- Consider adding `paths` to `tsconfig.json` if you want `@/components` style imports.
-- Add `@types/jest` to devDependencies (already added) so IDE autocompletion works for tests.
-
-6. Minimal CI workflow (GitHub Actions)
-
-Place in `.github/workflows/ci.yml`:
+A GitHub Actions workflow is configured in `.github/workflows/ci.yml`:
 
 ```yaml
 name: CI
@@ -79,7 +186,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: '18'
       - name: Install deps
         run: npm ci
       - name: Lint
@@ -90,16 +197,46 @@ jobs:
         run: npm test
 ```
 
-7. Team workflow recommendations (for a 5-person class project)
+## 10. Team Workflow Recommendations
 
-- Branching: Use feature branches and PRs. Protect `main` with required reviews (1-2 reviewers) and required CI checks.
-- PR template: There's a PR template in `documentation/`; ensure reviewers check lint, tests, and accessibility.
-- Code owners: Consider adding `CODEOWNERS` for critical directories like `lib/` or `pages/`.
-- Local dev: Add `README` run commands (already present) and add troubleshooting tips for common errors.
+### Branching Strategy
 
-8. Next steps for me (I can help with any of the following):
+- Use feature branches for all changes
+- Protect `main` branch with required reviews
+- Require 1-2 reviewers per PR
+- Require CI checks to pass before merging
 
-- Fix the ESLint import issue in `eslint.config.js`.
-- Add `husky` + `lint-staged` setup.
-- Create the GitHub Actions workflow file and commit it.
-- Run `npm install` and run the test suite here to validate end-to-end (if you want me to run it in this environment).
+### Code Review Checklist
+
+- [ ] Code follows style guide (Prettier + ESLint)
+- [ ] Tests are included and passing
+- [ ] No console.log statements
+- [ ] TypeScript types are used (no `any`)
+- [ ] Changes are documented if needed
+
+### Pull Requests
+
+- Use the PR template in `documentation/pull_request_template.md`
+- Link related issues
+- Include screenshots for UI changes
+- Keep PRs focused and reasonably sized
+
+## 11. Additional Resources
+
+- [Development Tools Documentation](./dev-tools.md) - Detailed tool configurations
+- [Firebase Schema](./firebase_schema.md) - Database structure
+- [Contributing Guide](./contributing.md) - Contribution guidelines
+- [PR Template](./pull_request_template.md) - Pull request template
+
+## 12. Recommended Improvements (Future)
+
+- [ ] Add `husky` + `lint-staged` for pre-commit hooks
+- [ ] Add `.env.example` with required Firebase keys
+- [ ] Consider path aliases (`@/components`) in tsconfig
+- [ ] Add `CODEOWNERS` for critical directories
+- [ ] Set up Dependabot for dependency updates
+
+---
+
+**Last Updated**: October 5, 2025  
+**Questions?** Check [dev-tools.md](./dev-tools.md) or reach out to the team!

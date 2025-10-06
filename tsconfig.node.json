@@ -8,11 +8,11 @@
     "skipLibCheck": true,
 
     /* Node mode (better for vite.config.ts) */
-    "moduleResolution": "node",
+    "moduleResolution": "NodeNext",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
-
+    
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
