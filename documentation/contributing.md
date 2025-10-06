@@ -27,12 +27,8 @@ documentation/       # Standards, SRS, schema, usage examples
 
 ## ✅ Contribution Workflow
 
-1. **Fork & Clone**  
-   - Fork the repo and clone it locally.  
-   - Add the upstream remote:  
-     ```bash
-     git remote add upstream https://github.com/<org>/stalk.ai.git
-     ```
+1. **Clone**  
+   - clone it locally.  
 
 2. **Branching**  
    - Use feature branches:  
@@ -50,9 +46,8 @@ documentation/       # Standards, SRS, schema, usage examples
    - Co-locate unit tests with components (`Component.test.tsx`).  
    - Ensure minimum **80% coverage** across statements, branches, functions, and lines.  
    - Use:  
-     - Jest + React Testing Library for unit tests.  
+     - Jest + React Testing Library for unit tests.[testing docs](https://jestjs.io/docs/getting-started)
      - jest-axe for accessibility.  
-     - Cypress/Playwright for e2e (if in `tests/e2e/`).  
 
 5. **Documentation**  
    - Every component and function must have **JSDoc comments**.  
@@ -75,7 +70,6 @@ documentation/       # Standards, SRS, schema, usage examples
 ## 🔍 Coding Style
 
 - **Linting:** Run `npm run lint` before committing.  
-- **Formatting:** Run `npm run format` (Prettier).  
 - **Imports:** Group imports (`react`, `lib`, `components`, `styles`).  
 - **Naming:**  
   - Components: `PascalCase`  
@@ -94,6 +88,12 @@ documentation/       # Standards, SRS, schema, usage examples
 
 ## 📚 References
 
-- [SRS – Software Requirement Specification](./documentation/SRS%20-%20Software%20Requirement%20Specification.pdf)  
-- [Development Standards](./documentation/dev-standards.md)  
-- [Firebase Schema](./documentation/firebase-schema.md)  
+- [Jest Testing Docs](https://jestjs.io/docs/getting-started)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+- [Material UI](https://mui.com/getting-started/installation/)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Git Commit Message Guidelines](https://chris.beams.io/posts/git-commit/)
+- [Writing Good Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
+- [JSDoc Guide](https://jsdoc.app/about-getting-started.html)
+- 
