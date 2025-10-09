@@ -11,3 +11,4 @@
  * @example
  * <Sidebar open={open} onClose={handleClose} activePage="dashboard" />
  */
+
