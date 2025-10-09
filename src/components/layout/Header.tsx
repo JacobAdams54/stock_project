@@ -9,7 +9,7 @@ import { Button, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 // import { Logo } from "./Logo"; // Uncomment and adjust path when Logo is available
 
-export function Header() {
+export default function Header() {
 	// Navigation handler stub
 	const handleNavigation = (page: string) => {
 		const event = new CustomEvent("navigate", { detail: { page } });
