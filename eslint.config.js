@@ -4,14 +4,16 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import reactRefresh from 'eslint-plugin-react-refresh';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-config-prettier';
+import jest from 'eslint-plugin-jest';
 
 export default [
-  // Ignore build output
-  { ignores: ['dist'] },
+  // Ignore build output and coverage
+  { ignores: ['dist', 'coverage/**'] },
 
   // App / frontend code (React + TS)
   {
     files: ['**/*.{ts,tsx}'],
+    ignores: ['**/*.test.ts', '**/*.test.tsx', '**/setupTests.ts'],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -50,6 +52,28 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...tseslint.configs.recommended.rules,
+    },
+  },
+
+  // Jest test files
+  {
+    files: ['**/*.test.ts', '**/*.test.tsx', '**/setupTests.ts'],
+    plugins: {
+      jest,
+    },
+    languageOptions: {
+      ecmaVersion: 2020,
+      parser: tseslint.parser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.jest,
+      },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      ...tseslint.configs.recommended.rules,
+      ...jest.configs.recommended.rules,
     },
   },
 
