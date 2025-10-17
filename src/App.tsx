@@ -1,8 +1,9 @@
+import Sidebar from './components/layout/Sidebar';
+
 function App() {
   return (
     <div>
-      <h1>Stock Project</h1>
-      <p>Welcome to the Stock Project application.</p>
+      <Sidebar activePage="dashboard" />
     </div>
   );
 }
