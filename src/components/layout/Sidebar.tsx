@@ -158,3 +158,14 @@ export default function Sidebar(props: Props) {
     </Box>
   );
 }
+
+/**
+ * Sidebar navigation component
+ *
+ * @note This component is ready for integration but not yet used in the application.
+ * It will be integrated once the Dashboard layout component is created.
+ *
+ * @example
+ * // Future usage in Dashboard component:
+ * <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
+ */
