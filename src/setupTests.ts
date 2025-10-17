@@ -3,7 +3,8 @@
 
 import '@testing-library/jest-dom';
 
-// Optional: configure any global mocks or helpers here
+// Polyfill for TextEncoder/TextDecoder (required by React Router in Jest)
+import { TextEncoder, TextDecoder } from 'util';
 
-// jest-dom adds custom jest matchers for asserting on DOM nodes.
-// e.g. expect(element).toBeInTheDocument()
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as typeof global.TextDecoder;
