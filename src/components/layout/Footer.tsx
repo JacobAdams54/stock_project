@@ -1,8 +1,20 @@
 /**
- * Renders the global footer layout for the stock prediction website.
- * Includes logo, company description, navigation links, and legal text.
- * Uses grid layout and Material UI components.
+ * Renders the global footer for the website.
+ *
+ * Includes:
+ * - Company logo and description
+ * - Social media icon buttons (Twitter, LinkedIn, GitHub)
+ * - Navigation links (Quick Links using React Router)
+ * - Static support links
+ * - Legal and branding information in the bottom row
+ *
+ * Layout:
+ * - Responsive 3-column grid using Tailwind CSS
+ * - Uses Material UI for icons and button components
+ *
+ * @returns {JSX.Element} The rendered footer component
  */
+
 
 import React from 'react';
 import { Logo } from './Logo';
@@ -19,15 +31,14 @@ export default function Footer() {
 
           <div className="space-y-4">
 
-            <Logo size="md" variant="dark" />
+            <Logo size="md" variant="dark" />{/* This section renders the company logo and tagline at the top left of the footer */}
             <p>
               Empowering investors with AI-driven insights and predictions for
               smarter trading decisions in the stock market.
             </p>
 
             <h3 className='text-white font-semibold text-lg'>Follow Us</h3>
-            <div>
-              {/* This section creates the social media icons on the left of the footer */}
+            <div> {/* This section creates the social media icons on the lower left of the footer */}
               <IconButton aria-label="Twitter" color="inherit">
                 <Twitter />
               </IconButton>
@@ -40,7 +51,7 @@ export default function Footer() {
             </div>
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4"> {/* This section creates the Quick Links in the middle column of the footer */}
             <h3 className="text-white font-semibold text-lg">Quick Links</h3>
             <div className='flex flex-col space-y-2'>
               <Link to="/home" className="text-white hover:underline hover:text-gray-400 inline w-max">Home</Link>
@@ -51,7 +62,7 @@ export default function Footer() {
 
           </div>
 
-          <div className="space-y-4">
+          <div className="space-y-4">{/* This section creates the Support links in the right column of the footer */}
             <h3 className="text-white font-semibold text-lg">Support</h3>
             <ul>
               <li>
@@ -70,7 +81,8 @@ export default function Footer() {
           </div>
         </div>
       </div>
-
+      
+      {/* This section creates the bottom row of the footer with legal and branding information */}
       <div className="border-gray-700 pb-1.5 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400 px-2.5">
         <p>© 2025 STALK.AI. All rights reserved.</p>
         <p>Made with love for smart investors</p>
