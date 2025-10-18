@@ -53,10 +53,10 @@ describe('Sidebar Component', () => {
     it('renders sidebar with all menu items', () => {
       renderWithTheme(<Sidebar {...defaultProps} />);
 
-      expect(screen.getAllByText('Dashboard')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Predictions')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Watchlist')[0]).toBeInTheDocument();
-      expect(screen.getAllByText('Settings')[0]).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /predictions/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /watchlist/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument();
     });
 
     it('renders correct icons for each menu item', () => {
