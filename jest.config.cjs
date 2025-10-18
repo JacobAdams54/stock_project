@@ -9,4 +9,12 @@ module.exports = {
     '^.+\\.[tj]sx?$': 'babel-jest',
   },
   setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  testEnvironmentOptions: {
+    customExportConditions: [''],
+  },
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
 };

@@ -4,5 +4,9 @@
 import '@testing-library/jest-dom';
 
 // Polyfill for TextEncoder/TextDecoder (required by React Router in Jest)
-// Note: These are already configured in jest.config.cjs globals,
-// but this provides additional type safety for the test environment.
+import { TextEncoder, TextDecoder } from 'util';
+
+Object.assign(global, {
+  TextEncoder,
+  TextDecoder,
+});
