@@ -16,8 +16,6 @@
  */
 
 
-import React from 'react';
-import { Logo } from './Logo';
 import { IconButton } from '@mui/material';
 import { Twitter, LinkedIn, GitHub } from '@mui/icons-material';
 import { Link } from "react-router-dom";
@@ -31,7 +29,16 @@ export default function Footer() {
 
           <div className="space-y-4">
 
-            <Logo size="md" variant="dark" />{/* This section renders the company logo and tagline at the top left of the footer */}
+            {/*<Logo size="md" variant="dark" />{/* This section renders the company logo and tagline at the top left of the footer */}
+            {/* Render a placeholder logo image for now */}
+            <img
+              src="https://via.placeholder.com/150"
+              alt="Placeholder logo"
+              className="w-24 h-auto"
+            />
+            
+
+            
             <p>
               Empowering investors with AI-driven insights and predictions for
               smarter trading decisions in the stock market.

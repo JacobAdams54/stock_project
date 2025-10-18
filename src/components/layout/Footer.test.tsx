@@ -22,8 +22,6 @@
 import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import Footer from "./Footer";
-
 // Mock the Logo component so tests can assert the "variant" prop without relying on implementation.
 jest.mock("./Logo", () => ({
   Logo: (props: { size?: string; variant?: string }) => (
@@ -32,6 +30,18 @@ jest.mock("./Logo", () => ({
     </div>
   ),
 }));
+
+// Mock react-router-dom Link to avoid needing Router context in tests.
+// Render as a simple anchor with href set to the "to" prop.
+jest.mock("react-router-dom", () => ({
+  Link: (props: { to: string; children?: React.ReactNode; className?: string }) => (
+    <a data-testid={`link-${props.to}`} href={props.to} className={props.className}>
+      {props.children}
+    </a>
+  ),
+}));
+
+import Footer from "./Footer";
 
 afterEach(() => {
   cleanup();
@@ -78,28 +88,26 @@ describe("Footer (high-level TDD tests)", () => {
     expect(github).toBeInTheDocument();
   });
 
-  test("quick links dispatch navigate CustomEvent with correct page detail when clicked", () => {
+  test("quick links render as anchors with correct hrefs", () => {
     render(<Footer />);
 
-    const events: any[] = [];
-    const handler = (e: Event) => events.push((e as CustomEvent).detail);
-    window.addEventListener("navigate", handler as EventListener);
+    const links = [
+      { name: "Home", to: "/home" },
+      { name: "Dashboard", to: "/dashboard" },
+      { name: "Stocks", to: "/stocks" },
+      { name: "About", to: "/about" },
+    ];
 
-    // Expected quick links (case-insensitive)
-    const linkNames = ["Home", "Dashboard", "Stocks", "About"];
-
-    linkNames.forEach((name) => {
+    links.forEach(({ name, to }) => {
       const link = screen.getByText(new RegExp(`^${name}$`, "i"));
       expect(link).toBeInTheDocument();
-      fireEvent.click(link);
+
+      // Footer uses react-router Link (mocked to <a href={to}> in tests) — assert href
+      expect((link as HTMLAnchorElement).getAttribute("href")).toBe(to);
+
+      // Clicking should not throw (no CustomEvent navigation in current implementation)
+      expect(() => fireEvent.click(link)).not.toThrow();
     });
-
-    // Each click should have dispatched an event with the expected page detail
-    expect(events.length).toBe(linkNames.length);
-    const pages = events.map((d) => d?.page);
-    expect(pages).toEqual(["home", "dashboard", "stocks", "about"]);
-
-    window.removeEventListener("navigate", handler as EventListener);
   });
 
   test("support links are static anchors with href attributes", () => {
