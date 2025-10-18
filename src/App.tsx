@@ -1,13 +1,24 @@
+import { Box, Typography } from '@mui/material';
 import Footer from "./components/layout/Footer";
+
 
 function App() {
   return (
-    <div>
-      <h1>Stock Project</h1>
-      <p>Welcome to the Stock Project application.</p>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        p: 3,
+      }}
+    >
+      <Typography variant="h4" component="h1">
+        Stock Predictor - Coming Soon
+      </Typography>
 
       <Footer />
-    </div>
+    </Box>
   );
 }
 

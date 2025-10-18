@@ -76,6 +76,49 @@ documentation/ # Standards, SRS, schema, usage examples
   - Hooks: `useCamelCase`
   - Variables/functions: `camelCase`
 
+### Styling
+
+We use **Material UI (`sx` prop) for consistency** across the application. Here's the styling approach:
+
+- **Material UI Components** → Use the `sx` prop for styling (preferred for consistency)
+- **Non-MUI Elements** → Use Tailwind CSS classes
+
+**Why?** Using MUI components with the `sx` prop ensures visual consistency, respects the design system, and avoids conflicts between Tailwind and MUI styles.
+
+#### Example: MUI Component with `sx`
+
+```tsx
+import Box from '@mui/material/Box';
+import Drawer from '@mui/material/Drawer';
+
+// Use sx prop for MUI components
+<Box sx={{ display: 'flex', gap: 2 }}>
+  <Drawer
+    variant="permanent"
+    sx={{
+      display: { xs: 'none', sm: 'block' },
+      '& .MuiDrawer-paper': {
+        boxSizing: 'border-box',
+        width: drawerWidth,
+      },
+    }}
+  >
+    {drawer}
+  </Drawer>
+</Box>
+```
+
+See [`src/components/layout/Sidebar.tsx`](../src/components/layout/Sidebar.tsx) for a real-world example of MUI styling with responsive breakpoints.
+
+#### Example: Non-MUI Element with Tailwind
+
+```tsx
+// Use Tailwind classes for custom/non-MUI elements
+<div className="flex gap-4 p-6 bg-gray-50">
+  Custom content here
+</div>
+```
+
 ---
 
 ## 🚦 PR Review Process
