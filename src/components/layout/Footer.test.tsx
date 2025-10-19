@@ -19,7 +19,6 @@
  *  - These are intentionally focused, not granular, to guide implementation by failing tests (TDD).
  */
 
-import React from "react";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
