@@ -5,8 +5,10 @@
 */
 
 import React from "react";
-import { Button, IconButton } from "@mui/material";
+import logo from "/src/assets/logo.png"; // Adjust path as necessary
+import { AppBar, Toolbar, Button, IconButton, Drawer, TextField, InputAdornment, Avatar, Menu, MenuItem, Badge, Stack } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
 // import { Logo } from "./Logo"; // Uncomment and adjust path when Logo is available
 
 export default function Header() {
@@ -16,36 +18,86 @@ export default function Header() {
 		window.dispatchEvent(event);
 	};
 
+	const [drawerOpen, setDrawerOpen] = React.useState(false);
+	const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+	const openUserMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+	const closeUserMenu = () => setAnchorEl(null);
+
 	return (
-		<header className="bg-white border-b border-gray-200 sticky top-0 z-50" role="banner">
-			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="flex justify-between items-center h-16">
+		<header className="w-full sticky top-0 z-50" role="banner">
+			<AppBar position="static" color="default" elevation={0}>
+				<Toolbar className="mx-auto px-4 sm:px-6 lg:px-8">
 					<div
 						onClick={() => handleNavigation("home")}
 						className="cursor-pointer"
 						data-testid="logo"
 					>
 						{/* <Logo size="sm" variant="light" /> */}
-						<span>Logo</span>
+						<img
+							src={ logo }
+							alt="Logo"
+							width={40}
+							height={40}
+							className="object-contain"
+							loading="eager"
+						/>
 					</div>
-					<nav className="hidden md:flex items-center space-x-8" aria-label="Main navigation">
-						<Button onClick={() => handleNavigation("home")}>Home</Button>
-						<Button onClick={() => handleNavigation("dashboard")}>Dashboard</Button>
-						<Button onClick={() => handleNavigation("stocks")}>Stocks</Button>
-						<Button onClick={() => handleNavigation("about")}>About</Button>
-						<Button onClick={() => handleNavigation("login")}>Login</Button>
-						<Button size="small" onClick={() => handleNavigation("admin")} color="inherit">Admin</Button>
-						<Button variant="contained" color="primary" size="small" onClick={() => handleNavigation("signup")}>
-							Sign Up
-						</Button>
+
+					{/* Search */}
+					<div className="flex-1 mx-4 hidden md:block">
+						<TextField
+							size="small"
+							placeholder="Search stocks, tickers..."
+							variant="outlined"
+							fullWidth
+							InputProps={{
+								startAdornment: (
+									<InputAdornment position="start">
+										<SearchIcon />
+									</InputAdornment>
+								),
+							}}
+						/>
+					</div>
+
+					<nav className="hidden md:flex items-center" aria-label="Main navigation">
+						<Stack direction="row" spacing={6} alignItems="center">
+							<Button onClick={() => handleNavigation("home")}>Home</Button>
+							<Button onClick={() => handleNavigation("stocks")}>Stocks</Button>
+							<Button onClick={() => handleNavigation("about")}>About</Button>
+							<Button onClick={() => handleNavigation("login")}>Login</Button>
+							<Button variant="contained" color="primary" size="small" onClick={() => handleNavigation("signup")}>
+								Sign Up
+							</Button>
+							<IconButton onClick={openUserMenu} size="small" aria-label="account">
+								<Badge color="secondary" variant="dot">
+									<Avatar sx={{ width: 32, height: 32 }}>U</Avatar>
+								</Badge>
+							</IconButton>
+						</Stack>
+						<Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={closeUserMenu}>
+							<MenuItem onClick={() => { closeUserMenu(); handleNavigation("profile"); }}>Profile</MenuItem>
+							<MenuItem onClick={() => { closeUserMenu(); handleNavigation("logout"); }}>Logout</MenuItem>
+						</Menu>
 					</nav>
+
+					{/* Mobile menu button */}
 					<div className="md:hidden">
-						<IconButton size="small" aria-label="Open menu">
+						<IconButton onClick={() => setDrawerOpen(true)} aria-label="Open menu">
 							<MenuIcon />
 						</IconButton>
 					</div>
+				</Toolbar>
+			</AppBar>
+
+			{/* Mobile drawer */}
+			<Drawer anchor="left" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+				<div className="w-64 p-4">
+					<Button fullWidth onClick={() => { setDrawerOpen(false); handleNavigation("home"); }}>Home</Button>
+					<Button fullWidth onClick={() => { setDrawerOpen(false); handleNavigation("stocks"); }}>Stocks</Button>
+					<Button fullWidth onClick={() => { setDrawerOpen(false); handleNavigation("about"); }}>About</Button>
 				</div>
-			</div>
+			</Drawer>
 		</header>
 	);
 }
