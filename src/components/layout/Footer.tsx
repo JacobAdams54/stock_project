@@ -16,7 +16,6 @@
  */
 
 
-import React from "react";
 import { IconButton } from '@mui/material';
 import { Twitter, LinkedIn, GitHub } from '@mui/icons-material';
 import { Link } from "react-router-dom";
