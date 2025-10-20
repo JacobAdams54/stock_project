@@ -18,12 +18,19 @@
     "@fontsource/roboto": "^5.2.8",
     "@mui/icons-material": "^7.3.4",
     "@mui/material": "^7.3.4",
+<<<<<<< HEAD
     "@tailwindcss/vite": "^4.1.14",
     "firebase": "^12.4.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.9.4",
     "tailwindcss": "^4.1.14"
+=======
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-is": "^19.2.0",
+    "recharts": "^3.2.1"
+>>>>>>> origin/component/Header
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",

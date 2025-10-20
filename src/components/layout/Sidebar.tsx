@@ -1,5 +1,6 @@
 /**
  * Sidebar navigation component for dashboard pages.
+<<<<<<< HEAD
  * Uses Material UI's Drawer with React Router for navigation.
  * Implements permanent drawer on desktop (≥600px) and temporary drawer on mobile.
  *
@@ -169,3 +170,17 @@ export default function Sidebar(props: Props) {
  * // Future usage in Dashboard component:
  * <Sidebar open={mobileOpen} onClose={handleDrawerToggle} />
  */
+=======
+ * Uses Material UI's Drawer for responsive, accessible navigation.
+ *
+ * @param {Object} props - Component props
+ * @param {boolean} props.open - Whether the sidebar drawer is open (for mobile)
+ * @param {() => void} props.onClose - Callback to close the drawer (for mobile)
+ * @param {string} props.activePage - The current active page identifier
+ * @returns {JSX.Element} Rendered sidebar navigation component
+ *
+ * @example
+ * <Sidebar open={open} onClose={handleClose} activePage="dashboard" />
+ */
+
+>>>>>>> origin/component/Header
