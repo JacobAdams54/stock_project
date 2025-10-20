@@ -94,19 +94,6 @@ describe('KeyStatistics Component', () => {
     });
   });
 
-  describe('Type Safety', () => {
-    it('throws error if required prop is missing (TypeScript compile-time)', () => {
-      // This test is for documentation only; TypeScript will prevent missing props at compile time
-      // @ts-expect-error
-      // renderWithTheme(<KeyStatistics />);
-    });
-    it('throws error if incorrect type is passed (TypeScript compile-time)', () => {
-      // This test is for documentation only; TypeScript will prevent incorrect types at compile time
-      // @ts-expect-error
-      // renderWithTheme(<KeyStatistics {...baseProps} fiftyTwoWeekHigh="not a number" />);
-    });
-  });
-
   describe('Accessibility', () => {
     it('renders labels with correct text', () => {
       renderWithTheme(<KeyStatistics {...baseProps} />);
