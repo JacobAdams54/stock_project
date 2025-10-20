@@ -30,7 +30,6 @@
     "react-dom": "^18.2.0",
     "react-is": "^19.2.0",
     "recharts": "^3.2.1"
->>>>>>> origin/component/Header
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",
