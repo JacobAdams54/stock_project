@@ -139,4 +139,20 @@ See [`src/components/layout/Sidebar.tsx`](../src/components/layout/Sidebar.tsx) 
 - [Firebase Documentation](https://firebase.google.com/docs)
 - [Git Commit Message Guidelines](https://chris.beams.io/posts/git-commit/)
 - [Writing Good Commit Messages](https://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html)
-- [JSDoc Guide](https://jsdoc.app/about-getting-started.html)
+
+## Architecture Decision: Data Fetching Pattern
+
+**Decision**: Pages fetch data, components receive props ("Smart Pages, Dumb Components")
+
+**Reasoning**:
+- Prevents duplicate API calls
+- Easier to coordinate loading states
+- Better for Firebase real-time listeners
+- Clearer data flow for team learning
+
+**Trade-offs**:
+- More props to pass down
+- Pages need to know child data requirements
+- Less component independence
+
+**Review Date**: After implementing 3-4 pages, evaluate if this pattern still serves us

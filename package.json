@@ -23,7 +23,9 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.9.4",
-    "tailwindcss": "^4.1.14"
+    "recharts": "^3.3.0",
+    "tailwindcss": "^4.1.14",
+    "yahoo-finance2": "^3.10.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.4",
