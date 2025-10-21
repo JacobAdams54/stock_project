@@ -5,7 +5,7 @@
 */
 
 import React from "react";
-import logo from "/src/assets/logo.png"; // Adjust path as necessary
+import logo from "../../assets/logo.png"; // Adjust path as necessary
 import { AppBar, Toolbar, Button, IconButton, Drawer, TextField, InputAdornment, Avatar, Menu, MenuItem, Badge, Stack } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import SearchIcon from "@mui/icons-material/Search";
