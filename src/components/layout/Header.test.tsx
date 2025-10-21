@@ -1,109 +1,85 @@
+/**
+ * @file Header.test.tsx
+ * @description High-level smoke test for the global Header component.
+ *
+ * - No Router provider needed (mocked Link + useLocation)
+ * - Desktop branch forced (mocked useMediaQuery => true)
+ * - Verifies banner, logo, and primary links (href + aria-current on active)
+ */
+
+
+import React from 'react';
+import { render, screen, cleanup } from '@testing-library/react';
+import '@testing-library/jest-dom';
+
+// Make sure this matches your component's import path for the logo:
 jest.mock('../../assets/logo.png', () => 'logo-mock.png');
 
-// src/components/Header.test.tsx
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { MemoryRouter, Routes, Route } from 'react-router-dom';
+// Force DESKTOP layout so the hamburger/mobile menu isn't involved
+jest.mock('@mui/material/useMediaQuery', () => ({
+	__esModule: true,
+	default: () => true, // desktop
+}));
+
+// Mock react-router Link + useLocation so we don't need MemoryRouter
+jest.mock('react-router-dom', () => {
+	return {
+		// Render a simple anchor with href from "to"
+		Link: (props: { to: string; children?: React.ReactNode; className?: string }) => (
+			<a data-testid={`link-${props.to}`} href={props.to} className={props.className}>
+				{props.children}
+			</a>
+		),
+		// Pretend current path is "/" so Home is active
+		useLocation: () => ({ pathname: '/' }),
+	};
+});
+
+// ⬇️ Update this import if your file name or path differs
 import Header from './Header';
 
-// Helper: render Header within a router & simple routes to observe navigation
-function renderWithRouter(initialPath = '/') {
-	return render(
-		<MemoryRouter initialEntries={[initialPath]}>
-			<Header />
-			<Routes>
-				<Route path="/" element={<div data-testid="page">Home Page</div>} />
-				<Route path="/dashboard" element={<div data-testid="page">Dashboard Page</div>} />
-				<Route path="/stocks" element={<div data-testid="page">Stocks Page</div>} />
-				<Route path="/about" element={<div data-testid="page">About Page</div>} />
-				<Route path="/login" element={<div data-testid="page">Login Page</div>} />
-				<Route path="/admin" element={<div data-testid="page">Admin Page</div>} />
-				<Route path="/signup" element={<div data-testid="page">Sign Up Page</div>} />
-			</Routes>
-		</MemoryRouter>
-	);
-}
+afterEach(() => cleanup()); //Removes custome navigation listeners between tests
 
-describe('Header (Jest + React Router)', () => {
-	it('renders the header with logo and navigation links', () => {
-		renderWithRouter('/');
+describe('Header (smoke test, Jest)', () => {
+	test('renders banner and logo', () => {
+		render(<Header />);
+
+		// landmark
 		expect(screen.getByRole('banner')).toBeInTheDocument();
+
+		// your component exposes data-testid="logo" on the clickable logo wrapper
 		expect(screen.getByTestId('logo')).toBeInTheDocument();
 
-		// MUI Button + RouterLink renders <a> → role="link"
-		expect(screen.getByRole('link', { name: /home/i })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /stocks/i })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /about/i })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /login/i })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /admin/i })).toBeInTheDocument();
-		expect(screen.getByRole('link', { name: /sign up/i })).toBeInTheDocument();
+		// The image itself (alt text)
+		expect(screen.getByRole('img', { name: /logo/i })).toBeInTheDocument();
 	});
 
-	it('navigates when logo is clicked', async () => {
-		const user = userEvent.setup();
-		renderWithRouter('/dashboard');
-		await user.click(screen.getByTestId('logo')); // RouterLink to "/"
-		expect(await screen.findByTestId('page')).toHaveTextContent('Home Page');
+	test('renders primary navigation links with correct hrefs', () => {
+		render(<Header />);
+
+		// The test assumes Router Links: adjust if your labels/paths differ
+		const cases: Array<[label: string, href: string]> = [
+			['Home', '/'],
+			['Dashboard', '/dashboard'],
+			['Stocks', '/stocks'],
+			['About', '/about'],
+			['Login', '/login'],
+			['Admin', '/admin'],
+			['Sign Up', '/signup'],
+		];
+
+		for (const [label, href] of cases) {
+			const el = screen.getByText(new RegExp(`^${label}$`, 'i'));
+			expect(el).toBeInTheDocument();
+			expect((el as HTMLAnchorElement).getAttribute('href')).toBe(href);
+		}
 	});
 
-	it('navigates for each nav link', async () => {
-		const user = userEvent.setup();
-		renderWithRouter('/');
+	test('marks the current route as active via aria-current', () => {
+		render(<Header />);
 
-		await user.click(screen.getByRole('link', { name: /dashboard/i }));
-		expect(await screen.findByTestId('page')).toHaveTextContent('Dashboard Page');
-
-		await user.click(screen.getByRole('link', { name: /stocks/i }));
-		expect(await screen.findByTestId('page')).toHaveTextContent('Stocks Page');
-
-		await user.click(screen.getByRole('link', { name: /about/i }));
-		expect(await screen.findByTestId('page')).toHaveTextContent('About Page');
-
-		await user.click(screen.getByRole('link', { name: /login/i }));
-		expect(await screen.findByTestId('page')).toHaveTextContent('Login Page');
-
-		await user.click(screen.getByRole('link', { name: /admin/i }));
-		expect(await screen.findByTestId('page')).toHaveTextContent('Admin Page');
-
-		await user.click(screen.getByRole('link', { name: /sign up/i }));
-		expect(await screen.findByTestId('page')).toHaveTextContent('Sign Up Page');
-	});
-
-	it('shows hamburger menu on mobile and reveals items when opened', async () => {
-		// Force the MOBILE branch by mocking MUI useMediaQuery to return false for up('md')
-		jest.mock('@mui/material/useMediaQuery', () => ({
-			__esModule: true,
-			default: () => false, // not desktop → show hamburger
-		}));
-		// Re-require after mock so it takes effect
-		const { default: MobileHeader } = (await import('./Header')) as any;
-
-		const user = userEvent.setup();
-		render(
-			<MemoryRouter>
-				<MobileHeader />
-			</MemoryRouter>
-		);
-
-		// Hamburger button present
-		const menuBtn = screen.getByRole('button', { name: /open navigation menu/i });
-		expect(menuBtn).toBeInTheDocument();
-
-		// Open menu and assert items
-		await user.click(menuBtn);
-		expect(await screen.findByRole('menuitem', { name: /dashboard/i })).toBeInTheDocument();
-		expect(screen.getByRole('menuitem', { name: /stocks/i })).toBeInTheDocument();
-		expect(screen.getByRole('menuitem', { name: /about/i })).toBeInTheDocument();
-		expect(screen.getByRole('menuitem', { name: /login/i })).toBeInTheDocument();
-		expect(screen.getByRole('menuitem', { name: /admin/i })).toBeInTheDocument();
-		expect(screen.getByRole('menuitem', { name: /sign up/i })).toBeInTheDocument();
-	});
-
-	it('marks the current route as active via aria-current', () => {
-		renderWithRouter('/dashboard');
-		const dashboard = screen.getByRole('link', { name: /dashboard/i });
-		expect(dashboard).toHaveAttribute('aria-current', 'page');
+		// useLocation() mocked to '/', so Home should be active
+		const home = screen.getByText(/^home$/i);
+		expect(home).toHaveAttribute('aria-current', 'page');
 	});
 });

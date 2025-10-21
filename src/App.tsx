@@ -1,12 +1,13 @@
-import Header2 from './components/layout/Header2';
+import Header from './components/layout/Header';
+import Footer from './components/layout/Footer';
 
 function App() {
   return (
     <div>
-      <Header2 />
+      <Header />
       <h1>Stock Project</h1>
       <p>Welcome to the Stock Project application.</p>
-
+      <Footer />
     </div>
   );
 }

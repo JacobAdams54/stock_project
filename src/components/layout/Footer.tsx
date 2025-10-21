@@ -18,6 +18,7 @@
 import { IconButton } from '@mui/material';
 import { Twitter, LinkedIn, GitHub } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import logo from '../../assets/logo.png';
 
 export default function Footer() {
   return (
@@ -28,8 +29,8 @@ export default function Footer() {
             {/*<Logo size="md" variant="dark" />{/* This section renders the company logo and tagline at the top left of the footer */}
             {/* Render a placeholder logo image for now */}
             <img
-              src="https://via.placeholder.com/150"
-              alt="Placeholder logo"
+              src={logo}
+              alt="Company logo"
               className="w-24 h-auto"
             />
 
