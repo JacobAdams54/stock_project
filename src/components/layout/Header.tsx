@@ -51,6 +51,7 @@ export default function Header() {
     return (
         <header role="banner" data-testid="header">
             <AppBar
+                component="div"
                 position="sticky"
                 color="transparent"
                 elevation={0}
