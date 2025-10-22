@@ -10,24 +10,19 @@ import { MemoryRouter } from 'react-router-dom';
 import Header from './Header';
 
 test('renders banner and core nav labels', () => {
-	render(
-		<MemoryRouter>
-			<Header />
-		</MemoryRouter>
-	);
+  render(
+    <MemoryRouter>
+      <Header />
+    </MemoryRouter>
+  );
 
-	// landmark + logo
-	expect(screen.getByTestId('header')).toBeInTheDocument();
+  // landmark + logo
+  expect(screen.getByTestId('header')).toBeInTheDocument();
 
-	// Core items your current header actually renders
-	for (const label of ['Home', 'Stocks', 'About', 'Login']) {
-		expect(screen.getByText(new RegExp(`^${label}$`, 'i'))).toBeInTheDocument();
-	}
+  // Core items your current header actually renders
+  for (const label of ['Home', 'Stocks', 'About', 'Login']) {
+    expect(screen.getByText(new RegExp(`^${label}$`, 'i'))).toBeInTheDocument();
+  }
 
-	// Optional: If your header currently shows "Sign Up", keep this enabled.
-	// If not, comment it out and the rest still passes.
-	const maybeSignUp = screen.queryByText(/^sign up$/i);
-	if (maybeSignUp) {
-		expect(maybeSignUp).toBeInTheDocument();
-	}
+  // If your header shows "Sign Up" keep this test file up to date.
 });
