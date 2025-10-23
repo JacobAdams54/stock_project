@@ -1,10 +1,14 @@
 import { Box, Typography } from '@mui/material';
 import Footer from "./components/layout/Footer";
 import Hero from './components/layout/Hero';
+import React from 'react';
+import StockChart from "./components/charts/StockChart";
+import Header from "./components/layout/Header";
 
 function App() {
   return (
     <>
+      <Header />
       <Hero />
     <Box
       sx={{
@@ -26,6 +30,7 @@ function App() {
       </Box>
       
       </Box>
+      <StockChart />
       <Footer />
     </>
   );
