@@ -52,12 +52,6 @@ const data = [
 ];
 
 export default function StockChart() {
-    const [age, setAge] = React.useState('');
-
-    const handleChange = (event: SelectChangeEvent) => {
-        setAge(event.target.value as string);
-    };
-
     return (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <div className="mb-6">
