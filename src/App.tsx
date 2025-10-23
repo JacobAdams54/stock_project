@@ -1,7 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Footer from "./components/layout/Footer";
-import Hero from './components/layout/Hero';
-
+import Header from "./components/layout/Header";
 
 function App() {
   return (
@@ -25,7 +24,7 @@ function App() {
           Stock Predictor - Coming Soon
         </Typography>
       </Box>
-      <StockChart />
+      
       </Box>
       <Footer />
     </>
