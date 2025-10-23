@@ -21,7 +21,9 @@
  *
  * ## Example Usage
  * <Logo size="lg" variant="dark" />
- * 
+ * <Logo customSize="50px" />
+ * <Logo customSize="3rem" />
+ * <Logo customSize="10vh" />
  */
 
 
