@@ -13,7 +13,7 @@ const data = [
     { date: "Mar 5", price: 182.15 },
 ];
 
-export function StockChart() {
+export default function StockChart() {
     return (
         <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm">
             <div className="mb-6">
