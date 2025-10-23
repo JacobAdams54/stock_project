@@ -1,15 +1,11 @@
 //Hero.tsx
-import React from 'react';
 import { Button } from '@mui/material';
-import { ImageWithFallback } from './ImageWithFallback';
 
-
-export function Hero() {
+function Hero() {
   const handleGetStarted = () => {
     const event = new CustomEvent('navigate', { detail: { page: 'signup' } });
     window.dispatchEvent(event);
   };
-
 
   return (
     <section
@@ -30,10 +26,10 @@ export function Hero() {
               Get Started
             </Button>
           </div>
+
           <div className="lg:w-1/2">
-            <ImageWithFallback
-              src="https://example.com/hero-chart.png"
-              fallbackSrc="https://placehold.co/1080x720?text=Stock+Prediction+AI"
+            <img
+              src="https://placehold.co/1080x720?text=Stock+Prediction+AI"
               alt="Stock market chart illustration"
               loading="lazy"
               className="w-full h-auto rounded-xl shadow-lg"
@@ -44,3 +40,6 @@ export function Hero() {
     </section>
   );
 }
+
+export default Hero;  
+export { Hero };      
