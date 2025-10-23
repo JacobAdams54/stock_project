@@ -1,12 +1,12 @@
 import { Box, Typography } from '@mui/material';
 import Footer from "./components/layout/Footer";
-import Header from "./components/layout/Header";
-import StockChart from "./components/charts/StockChart";
+import Hero from './components/layout/Hero';
+
 
 function App() {
   return (
     <>
-      <Header />
+      <Hero />
     <Box
       sx={{
         display: 'flex',
