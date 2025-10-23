@@ -1,0 +1,176 @@
+//UserStocks.tsx
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  TextField,
+  Button,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+  IconButton,
+  Stack,
+  Typography,
+  Divider,
+  Snackbar,
+  Alert,
+} from "@mui/material";
+import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+
+type Stock = {
+  symbol: string;
+  name: string;
+  price: number;
+};
+
+const mockPrice = () => Number((Math.random() * 200 + 20).toFixed(2));
+
+export default function UserStocks() {
+  const [stocks, setStocks] = useState<Stock[]>([]);
+  const [symbol, setSymbol] = useState("");
+  const [name, setName] = useState("");
+  const [toast, setToast] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "info";
+  }>({ open: false, message: "", severity: "success" });
+
+  const showToast = (
+    message: string,
+    severity: "success" | "error" | "info" = "success"
+  ) => setToast({ open: true, message, severity });
+
+  const handleCloseToast = () => setToast((t) => ({ ...t, open: false }));
+
+  const handleAdd = () => {
+    const sym = symbol.trim().toUpperCase();
+    const nm = name.trim();
+
+    if (!sym || !nm) {
+      showToast("Both Symbol and Company name are required.", "error");
+      return;
+    }
+    if (stocks.some((s) => s.symbol.toUpperCase() === sym)) {
+      showToast(`"${sym}" is already being tracked.`, "error");
+      return;
+    }
+
+    const newStock: Stock = { symbol: sym, name: nm, price: mockPrice() };
+    setStocks((prev) => [...prev, newStock]);
+    setSymbol("");
+    setName("");
+    showToast(`Added ${sym} – ${nm}`, "success");
+  };
+
+  const handleRemove = (sym: string) => {
+    setStocks((prev) => prev.filter((s) => s.symbol !== sym));
+    showToast(`Removed ${sym} from your list.`, "info");
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+      {/* Title */}
+      <header className="flex items-center justify-between">
+        <Typography variant="h4" component="h1" className="font-bold">
+          Track Your Stocks
+        </Typography>
+      </header>
+
+      {/* Add Stock Card */}
+      <Card className="shadow-md rounded-2xl">
+        <CardHeader title="Add a Stock" />
+        <Divider />
+        <CardContent>
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            alignItems={{ xs: "stretch", sm: "flex-end" }}
+          >
+            <TextField
+              label="Symbol"
+              placeholder="e.g. AAPL"
+              value={symbol}
+              onChange={(e) => setSymbol(e.target.value)}
+              inputProps={{ "aria-label": "Stock symbol" }}
+              className="w-full sm:w-48"
+            />
+            <TextField
+              label="Company name"
+              placeholder="e.g. Apple Inc."
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              inputProps={{ "aria-label": "Company name" }}
+              className="w-full"
+            />
+            <Button variant="contained" onClick={handleAdd} sx={{ height: 56 }}>
+              Add Stock
+            </Button>
+          </Stack>
+        </CardContent>
+      </Card>
+
+      {/* Table Card */}
+      <Card className="shadow-md rounded-2xl">
+        <CardHeader title="Your Tracked Stocks" />
+        <Divider />
+        <CardContent>
+          {stocks.length === 0 ? (
+            <Typography color="text.secondary">
+              No stocks yet. Add one above to get started.
+            </Typography>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table aria-label="tracked stocks table">
+                <TableHead>
+                  <TableRow>
+                    <TableCell className="font-semibold">Symbol</TableCell>
+                    <TableCell className="font-semibold">Company</TableCell>
+                    <TableCell className="font-semibold">Price</TableCell>
+                    <TableCell className="font-semibold">Actions</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {stocks.map((s) => (
+                    <TableRow key={s.symbol} hover>
+                      <TableCell>{s.symbol}</TableCell>
+                      <TableCell>{s.name}</TableCell>
+                      <TableCell>${s.price.toFixed(2)}</TableCell>
+                      <TableCell>
+                        <IconButton
+                          aria-label={`Remove ${s.symbol}`}
+                          onClick={() => handleRemove(s.symbol)}
+                        >
+                          <DeleteOutlineIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Snackbar for notifications */}
+      <Snackbar
+        open={toast.open}
+        autoHideDuration={3000}
+        onClose={handleCloseToast}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseToast}
+          severity={toast.severity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {toast.message}
+        </Alert>
+      </Snackbar>
+    </div>
+  );
+}
