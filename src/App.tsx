@@ -1,6 +1,7 @@
 import { Box, Typography } from '@mui/material';
 import Footer from "./components/layout/Footer";
-import Hero from './components/layout/Hero';
+import Hero from "./components/layout/Hero";
+
 
 function App() {
   return (
@@ -32,4 +33,3 @@ function App() {
 }
 
 export default App;
-
