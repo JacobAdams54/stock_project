@@ -50,13 +50,6 @@ const KeyStatistics = ({
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
         Key Statistics
       </Typography>
-
-      {/* 
-        🎯 LEARNING NOTE: Horizontal row layout using Flexbox
-        - justifyContent: 'space-between' = evenly distribute items
-        - gap: 4 = spacing between items (32px)
-        - Wraps on small screens with flexWrap
-      */}
       <Box
         sx={{
           display: 'flex',
