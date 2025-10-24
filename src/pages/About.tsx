@@ -35,7 +35,7 @@ export default function About() {
 				{/* Hero */}
 				<section className="bg-gradient-to-r from-sky-50 via-white to-white py-16" aria-labelledby="about-hero">
 					<div className="max-w-4xl mx-auto text-center px-4">
-						<img src="https://via.placeholder.com/160" alt={ABOUT_PAGE.logoAlt} className="mx-auto w-32" />
+						{/*<img src="https://via.placeholder.com/160" alt={ABOUT_PAGE.logoAlt} className="mx-auto w-32" />*/}
 						<h1 id="about-hero" className="text-3xl md:text-4xl font-extrabold mt-6">
 							{ABOUT_PAGE.tagline}
 						</h1>
@@ -47,7 +47,7 @@ export default function About() {
 				<section className="py-12" aria-labelledby="about-stats">
 					<div className="max-w-6xl mx-auto px-4">
 						<h2 id="about-stats" className="text-2xl font-semibold mb-6 text-center">Platform stats</h2>
-						<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+						<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
 							{STATS.map((s) => (
 								<div key={s.id} className="bg-white p-6 rounded-lg shadow text-center">
 									<div className="text-2xl font-bold">{s.value}</div>
@@ -70,23 +70,26 @@ export default function About() {
 					</div>
 				</section>
 
-				{/* Features */}
+				{/* Features - PLACEHOLDER: This section will be replaced with final features implementation */}
 				<section className="py-12" aria-labelledby="about-features">
 					<div className="max-w-6xl mx-auto px-4">
-						<h2 id="about-features" className="text-2xl font-semibold mb-6 text-center">Features</h2>
+						<h2 id="about-features" className="text-2xl font-semibold mb-6 text-center">
+							Features <span className="text-sm font-normal text-gray-500">(Coming Soon)</span>
+						</h2>
 						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+							{/* Placeholder cards - will be replaced with final feature set */}
 							{FEATURES.map((f) => {
-								const Icon = (Icons as any)[f.icon] || Icons.GitPullRequest;
+								const Icon = Icons.Clock; // Placeholder icon
 								return (
-									<Card key={f.id} className="hover:shadow-lg transition-shadow">
+									<Card key={f.id} className="hover:shadow-lg transition-shadow bg-gray-50">
 										<CardContent>
 											<div className="flex items-start gap-4">
-												<div className="p-2 rounded-md bg-sky-50">
-													<Icon className="w-6 h-6 text-sky-600" />
+												<div className="p-2 rounded-md bg-gray-100">
+													<Icon className="w-6 h-6 text-gray-400" />
 												</div>
 												<div>
-													<h3 className="text-lg font-semibold">{f.title}</h3>
-													<p className="text-sm text-gray-600 mt-1">{f.description}</p>
+													<h3 className="text-lg font-semibold text-gray-400">Feature {f.id}</h3>
+													<p className="text-sm text-gray-400 mt-1">Placeholder content - final features coming soon</p>
 												</div>
 											</div>
 										</CardContent>
@@ -99,7 +102,7 @@ export default function About() {
 
 				{/* Team */}
 				<section className="py-12 bg-gray-50" aria-labelledby="about-team">
-					<div className="max-w-6xl mx-auto px-4">
+					<div className="max-w-8xl mx-auto px-12">
 						<h2 id="about-team" className="text-2xl font-semibold mb-6 text-center">Meet the team</h2>
 						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
 							{TEAM.map((t) => (
@@ -108,7 +111,21 @@ export default function About() {
 										<div className="flex flex-col items-center gap-3">
 											<Avatar className="bg-teal-400 text-white">{t.name.split(' ').map((n) => n[0]).slice(0,2).join('')}</Avatar>
 											<div className="font-medium">{t.name}</div>
-											<Badge badgeContent={t.role} color="primary" className="mt-2" />
+											{/* Larger badge: increase font size, padding, and border radius via MUI sx prop */}
+											<Badge
+												badgeContent={t.role}
+												color="primary"
+												className="mt-2"
+												sx={{
+													'& .MuiBadge-badge': {
+														fontSize: '0.85rem',
+														padding: '6px 10px',
+														borderRadius: '999px',
+														minWidth: 36,
+														height: 'auto',
+													},
+												}}
+											/>
 										</div>
 									</CardContent>
 								</Card>
