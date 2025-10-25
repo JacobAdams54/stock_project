@@ -1,3 +1,23 @@
+/**
+ * @file SignupForm.tsx
+ * @description A React component for creating new user accounts using Firebase Authentication.
+ *              It includes email/password signup, password strength validation, and a required
+ *              Terms & Conditions agreement checkbox. The form also stores user details and
+ *              terms acceptance metadata in Firestore upon successful registration.
+ *
+ * @features
+ *  - Uses Material UI components for styling and responsive layout.
+ *  - Validates password strength (uppercase, lowercase, number, special character).
+ *  - Allows toggling password visibility for better UX.
+ *  - Requires users to accept Terms & Conditions before creating an account.
+ *  - Integrates with Firebase Auth (email/password + Google sign-in).
+ *  - Stores user profile info and agreement data in Firestore.
+ *
+ * @usage
+ *  Appears on the `/signup` route. On successful signup, a new Firebase Auth user
+ *  is created, and a Firestore document is generated in `users/{uid}`.
+ */
+
 import React, { useState } from "react";
 import {
     Container, Paper, Box, TextField, Typography, Alert,
