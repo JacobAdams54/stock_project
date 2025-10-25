@@ -28,4 +28,14 @@ coverage/
 *.lcov
 .nyc_output/
 
-build/
+build/f
+
+# Firebase CLI local data and logs
+.firebase/
+firebase-debug.log
+firestore-debug.log
+database-debug.log
+ui-debug.log
+
+# If you ever add Cloud Functions
+functions/.runtimeconfig.json
