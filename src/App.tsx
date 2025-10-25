@@ -1,6 +1,6 @@
 import { Box, Typography } from '@mui/material';
 import Footer from "./components/layout/Footer";
-import Header from "./components/layout/Header";
+import SignupForm from './components/auth/SignupForm';
 
 
 function App() {
@@ -24,6 +24,9 @@ function App() {
         <Typography variant="h4" component="h1">
           Stock Predictor - Coming Soon
         </Typography>
+        <Box sx={{ mt: 4, width: '100%', maxWidth: 400 }}>
+          <SignupForm />
+        </Box>
       </Box>
 
       </Box>
