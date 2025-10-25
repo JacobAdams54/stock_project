@@ -1,6 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
 import { useStockData } from '../hooks/useStockData';
+import KeyStatistics from '../components/stocks/KeyStatistics';
+import PredictionCard from '../components/stocks/PredictionCard';
 
 /**
  * Stock detail page component
@@ -127,22 +129,22 @@ const StockDetail = () => {
             backgroundColor: 'grey.50',
           }}
         >
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            📊 Key Statistics
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Statistics component being implemented - will display company info,
-            sector, market cap, and 52-week ranges
-          </Typography>
+          <KeyStatistics
+            companyName="AAPL"
+            sector="Technology"
+            marketCap="2000"
+            fiftyTwoWeekHigh={182.94}
+            fiftyTwoWeekLow={129.04}
+          />
         </Paper>
       </Box>
 
       {/* Main Content Container - Future home of chart and AI predictions */}
       <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3, pt: 2 }}>
-        {/* 
+        {/*
           🎯 TEAM NOTE: Chart and AI components will be implemented by other teams
-          - StockChart component (chart team)
-          - AIPredictionCard component (AI team)
+          - StockChart component (Jason + Anthony)
+          - AIPredictionCard component (Anthony)
           Once ready, they'll be integrated in the grid layout below
         */}
 
@@ -150,7 +152,7 @@ const StockDetail = () => {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '3fr 1fr' },
+            gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' },
             gap: 3,
           }}
         >
@@ -186,12 +188,7 @@ const StockDetail = () => {
               backgroundColor: 'grey.50',
             }}
           >
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              🤖 AI Prediction
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              AI component being implemented by AI team
-            </Typography>
+            <PredictionCard trend="Bullish" confidence={0.9} />
           </Paper>
         </Box>
       </Box>
