@@ -56,6 +56,7 @@ import { auth, db } from '../../firebase/firebase';
 import Logo from '../layout/Logo';
 import { Link as RouterLink } from 'react-router-dom';
 
+
 export default function SignupForm() {
   // state
   const [displayName, setDisplayName] = useState('');
@@ -106,8 +107,7 @@ export default function SignupForm() {
       {
         displayName: name,
         email,
-        // optional UI flag; NOT used for security:
-        // isAdmin: false,
+        isAdmin: false,
         terms: {
           accepted: true,
           version: TERMS_VERSION,
@@ -346,6 +346,7 @@ export default function SignupForm() {
                   and{' '}
                   <Link
                     component="button"
+                    component="button"
                     onClick={openPrivacy}
                     underline="hover"
                   >
@@ -401,10 +402,10 @@ export default function SignupForm() {
           Continue with Google
         </Button>
         <Typography sx={{ mt: 3 }}>
-          Already a User?{' '}
-          <Link component={RouterLink} to="/login" underline="hover">
+        Already a User?{' '}
+        <Link component={RouterLink} to="/login" underline="hover">
             Login
-          </Link>
+        </Link>
         </Typography>
       </Paper>
 
