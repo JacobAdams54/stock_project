@@ -100,13 +100,12 @@ export default function SignupForm() {
   const TERMS_VERSION = 'v1.0'; // bump when your terms change
 
   // helper (keep near the component or in a utils file)
-  async function createUserDoc(uid: string, name: string, email: string) {
+  async function createUserDoc(uid: string, name: string) {
     const userRef = doc(db, 'users', uid);
     await setDoc(
       userRef,
       {
         displayName: name,
-        email,
         isAdmin: false,
         terms: {
           accepted: true,
@@ -142,7 +141,7 @@ export default function SignupForm() {
       await updateProfile(cred.user, { displayName });
 
       // 3) Create/merge the Firestore user profile
-      await createUserDoc(cred.user.uid, displayName, email);
+      await createUserDoc(cred.user.uid, displayName);
 
       // 4) Send email verification (recommended)
       try {
