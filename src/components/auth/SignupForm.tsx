@@ -545,7 +545,7 @@ export default function SignupForm() {
             authorities, if required by law or to protect our rights.
           </Typography>
           <Typography variant="subtitle1" gutterBottom>
-            6. You're Rights
+            6. Your Rights
           </Typography>
           <Typography paragraph>
             You have the right to: - Access and update your personal data. -
