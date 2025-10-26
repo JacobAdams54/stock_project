@@ -3,7 +3,7 @@
  * Tests stock detail view with loading, error, no-data, header, price, change, and placeholders.
  */
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import '@testing-library/jest-dom';
@@ -37,15 +37,18 @@ const renderWithTheme = (symbol = 'MSFT') => {
   );
 };
 
-// Default successful data state
+// Default successful data state aligned with useStockData's shape
 const mockSuccessData = {
   data: {
     symbol: 'MSFT',
-    name: 'MSFT Inc.',
+    companyName: 'Microsoft Corporation',
+    sector: 'Technology',
+    marketCap: '3.00T',
+    fiftyTwoWeekHigh: 199.62,
+    fiftyTwoWeekLow: 124.17,
     currentPrice: 174.12,
     change: 2.34,
     changePercent: 1.36,
-    priceHistory: [],
   },
   loading: false,
   error: null,
@@ -62,7 +65,7 @@ describe('StockDetail Component', () => {
     renderWithTheme();
 
     expect(screen.getByRole('heading', { name: /MSFT/i })).toBeInTheDocument();
-    expect(screen.getByText(/MSFT Inc\./i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Microsoft Corporation/i)[0]).toBeInTheDocument();
   });
 
   it('renders current stock price and change', async () => {
@@ -116,16 +119,33 @@ describe('StockDetail Component', () => {
     expect(screen.getByText(/MSFT/i)).toBeInTheDocument();
   });
 
-  it('renders key statistics placeholder when data is loaded', () => {
+  it('renders key statistics with company, sector, market cap and 52-week range', () => {
     renderWithTheme();
 
-    expect(screen.getByText(/📊 Key Statistics/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/statistics component being implemented/i)
-    ).toBeInTheDocument();
+    // Section header
+    const keyStatsHeader = screen.getByText(/Key Statistics/i);
+    expect(keyStatsHeader).toBeInTheDocument();
+
+    // Scope queries within the Key Statistics section to avoid duplicate matches
+    const keyStatsContainer = keyStatsHeader.closest('div') as HTMLElement;
+    expect(keyStatsContainer).toBeInTheDocument();
+    const withinKeyStats = within(keyStatsContainer);
+
+    // Labels
+    expect(withinKeyStats.getByText(/Company/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/Sector/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/Market Cap/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/52W High/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/52W Low/i)).toBeInTheDocument();
+    // Values
+    expect(withinKeyStats.getByText(/Microsoft Corporation/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/Technology/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/3\.00T/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/\$199\.62/)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/\$124\.17/)).toBeInTheDocument();
   });
 
-  it('renders chart and AI prediction placeholders when data is loaded', () => {
+  it('renders chart section and AI prediction summary when data is loaded', () => {
     renderWithTheme();
 
     expect(screen.getByText(/📊 Stock Chart/i)).toBeInTheDocument();
@@ -133,10 +153,8 @@ describe('StockDetail Component', () => {
       screen.getByText(/chart component being implemented/i)
     ).toBeInTheDocument();
 
-    expect(screen.getByText(/🤖 AI Prediction/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/AI component being implemented/i)
-    ).toBeInTheDocument();
+    // AI prediction card header
+    expect(screen.getByText(/AI Prediction Summary/i)).toBeInTheDocument();
   });
 
   it('displays negative change with down arrow and red styling', () => {
@@ -144,11 +162,14 @@ describe('StockDetail Component', () => {
     mockUseStockData.mockReturnValue({
       data: {
         symbol: 'MSFT',
-        name: 'MSFT Inc.',
+        companyName: 'Microsoft Corporation',
+        sector: 'Technology',
+        marketCap: '3.00T',
+        fiftyTwoWeekHigh: 199.62,
+        fiftyTwoWeekLow: 124.17,
         currentPrice: 171.78,
         change: -2.34,
         changePercent: -1.34,
-        priceHistory: [],
       },
       loading: false,
       error: null,

@@ -12,15 +12,14 @@ import PredictionCard from '../components/stocks/PredictionCard';
  * pattern where the page fetches all data and passes it down to presentational components.
  * This prevents duplicate API calls and coordinates loading/error states.
  *
- * @todo KeyStatistics component - implement with real API data
- * @todo StockChart component - being implemented by chart team
- * @todo AIPredictionCard component - being implemented by AI team
+ * Note: Key statistics are powered by the useStockData hook and rendered via the KeyStatistics component.
+ * Future sections (chart and AI prediction) are placeholders to be implemented by respective teams.
  *
  * @returns {JSX.Element} Stock detail page with header and placeholders for future components
  *
  * @example
  * // Accessed via route: /stock/:symbol
- * // URL: /stock/MSFT shows Microsoft stock header with placeholders
+ * // URL: /stock/MSFT shows Microsoft stock header with live key statistics
  */
 const StockDetail = () => {
   const { symbol } = useParams<{ symbol: string }>();
@@ -54,7 +53,7 @@ const StockDetail = () => {
           <Typography variant="h6">Failed to load stock data</Typography>
           <Typography variant="body2">{error.message}</Typography>
           <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-            Symbol: {symbol}
+            Symbol: {stockSymbol}
           </Typography>
         </Alert>
       </Box>
@@ -66,7 +65,7 @@ const StockDetail = () => {
     return (
       <Box sx={{ p: 4 }}>
         <Alert severity="warning">
-          No data found for symbol: <strong>{symbol}</strong>
+          No data found for symbol: <strong>{stockSymbol}</strong>
         </Alert>
       </Box>
     );
@@ -88,7 +87,8 @@ const StockDetail = () => {
           </Typography>
 
           <Typography variant="body1" color="text.secondary" gutterBottom>
-            {data.name}
+            {/* Use companyName from data object */}
+            {data.companyName}
           </Typography>
 
           {/* Price and Change Display */}
@@ -116,27 +116,15 @@ const StockDetail = () => {
         </Box>
       </Paper>
 
-      {/* Key Statistics Section - Placeholder */}
+      {/* Key Statistics Section - Now with real data! */}
       <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pt: 3, pb: 2 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 4,
-            borderRadius: 2,
-            textAlign: 'center',
-            border: '2px dashed',
-            borderColor: 'grey.300',
-            backgroundColor: 'grey.50',
-          }}
-        >
-          <KeyStatistics
-            companyName="AAPL"
-            sector="Technology"
-            marketCap="2000"
-            fiftyTwoWeekHigh={182.94}
-            fiftyTwoWeekLow={129.04}
-          />
-        </Paper>
+        <KeyStatistics
+          companyName={data.companyName}
+          sector={data.sector}
+          marketCap={data.marketCap}
+          fiftyTwoWeekHigh={data.fiftyTwoWeekHigh}
+          fiftyTwoWeekLow={data.fiftyTwoWeekLow}
+        />
       </Box>
 
       {/* Main Content Container - Future home of chart and AI predictions */}
