@@ -486,7 +486,7 @@ export default function SignupForm() {
       </Dialog>
 
       <Dialog open={privacyOpen} onClose={closePrivacy} fullWidth maxWidth="md">
-        <DialogTitle>Privicy Policy</DialogTitle>
+        <DialogTitle>Privacy Policy</DialogTitle>
         <DialogContent dividers sx={{ typography: 'body1' }}>
           <Typography variant="h6" gutterBottom>
             Last updated: Oct 25, 2025
