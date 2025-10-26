@@ -346,7 +346,6 @@ export default function SignupForm() {
                   and{' '}
                   <Link
                     component="button"
-                    component="button"
                     onClick={openPrivacy}
                     underline="hover"
                   >
