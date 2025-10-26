@@ -349,7 +349,7 @@ export default function SignupForm() {
                     onClick={openPrivacy}
                     underline="hover"
                   >
-                    Privary Policy.
+                    Privacy Policy.
                   </Link>
                 </span>
               }
