@@ -36,7 +36,7 @@ interface LogoProps {
 }
 
 
-export const Logo = ({ size = "md", customSize, variant = "light" }: LogoProps) => {
+const Logo = ({ size = "md", customSize, variant = "light" }: LogoProps) => {
     // Tailwind height classes based on size
     const sizeClasses = {
         sm: "h-8",
@@ -60,3 +60,5 @@ export const Logo = ({ size = "md", customSize, variant = "light" }: LogoProps) 
         />
     );
 };
+
+export default Logo;

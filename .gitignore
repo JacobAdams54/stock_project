@@ -39,3 +39,4 @@ ui-debug.log
 
 # If you ever add Cloud Functions
 functions/.runtimeconfig.json
+.firebase
