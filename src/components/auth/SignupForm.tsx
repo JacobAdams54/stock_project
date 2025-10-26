@@ -201,7 +201,7 @@ export default function SignupForm() {
             >
               STALK.AI
             </Typography>
-            <span>STOCK PREDICITION</span>
+            <span>STOCK PREDICTION</span>
           </Box>
         </Box>
         <Typography
