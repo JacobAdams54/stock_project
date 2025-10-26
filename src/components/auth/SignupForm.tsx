@@ -529,7 +529,7 @@ export default function SignupForm() {
             longer retention period is required by law.
           </Typography>
           <Typography variant="subtitle1" gutterBottom>
-            4. Data Secuirty
+            4. Data Security
           </Typography>
           <Typography paragraph>
             We implement appropriate technical and organizational measures to
