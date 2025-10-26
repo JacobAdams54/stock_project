@@ -54,6 +54,7 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../firebase/firebase';
 import Logo from '../layout/Logo';
+import { Link as RouterLink } from 'react-router-dom';
 
 export default function SignupForm() {
   // state
@@ -183,24 +184,25 @@ export default function SignupForm() {
         elevation={4}
         sx={{ width: '100%', p: { xs: 2, sm: 3 }, borderRadius: 3 }}
       >
-        <Box 
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            gap={1}
-            mb={2}>
-        <Logo size="lg" variant="dark" />
-        <Box alignItems="left"
-        justifyContent="left"
-        >   
-        <Typography variant="h6" color="black" gutterBottom textAlign="left">
-          STALK.AI
-        </Typography>
-        <span>STOCK PREDICITION</span>
-        </Box>
-        
-        
-        
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          gap={1}
+          mb={2}
+        >
+          <Logo size="lg" variant="dark" />
+          <Box alignItems="left" justifyContent="left">
+            <Typography
+              variant="h6"
+              color="black"
+              gutterBottom
+              textAlign="left"
+            >
+              STALK.AI
+            </Typography>
+            <span>STOCK PREDICITION</span>
+          </Box>
         </Box>
         <Typography
           variant="h4"
@@ -343,7 +345,7 @@ export default function SignupForm() {
                   </Link>{' '}
                   and{' '}
                   <Link
-                    componet="button"
+                    component="button"
                     onClick={openPrivacy}
                     underline="hover"
                   >
@@ -399,7 +401,10 @@ export default function SignupForm() {
           Continue with Google
         </Button>
         <Typography sx={{ mt: 3 }}>
-          Already a User? <Link to="LoginForm">Login</Link>
+          Already a User?{' '}
+          <Link component={RouterLink} to="/login" underline="hover">
+            Login
+          </Link>
         </Typography>
       </Paper>
 
