@@ -183,10 +183,25 @@ export default function SignupForm() {
         elevation={4}
         sx={{ width: '100%', p: { xs: 2, sm: 3 }, borderRadius: 3 }}
       >
-        <Typography variant="h6" color="black" gutterBottom textAlign="center">
+        <Box 
+            display="flex"
+            alignItems="center"
+            justifyContent="center"
+            gap={1}
+            mb={2}>
+        <Logo size="lg" variant="dark" />
+        <Box alignItems="left"
+        justifyContent="left"
+        >   
+        <Typography variant="h6" color="black" gutterBottom textAlign="left">
           STALK.AI
         </Typography>
-        <Logo size="lg" variant="dark" />
+        <span>STOCK PREDICITION</span>
+        </Box>
+        
+        
+        
+        </Box>
         <Typography
           variant="h4"
           fontWeight={700}
