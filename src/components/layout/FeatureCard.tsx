@@ -29,23 +29,14 @@
  * Usage Example:
  * ```tsx
  * <FeatureCards
- *   features={[
- *     {
- *       icon: TrendingUp,
- *       title: "Real-time Data",
- *       description: "Stay up-to-date with live stock prices and insights.",
- *       color: "text-blue-600",
- *       bgColor: "bg-blue-100",
- *     },
- *   ]}
+ *   features={[{ icon: TrendingUp, title: "Real-time Data", description: "Stay up-to-date...", color: "text-blue-600", bgColor: "bg-blue-100" }]}
  * />
  * ```
  */
 import { Card, CardContent } from '@mui/material';
 import React from 'react';
 
-// Define the structure for a single feature card
-type Feature = {
+export type Feature = {
   icon: React.ElementType;
   title: string;
   description: string;
@@ -53,14 +44,26 @@ type Feature = {
   bgColor: string;
 };
 
-// Define props that the FeatureCards component can receive
-type FeatureCardsProps = {
+export type FeatureCardsProps = {
   features: Feature[];
   heading?: string;
   subheading?: string;
 };
 
-// Functional component that renders the feature cards section
+/**
+ * FeatureCards section with heading, subheading, and a responsive grid of feature cards.
+ * @param {FeatureCardsProps} props - Component props.
+ * @param {Feature[]} props.features - Features to render.
+ * @param {string} [props.heading] - Optional custom heading (defaults provided).
+ * @param {string} [props.subheading] - Optional custom subheading (defaults provided).
+ * @returns {JSX.Element} Rendered feature cards section.
+ * @example
+ * <FeatureCards
+ *   features={[
+ *     { icon: IconA, title: "Real-time Data", description: "Live updates.", color: "text-blue-600", bgColor: "bg-blue-100" }
+ *   ]}
+ * />
+ */
 export function FeatureCards({
   features,
   heading = 'Why Choose StockPredict AI?',
@@ -81,7 +84,7 @@ export function FeatureCards({
         {/* Grid layout for feature cards — 1 column on mobile, 3 on desktop */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {features.map((feature) => {
-            const Icon = feature.icon; // Icon is a React component passed into props
+            const Icon = feature.icon;
             return (
               <Card
                 key={feature.title}
@@ -91,13 +94,10 @@ export function FeatureCards({
                   boxShadow: 1,
                   borderRadius: '12px',
                   transition: 'box-shadow 0.2s ease-in-out',
-                  '&:hover': {
-                    boxShadow: 4,
-                  },
+                  '&:hover': { boxShadow: 4 },
                 }}
                 data-testid="mui-card"
               >
-                {/* Card content wrapper */}
                 <CardContent
                   className="p-6 text-center"
                   data-testid="mui-cardcontent"
@@ -105,7 +105,6 @@ export function FeatureCards({
                   <div
                     className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${feature.bgColor} mb-4`}
                   >
-                    {/* Icon inside a styled circle */}
                     <Icon className={`h-8 w-8 ${feature.color}`} />
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-3">
@@ -123,3 +122,5 @@ export function FeatureCards({
     </section>
   );
 }
+
+export default FeatureCards;
