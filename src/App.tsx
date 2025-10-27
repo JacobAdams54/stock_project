@@ -1,7 +1,9 @@
 import { Box } from '@mui/material';
 import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
-import Hero from './components/layout/Hero'
+import Hero from './components/layout/Hero';
+import { FeatureCards } from './components/layout/FeatureCard';
+import { TrendingUp } from '@mui/icons-material';
 
 function App() {
   return (
@@ -16,6 +18,18 @@ function App() {
         }}
       >
         <Hero />
+        <FeatureCards
+          features={[
+            {
+              icon: TrendingUp,
+              title: 'Real-time Data',
+              description:
+                'Stay up-to-date with live stock prices and insights.',
+              color: 'text-blue-600',
+              bgColor: 'bg-blue-100',
+            },
+          ]}
+        />
         <Box
           sx={{
             flex: 1, // fills the available vertical space
