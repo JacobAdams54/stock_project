@@ -42,6 +42,7 @@
  * ```
  */
 import { Card, CardContent } from '@mui/material';
+import React from 'react';
 
 // Define the structure for a single feature card
 type Feature = {
@@ -62,18 +63,19 @@ type FeatureCardsProps = {
 // Functional component that renders the feature cards section
 export function FeatureCards({
   features,
-  heading = "Why Choose StockPredict AI?",
-  subheading = "Our platform combines cutting-edge technology with intuitive design to help you make smarter investment decisions."
+  heading = 'Why Choose StockPredict AI?',
+  subheading = 'Our platform combines cutting-edge technology with intuitive design to help you make smarter investment decisions.',
 }: FeatureCardsProps) {
   return (
     // Semantic <section> tag for the feature cards area
     <section className="py-16 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
         {/* Section heading and subheading */}
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">{heading}</h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">{subheading}</p>
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            {subheading}
+          </p>
         </div>
 
         {/* Grid layout for feature cards — 1 column on mobile, 3 on desktop */}
@@ -84,26 +86,34 @@ export function FeatureCards({
               <Card
                 key={feature.title}
                 sx={{
-                  backgroundColor: "white",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: 'white',
+                  border: '1px solid #e5e7eb',
                   boxShadow: 1,
-                  borderRadius: "12px",
-                  transition: "box-shadow 0.2s ease-in-out",
+                  borderRadius: '12px',
+                  transition: 'box-shadow 0.2s ease-in-out',
                   '&:hover': {
                     boxShadow: 4,
                   },
                 }}
                 data-testid="mui-card"
               >
-
                 {/* Card content wrapper */}
-                <CardContent className="p-6 text-center" data-testid="mui-cardcontent">
-                  <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${feature.bgColor} mb-4`}>
+                <CardContent
+                  className="p-6 text-center"
+                  data-testid="mui-cardcontent"
+                >
+                  <div
+                    className={`inline-flex items-center justify-center w-16 h-16 rounded-full ${feature.bgColor} mb-4`}
+                  >
                     {/* Icon inside a styled circle */}
                     <Icon className={`h-8 w-8 ${feature.color}`} />
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 leading-relaxed">
+                    {feature.description}
+                  </p>
                 </CardContent>
               </Card>
             );
