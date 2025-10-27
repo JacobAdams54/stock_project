@@ -24,9 +24,9 @@
  *   user-friendly messages shown inline. Other errors fallback to the error message.
  *
  * Notes
- * - This implementation uses semantic HTML + Tailwind utility classes for a
- *   lightweight, easily testable implementation. If Material UI is available in
- *   the project, the inputs/buttons can be swapped for MUI components with minimal change.
+ * - This implementation uses Material-UI (MUI) components for layout, inputs, and buttons,
+ *   providing a consistent, accessible, and easily testable UI. All form elements and layout
+ *   are built using MUI's `Container`, `Paper`, `Box`, `TextField`, `Button`, and related components.
  */
 
 import React, { useState } from "react";
