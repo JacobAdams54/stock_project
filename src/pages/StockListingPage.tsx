@@ -1,5 +1,42 @@
+/**
+ * StockListingPage
+ *
+ * Renders a searchable, filterable grid of stock prediction cards.
+ *
+ * Props
+ * - initialStocks?: Stock[]
+ *   Optional initial dataset to render. When provided, the page uses this
+ *   array as the source of truth for the listing (useful for tests and
+ *   server-side hydration). Each Stock object should match the shape defined
+ *   in this module's `Stock` type.
+ *
+ * Behavior / responsibilities
+ * - Provides search (by symbol or company name), sector filtering and
+ *   sorting options. These are client-side only and operate on the
+ *   `initialStocks` array.
+ * - Each stock is rendered with a presentational `StockCard` component.
+ * - Navigation: stock cards are wrapped in `react-router` `<Link>` elements
+ *   that navigate to `/stocks/:symbol`. The full stock object is provided
+ *   in `location.state` so a detail page can opt-in to use it.
+ *
+ * Accessibility
+ * - The component uses proper labels for form controls (aria-label or
+ *   visible labels) and `data-testid` attributes to assist testing.
+ * - Consumers should ensure the page is wrapped in a `ThemeProvider` and
+ *   `BrowserRouter`/`MemoryRouter` when rendering in integration tests.
+ *
+ * Example
+ *   <StockListingPage initialStocks={[{ symbol: 'AAPL', name: 'Apple Inc.', ... }]} />
+ *
+ * Notes
+ * - This file is intentionally presentation-focused; complex data fetching
+ *   or Firestore integration should live in a hook (e.g. `useStockData`) and
+ *   be composed into this page.
+ */
+
 import React from 'react';
 import { Box, Container, Typography, TextField, Select, Button } from '@mui/material';
+import { Link } from 'react-router-dom';
 
 import Header from '../components/layout/Header';
 import Footer from '../components/layout/Footer';
@@ -61,10 +98,7 @@ export default function StockListingPage({ initialStocks }: { initialStocks?: St
         return sorted;
     }, [stocks, query, sector, sort]);
 
-    const handleCardClick = (symbol: string) => {
-        const event = new CustomEvent('navigate', { detail: { page: 'stock-detail', stockSymbol: symbol } });
-        window.dispatchEvent(event);
-    };
+    // Navigation is handled via react-router Links. Header/Footer provide top-level navigation.
 
     return (
         <div>
@@ -84,7 +118,7 @@ export default function StockListingPage({ initialStocks }: { initialStocks?: St
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         size="small"
-                        inputProps={{ 'aria-label': 'search' }}
+                        slotProps={{ input: { 'aria-label': 'search stocks' } }}
                         sx={{ minWidth: 240 }}
                     />
 
@@ -134,11 +168,11 @@ export default function StockListingPage({ initialStocks }: { initialStocks?: St
                     <div data-testid="stock-grid" className="overflow-auto">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             {filtered.map((s) => (
-                                <div
+                                <Link
                                     key={s.symbol}
+                                    to={`/stocks/${String(s.symbol)}`}
                                     data-testid={`stock-card-${s.symbol}`}
-                                    className="cursor-pointer"
-                                    onClick={() => handleCardClick(String(s.symbol))}
+                                    className="block cursor-pointer"
                                 >
                                     <StockCard
                                         ticker={String(s.symbol)}
@@ -148,7 +182,7 @@ export default function StockListingPage({ initialStocks }: { initialStocks?: St
                                         confidence={Math.round((s.confidence ?? 0) * 100)}
                                         riskLevel={(s.riskLevel as any) ?? 'Moderate'}
                                     />
-                                </div>
+                                </Link>
                             ))}
                         </div>
                     </div>
