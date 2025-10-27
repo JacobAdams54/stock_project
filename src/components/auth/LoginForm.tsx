@@ -52,6 +52,11 @@ import VisibilityOff from "@mui/icons-material/VisibilityOff";
 import GoogleIcon from "@mui/icons-material/Google";
 import Logo from "../layout/Logo";
 
+/**
+ * Map Firebase Auth error codes to friendly user-facing messages.
+ * @param {string} [code] - Firebase auth error code (e.g. 'auth/wrong-password')
+ * @returns {string} Localized, user-readable error message.
+ */
 function mapAuthError(code?: string): string {
   switch (code) {
     case "auth/invalid-email":
@@ -66,6 +71,15 @@ function mapAuthError(code?: string): string {
   }
 }
 
+/**
+ * Attempt to sign a user in with email/password and return a normalized result.
+ * - Sets persistence based on `remember`.
+ * - Verifies email is confirmed.
+ * - Reads custom claims and Firestore profile when available.
+ *
+ * @param {{email: string, password: string, remember: boolean}} params
+ * @returns {Promise<Object>} Object with shape { ok: boolean, error?: string, uid?: string, email?: string, displayName?: string, isAdmin?: boolean, profile?: any }
+ */
 export async function login({
   email,
   password,
@@ -107,6 +121,16 @@ export async function login({
   }
 }
 
+/**
+ * LoginForm component
+ * Renders the email/password form, handles validation, and performs
+ * authentication (email/password + Google) using Firebase.
+ *
+ * Emits a `CustomEvent('navigate', { detail: { page } })` prior to
+ * react-router navigation to allow event-driven listeners.
+ *
+ * @returns {React.ReactElement} The login form element.
+ */
 export default function LoginForm(): React.ReactElement {
   // form state
   const [email, setEmail] = useState("");
