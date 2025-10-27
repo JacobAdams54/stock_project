@@ -246,6 +246,10 @@ function formatMarketCap(value: unknown): string {
  * 4) price
  * 5) pc/p (previous close) as last-resort fallback
  * Note: Using previous close can understate intraday moves; only used if no close-like field exists.
+ * @param {DailyPriceDoc} docData - The daily price document containing various price fields
+ * @param {string} idLabel - Identifier label for error reporting context
+ * @returns {number} The selected plausible close price for the day
+ * @throws {InvalidDataError} If no valid price field is found
  */
 function pickDailyPrice(docData: DailyPriceDoc, idLabel: string): number {
   const candidates = [
