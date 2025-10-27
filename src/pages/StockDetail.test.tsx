@@ -65,7 +65,9 @@ describe('StockDetail Component', () => {
     renderWithTheme();
 
     expect(screen.getByRole('heading', { name: /MSFT/i })).toBeInTheDocument();
-    expect(screen.getAllByText(/Microsoft Corporation/i)[0]).toBeInTheDocument();
+    expect(
+      screen.getAllByText(/Microsoft Corporation/i)[0]
+    ).toBeInTheDocument();
   });
 
   it('renders current stock price and change', async () => {
@@ -102,7 +104,7 @@ describe('StockDetail Component', () => {
 
     expect(screen.getByText(/failed to load stock data/i)).toBeInTheDocument();
     expect(screen.getByText(/network error/i)).toBeInTheDocument();
-    expect(screen.getByText(/Symbol: MSFT/i)).toBeInTheDocument();
+    expect(screen.getByText(/symbol: msft/i)).toBeInTheDocument();
   });
 
   it('shows no data alert when no data returned', async () => {
@@ -116,14 +118,14 @@ describe('StockDetail Component', () => {
     renderWithTheme();
 
     expect(screen.getByText(/no data found for symbol/i)).toBeInTheDocument();
-    expect(screen.getByText(/MSFT/i)).toBeInTheDocument();
+    expect(screen.getByText(/msft/i)).toBeInTheDocument();
   });
 
   it('renders key statistics with company, sector, market cap and 52-week range', () => {
     renderWithTheme();
 
     // Section header
-    const keyStatsHeader = screen.getByText(/Key Statistics/i);
+    const keyStatsHeader = screen.getByText(/key statistics/i);
     expect(keyStatsHeader).toBeInTheDocument();
 
     // Scope queries within the Key Statistics section to avoid duplicate matches
@@ -132,29 +134,31 @@ describe('StockDetail Component', () => {
     const withinKeyStats = within(keyStatsContainer);
 
     // Labels
-    expect(withinKeyStats.getByText(/Company/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/Sector/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/Market Cap/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/52W High/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/52W Low/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/company/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/sector/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/market cap/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/52w high/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/52w low/i)).toBeInTheDocument();
     // Values
-    expect(withinKeyStats.getByText(/Microsoft Corporation/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/Technology/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/3\.00T/i)).toBeInTheDocument();
+    expect(
+      withinKeyStats.getByText(/microsoft corporation/i)
+    ).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/technology/i)).toBeInTheDocument();
+    expect(withinKeyStats.getByText(/3\.00t/i)).toBeInTheDocument();
     expect(withinKeyStats.getByText(/\$199\.62/)).toBeInTheDocument();
     expect(withinKeyStats.getByText(/\$124\.17/)).toBeInTheDocument();
   });
 
-  it('renders chart section and AI prediction summary when data is loaded', () => {
+  it('renders chart section and ai prediction summary when data is loaded', () => {
     renderWithTheme();
 
-    expect(screen.getByText(/📊 Stock Chart/i)).toBeInTheDocument();
+    expect(screen.getByText(/📊 stock chart/i)).toBeInTheDocument();
     expect(
       screen.getByText(/chart component being implemented/i)
     ).toBeInTheDocument();
 
     // AI prediction card header
-    expect(screen.getByText(/AI Prediction Summary/i)).toBeInTheDocument();
+    expect(screen.getByText(/ai prediction summary/i)).toBeInTheDocument();
   });
 
   it('displays negative change with down arrow and red styling', () => {

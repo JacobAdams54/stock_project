@@ -42,7 +42,6 @@ jest.mock('firebase/firestore', () => {
 });
 
 // Import hooks AFTER mocks so they see the mocked modules
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const {
   useStockMetadata,
   useStockData,
