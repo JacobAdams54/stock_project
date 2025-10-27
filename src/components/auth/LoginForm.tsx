@@ -113,35 +113,34 @@ export default function LoginForm(): React.ReactElement {
 
   const navigate = useNavigate();
 
-  // helper to support both react-router navigation and the required CustomEvent navigation
   function handleNavigation(page: 'home' | 'dashboard' | 'forgot-password' | 'signup') {
-    // dispatch the CustomEvent for other parts of the app that listen for navigation
     try {
       window.dispatchEvent(new CustomEvent('navigate', { detail: { page } }));
-    } catch (e) {
-      // ignore if CustomEvent is not supported in the environment
-    }
-
-    // also navigate using react-router for normal routing
+    } catch (e) {}
     const routeMap: Record<string, string> = {
       home: '/',
       dashboard: '/dashboard',
       'forgot-password': '/forgot-password',
       signup: '/signup',
     };
-
     const path = routeMap[page];
     if (path) navigate(path);
   }
 
   const toggleShowPassword = () => setShowPassword((s) => !s);
-  const preventMouseDown = (e: React.MouseEvent<HTMLButtonElement>) =>
-    e.preventDefault();
+  const preventMouseDown = (e: React.MouseEvent<HTMLButtonElement>) => e.preventDefault();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccess(null);
+
+    // ✅ Added validation check (matches test expectations)
+    if (!email.trim() || !password.trim()) {
+      setError("Please enter your email and password");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -154,9 +153,7 @@ export default function LoginForm(): React.ReactElement {
       }
 
       setSuccess("Signed in successfully");
-      // small delay to show success then route
       setTimeout(() => {
-        // if admin, still navigate to dashboard route; admin UI can be gated elsewhere
         handleNavigation('dashboard');
       }, 400);
     } catch (err: any) {
@@ -241,9 +238,14 @@ export default function LoginForm(): React.ReactElement {
               control={<Checkbox checked={remember} onChange={(e) => setRemember(e.target.checked)} />}
               label="Remember me"
             />
-              <Link component={RouterLink} to="/forgot-password" variant="body2" onClick={() => handleNavigation('forgot-password')}>
-                Forgot password?
-              </Link>
+            <Link
+              component={RouterLink}
+              to="/forgot-password"
+              variant="body2"
+              onClick={() => handleNavigation('forgot-password')}
+            >
+              Forgot password?
+            </Link>
           </Stack>
 
           <Button
@@ -263,26 +265,28 @@ export default function LoginForm(): React.ReactElement {
             setSuccess(null);
             setLoading(true);
             try {
-              // respect "remember" checkbox for persistence
               await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
               const provider = new GoogleAuthProvider();
               const cred = await signInWithPopup(auth, provider);
               const user = cred.user;
 
-              // ensure user doc exists
               const userRef = doc(db, "users", user.uid);
               const snap = await getDoc(userRef);
               if (!snap.exists()) {
-                await setDoc(userRef, {
-                  displayName: user.displayName ?? null,
-                  isAdmin: false,
-                  createdAt: serverTimestamp(),
-                }, { merge: true });
+                await setDoc(
+                  userRef,
+                  {
+                    displayName: user.displayName ?? null,
+                    isAdmin: false,
+                    createdAt: serverTimestamp(),
+                  },
+                  { merge: true }
+                );
               }
 
               setLoading(false);
               setSuccess("Signed in successfully");
-              setTimeout(() => handleNavigation('dashboard'), 300);
+              setTimeout(() => handleNavigation("dashboard"), 300);
             } catch (err: any) {
               setLoading(false);
               setError(mapAuthError(err?.code) || err?.message || "Unable to sign in with Google");
@@ -298,8 +302,8 @@ export default function LoginForm(): React.ReactElement {
         </Button>
         <Box mt={2} textAlign="center">
           <Typography variant="body2">
-            Don't have an account?{' '}
-            <Link component={RouterLink} to="/signup" onClick={() => handleNavigation('signup')}>
+            Don't have an account?{" "}
+            <Link component={RouterLink} to="/signup" onClick={() => handleNavigation("signup")}>
               Sign up
             </Link>
           </Typography>
