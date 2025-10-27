@@ -18,6 +18,8 @@
  * @requires @mui/material
  */
 
+/* eslint-disable react-refresh/only-export-components */
+
 import {
   signInWithEmailAndPassword,
   setPersistence,
@@ -52,11 +54,15 @@ import Logo from "../layout/Logo";
 
 function mapAuthError(code?: string): string {
   switch (code) {
-    case "auth/invalid-email": return "Invalid email address.";
+    case "auth/invalid-email":
+      return "Invalid email address.";
     case "auth/user-not-found":
-    case "auth/wrong-password": return "Incorrect email or password.";
-    case "auth/too-many-requests": return "Too many attempts. Try again later.";
-    default: return "Unable to sign in. Please try again.";
+    case "auth/wrong-password":
+      return "Incorrect email or password.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Try again later.";
+    default:
+      return "Unable to sign in. Please try again.";
   }
 }
 
@@ -115,8 +121,10 @@ export default function LoginForm(): React.ReactElement {
 
   function handleNavigation(page: 'home' | 'dashboard' | 'forgot-password' | 'signup') {
     try {
-      window.dispatchEvent(new CustomEvent('navigate', { detail: { page } }));
-    } catch (e) {}
+        window.dispatchEvent(new CustomEvent('navigate', { detail: { page } }));
+      } catch {
+        // ignore dispatch errors in older browsers or test env
+      }
     const routeMap: Record<string, string> = {
       home: '/',
       dashboard: '/dashboard',

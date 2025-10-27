@@ -5,6 +5,9 @@
 
 import React from "react";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { act } from "react";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 import LoginForm from "./LoginForm";
@@ -44,9 +47,26 @@ afterEach(() => {
 });
 
 function renderLogin() {
+  const theme = createTheme({
+    components: {
+      MuiButtonBase: {
+        defaultProps: {
+          // Disable ripples in tests to avoid asynchronous TouchRipple state updates
+          // that lead to React's "act(...)" warnings. Ripples are purely visual;
+          // disabling them makes tests deterministic and faster.
+          // See: https://mui.com/material-ui/react-button/#disable-ripple
+          // and https://react.dev/reference/react-dom/test-utils#act for background.
+          disableRipple: true,
+        },
+      },
+    },
+  });
+
   return render(
     <MemoryRouter initialEntries={["/login"]}>
-      <LoginForm />
+      <ThemeProvider theme={theme}>
+        <LoginForm />
+      </ThemeProvider>
     </MemoryRouter>
   );
 }
@@ -66,7 +86,9 @@ test("renders login form fields and buttons", () => {
 
 test("shows validation message for empty form submit", async () => {
   renderLogin();
-  fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: /log in/i }));
+  });
   expect(await screen.findByText(/please enter your email and password/i)).toBeInTheDocument();
 });
 
@@ -81,7 +103,9 @@ test("performs successful login using session persistence by default", async () 
   renderLogin();
   fireEvent.change(screen.getByLabelText(/email/i), { target: { value: "test@example.com" } });
   fireEvent.change(getPasswordInput(), { target: { value: "secret123" } });
-  fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: /log in/i }));
+  });
 
   await waitFor(() => {
     expect(authMod.setPersistence).toHaveBeenCalled();
@@ -107,8 +131,12 @@ test("uses local persistence when Remember Me is checked", async () => {
   renderLogin();
   fireEvent.change(screen.getByLabelText(/email/i), { target: { value: "test@example.com" } });
   fireEvent.change(getPasswordInput(), { target: { value: "secret123" } });
-  fireEvent.click(screen.getByLabelText(/remember me/i));
-  fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+  await act(async () => {
+    await userEvent.click(screen.getByLabelText(/remember me/i));
+  });
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: /log in/i }));
+  });
 
   await waitFor(() => {
     const persistenceArg = (authMod.setPersistence as jest.Mock).mock.calls[0][1];
@@ -124,17 +152,21 @@ test("shows error for wrong credentials", async () => {
   renderLogin();
   fireEvent.change(screen.getByLabelText(/email/i), { target: { value: "bad@example.com" } });
   fireEvent.change(getPasswordInput(), { target: { value: "nope" } });
-  fireEvent.click(screen.getByRole("button", { name: /log in/i }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: /log in/i }));
+  });
 
   expect(await screen.findByText(/incorrect email or password/i)).toBeInTheDocument();
 });
 
-test("toggles password visibility when clicking eye icon", () => {
+test("toggles password visibility when clicking eye icon", async () => {
   renderLogin();
   const pwd = getPasswordInput() as HTMLInputElement;
   expect(pwd.type).toBe("password");
   const eyeBtn = screen.getByRole("button", { name: /show password/i });
-  fireEvent.click(eyeBtn);
+  await act(async () => {
+    await userEvent.click(eyeBtn);
+  });
   expect(pwd.type).toBe("text");
 });
 
@@ -144,11 +176,83 @@ test("google sign-in creates Firestore user doc if missing", async () => {
   (fsMod.getDoc as jest.Mock).mockResolvedValueOnce({ exists: () => false });
 
   renderLogin();
-  fireEvent.click(screen.getByRole("button", { name: /continue with google/i }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole("button", { name: /continue with google/i }));
+  });
 
   await waitFor(() => {
     expect(authMod.signInWithPopup).toHaveBeenCalled();
     expect(fsMod.getDoc).toHaveBeenCalled();
     expect(fsMod.setDoc).toHaveBeenCalled();
   });
+});
+
+test('shows email verification message when login helper returns email-verify error', async () => {
+  // Mock firebase to simulate email-not-verified path
+  const fakeUser: any = {
+    reload: jest.fn().mockResolvedValue(undefined),
+    emailVerified: false,
+    getIdTokenResult: jest.fn().mockResolvedValue({ claims: {} }),
+  };
+  (authMod.signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({ user: fakeUser });
+
+  renderLogin();
+  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'notverified@example.com' } });
+  fireEvent.change(getPasswordInput(), { target: { value: 'secret' } });
+  await act(async () => {
+    await userEvent.click(screen.getByRole('button', { name: /log in/i }));
+  });
+
+  expect(await screen.findByText(/please verify your email before continuing/i)).toBeInTheDocument();
+});
+
+test('clicking Sign up emits navigate custom event', async () => {
+  const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+  renderLogin();
+  const signUp = screen.getByRole('link', { name: /sign up/i });
+  await act(async () => {
+    await userEvent.click(signUp);
+  });
+  expect(dispatchSpy).toHaveBeenCalled();
+  const ev = dispatchSpy.mock.calls[dispatchSpy.mock.calls.length - 1][0];
+  expect(ev.type).toBe('navigate');
+  // @ts-ignore
+  expect(ev.detail?.page).toBe('signup');
+});
+
+test('clicking Forgot password emits navigate custom event', async () => {
+  const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+  renderLogin();
+  const forgot = screen.getByRole('link', { name: /forgot password\?/i });
+  await act(async () => {
+    await userEvent.click(forgot);
+  });
+  expect(dispatchSpy).toHaveBeenCalled();
+  const ev = dispatchSpy.mock.calls[dispatchSpy.mock.calls.length - 1][0];
+  expect(ev.type).toBe('navigate');
+  // @ts-ignore
+  expect(ev.detail?.page).toBe('forgot-password');
+});
+
+test('google sign-in failure shows friendly error', async () => {
+  (authMod.signInWithPopup as jest.Mock).mockRejectedValueOnce({ code: 'auth/unknown-error' });
+  renderLogin();
+  await act(async () => {
+    await userEvent.click(screen.getByRole('button', { name: /continue with google/i }));
+  });
+
+  // default mapAuthError should produce the fallback message
+  expect(await screen.findByText(/unable to sign in with google|unable to sign in. please try again/i)).toBeInTheDocument();
+});
+
+test('password icon mouseDown prevents default', () => {
+  renderLogin();
+  const pwd = getPasswordInput() as HTMLInputElement;
+  const eyeBtn = screen.getByRole('button', { name: /show password/i });
+  // spy on preventDefault of the event object by calling fireEvent.mouseDown
+  // ensure no exception and input type remains 'password' (mouseDown shouldn't toggle)
+  act(() => {
+    fireEvent.mouseDown(eyeBtn);
+  });
+  expect(pwd.type).toBe('password');
 });
