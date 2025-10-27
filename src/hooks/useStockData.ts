@@ -1,3 +1,55 @@
+/**
+ * USAGE EXAMPLES
+ * -----------------------------------------------------------------------------
+ * 1) Metadata-only (summary card)
+ *
+ * import { useStockMetadata } from './useStockData';
+ *
+ * function StockSummaryCard({ symbol }: { symbol: string }) {
+ *   const { data: meta, loading, error } = useStockMetadata(symbol);
+ *   if (loading) return <div>Loading…</div>;
+ *   if (error || !meta) return <div>Error</div>;
+ *   return (
+ *     <div>
+ *       <h3>{meta.companyName} ({symbol})</h3>
+ *       <div>Sector: {meta.sector}</div>
+ *       <div>Market Cap: {meta.marketCap}</div>
+ *     </div>
+ *   );
+ * }
+ *
+ * 2) Full stock detail (metadata + summary + full history for charts)
+ *
+ * import { useStockData, useStockHistory } from './useStockData';
+ *
+ * function StockDetail({ symbol }: { symbol: string }) {
+ *   const { data: summary, loading: loadingSummary } = useStockData(symbol);
+ *   const { data: history, loading: loadingHistory } = useStockHistory(symbol);
+ *   if (loadingSummary || loadingHistory) return <div>Loading…</div>;
+ *   if (!summary || !history) return <div>Error</div>;
+ *   // render summary fields + pass `history` to your chart component
+ *   return <div>{summary.companyName} — {history.length} bars</div>;
+ * }
+ *
+ * 3) All stocks metadata for a listing page
+ *
+ * import { useStocksList } from './useStockData';
+ *
+ * function StocksListing() {
+ *   const { data: stocks, loading, error } = useStocksList();
+ *   if (loading) return <div>Loading…</div>;
+ *   if (error || !stocks) return <div>Error</div>;
+ *   return (
+ *     <ul>
+ *       {stocks.map(s => (
+ *         <li key={s.symbol}>{s.symbol} — {s.companyName} — {s.sector} — {s.marketCap}</li>
+ *       ))}
+ *     </ul>
+ *   );
+ * }
+ * -----------------------------------------------------------------------------
+ */
+
 import { useEffect, useState } from 'react';
 import {
   collection,
@@ -54,8 +106,57 @@ interface Metadata {
 }
 
 /**
- * Internal structure summarizing price history.
- * Not exported directly; merged into StockDetailData.
+ * Public type for components that only need stock metadata.
+ */
+export type StockMetadata = Metadata;
+
+/* -------------------------------------------------------------------------- */
+/*                                  CONSTANTS                                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Approximate number of trading days in a 52-week period.
+ */
+const HISTORY_DAYS_52W = 252;
+
+/* -------------------------------------------------------------------------- */
+/*                           FIRESTORE DAILY DOC TYPE                          */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Firestore daily price document shape with flexible provider fields.
+ * @property {number | string | undefined} o - Open price
+ * @property {number | string | undefined} h - High price
+ * @property {number | string | undefined} l - Low price
+ * @property {number | string | undefined} c - Close/current price (preferred)
+ * @property {number | string | undefined} close - Alternative close field
+ * @property {number | string | undefined} adjClose - Adjusted close field
+ * @property {number | string | undefined} price - Generic price field
+ * @property {number | string | undefined} pc - Previous close
+ * @property {number | string | undefined} p - Previous/other price representation
+ * @property {number | string | undefined} v - Volume
+ */
+interface DailyPriceDoc {
+  o?: number | string;
+  h?: number | string;
+  l?: number | string;
+  c?: number | string;
+  close?: number | string;
+  adjClose?: number | string;
+  price?: number | string;
+  pc?: number | string;
+  p?: number | string;
+  v?: number | string;
+}
+
+/**
+ * Derived price summary used by readAndSummarizePrices and merged into StockDetailData.
+ *
+ * @property {number} fiftyTwoWeekHigh - Highest high over the last ~252 trading days
+ * @property {number} fiftyTwoWeekLow - Lowest low over the last ~252 trading days
+ * @property {number} currentPrice - Most recent close price
+ * @property {number} change - Absolute day-over-day change (current - previous close)
+ * @property {number} changePercent - Percentage day-over-day change
  */
 interface PriceSummary {
   fiftyTwoWeekHigh: number;
@@ -63,85 +164,6 @@ interface PriceSummary {
   currentPrice: number;
   change: number;
   changePercent: number;
-}
-
-/**
- * Flexible shape for daily price documents from multiple providers.
- * Common provider schema: c (close), o (open), h (high), l (low), v (volume), pc/p (previous close).
- */
-interface DailyPriceDoc {
-  /** Explicit close price (if normalized upstream) */
-  close?: number;
-  /** Adjusted close (split/dividend adjusted) */
-  adjClose?: number;
-  /** Generic price field used by some sources */
-  price?: number;
-
-  /** Provider: daily close/current price */
-  c?: number;
-  /** Provider: previous close (Finnhub-style) */
-  pc?: number;
-  /** Provider: previous close (alternate) */
-  p?: number;
-
-  /** Provider: high of day */
-  h?: number;
-  /** Provider: low of day */
-  l?: number;
-  /** Provider: open of day */
-  o?: number;
-  /** Provider: volume of day */
-  v?: number;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                                   CACHE                                    */
-/* -------------------------------------------------------------------------- */
-
-/**
- * In-memory cache time-to-live in milliseconds.
- * Keeps Firestore load low during rapid UI interactions.
- */
-const CACHE_TTL_MS = 60_000;
-
-/**
- * Trading days approximating a rolling 52-week window.
- * Used to bound the price history query.
- */
-const HISTORY_DAYS_52W = 252; // ~trading days in a year
-
-/**
- * Simple in-memory cache keyed by symbol.
- * Note: Resets on page reload; not persisted.
- */
-const memoryCache = new Map<
-  string,
-  { data: StockDetailData; timestamp: number }
->();
-
-/**
- * Get a cached StockDetailData if present and not expired.
- * @param {string} symbol - Uppercase ticker symbol
- * @returns {StockDetailData | null} Cached value or null if missing/expired
- */
-function getCached(symbol: string): StockDetailData | null {
-  const entry = memoryCache.get(symbol);
-  if (!entry) return null;
-  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
-    memoryCache.delete(symbol);
-    return null;
-  }
-  return entry.data;
-}
-
-/**
- * Insert or update a cached StockDetailData for the given symbol.
- * @param {string} symbol - Uppercase ticker symbol
- * @param {StockDetailData} data - Value to cache
- * @returns {void}
- */
-function putCached(symbol: string, data: StockDetailData) {
-  memoryCache.set(symbol, { data, timestamp: Date.now() });
 }
 
 /* -------------------------------------------------------------------------- */
@@ -338,29 +360,17 @@ async function readAndSummarizePrices(symbol: string): Promise<PriceSummary> {
 
 /**
  * React hook that loads stock metadata and price summary for a symbol.
- *
- * Behavior:
- * - Normalizes the symbol to uppercase and trims whitespace.
- * - Uses an in-memory TTL cache to avoid redundant Firestore reads.
- * - Performs parallel Firestore reads for metadata and price history.
- * - Cancels state updates when the component unmounts or symbol changes.
- *
- * Side effects:
- * - Reads from Firebase Firestore (external dependency).
- * - Writes to an in-memory cache for up to CACHE_TTL_MS.
+ * One-time Firestore reads; no in-memory caching.
  *
  * @param {string | undefined} symbol - Stock symbol input; falsy clears state
  * @returns {{
  *   data: StockDetailData | null,
  *   loading: boolean,
  *   error: Error | null
- * }} Object with current data, loading state, and error (if any)
+ * }}
  *
  * @example
  * const { data, loading, error } = useStockData('AAPL');
- * if (loading) return <Spinner />;
- * if (error) return <ErrorBanner message={error.message} />;
- * return <StockCard stock={data!} />;
  */
 export const useStockData = (symbol: string | undefined) => {
   const [data, setData] = useState<StockDetailData | null>(null);
@@ -376,14 +386,6 @@ export const useStockData = (symbol: string | undefined) => {
     }
 
     const sym = symbol.trim().toUpperCase();
-    const cached = getCached(sym);
-
-    if (cached) {
-      setData(cached);
-      setLoading(false);
-      setError(null);
-      return; // avoid redundant reads within TTL
-    }
 
     let cancelled = false;
     setLoading(true);
@@ -403,12 +405,9 @@ export const useStockData = (symbol: string | undefined) => {
 
         if (cancelled) return;
         setData(result);
-        putCached(sym, result);
       } catch (e) {
         if (cancelled) return;
         let err = e instanceof Error ? e : new Error('Unknown error');
-        // Developer-friendly hint when Firestore index is missing
-        // FirebaseError.code === 'failed-precondition' typically indicates an index is required
         const anyErr = err as any;
         if (
           typeof anyErr?.code === 'string' &&
@@ -434,3 +433,235 @@ export const useStockData = (symbol: string | undefined) => {
 
   return { data, loading, error };
 };
+
+/* -------------------------------------------------------------------------- */
+/*                        ADDITION: METADATA-ONLY HOOK                        */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Hook to fetch metadata only (companyName, sector, marketCap).
+ * Use this for lightweight summary cards that don’t need prices.
+ *
+ * @param {string | undefined} symbol - Stock ticker
+ * @returns {{
+ *   data: StockMetadata | null,
+ *   loading: boolean,
+ *   error: Error | null
+ * }}
+ * @example
+ * const { data: meta } = useStockMetadata('AAPL');
+ */
+export function useStockMetadata(symbol: string | undefined) {
+  const [data, setData] = useState<StockMetadata | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!symbol?.trim()) {
+      setData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+
+    const sym = symbol.trim().toUpperCase();
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const meta = await readMetadata(sym);
+        if (cancelled) return;
+        setData(meta);
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e : new Error('Unknown error'));
+        setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol]);
+
+  return { data, loading, error };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                        ADDITION: HISTORY + LIST HOOKS                      */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Normalized OHLCV bar for charting.
+ */
+export interface PriceBar {
+  /** Sortable key (expected YYYY-MM-DD from document ID) */
+  t: string;
+  o: number;
+  h: number;
+  l: number;
+  c: number;
+  v?: number;
+}
+
+/**
+ * Item for the stock listing page.
+ */
+export interface StockIndexItem {
+  symbol: string;
+  companyName: string;
+  sector: string;
+  marketCap: string;
+}
+
+/**
+ * Read full daily price history for a symbol.
+ * Ordered ascending by documentId (oldest -> newest).
+ *
+ * @param {string} symbol
+ * @returns {Promise<PriceBar[]>}
+ * @throws {DataNotFoundError} If no documents exist
+ */
+async function readPriceHistory(symbol: string): Promise<PriceBar[]> {
+  const dailyRef = collection(db, 'prices', symbol, 'daily');
+  const qy = query(dailyRef, orderBy(documentId()));
+  const snap = await getDocs(qy);
+  if (snap.empty) throw new DataNotFoundError('price data', symbol);
+
+  const bars: PriceBar[] = [];
+  for (const d of snap.docs) {
+    const raw = d.data() as DailyPriceDoc;
+    const c = pickDailyPrice(raw, d.id);
+    const o = Number.isFinite(Number(raw?.o)) ? Number(raw.o) : c;
+    const h = Number.isFinite(Number(raw?.h)) ? Number(raw.h) : c;
+    const l = Number.isFinite(Number(raw?.l)) ? Number(raw.l) : c;
+    const v = Number.isFinite(Number(raw?.v)) ? Number(raw.v) : undefined;
+
+    bars.push({ t: d.id, o, h, l, c, v });
+  }
+  return bars;
+}
+
+/**
+ * Hook to fetch full price history for charts.
+ * One-time fetch; no caching.
+ *
+ * @param {string | undefined} symbol
+ * @returns {{
+ *   data: PriceBar[] | null,
+ *   loading: boolean,
+ *   error: Error | null
+ * }}
+ * @example
+ * const { data: bars } = useStockHistory('AAPL');
+ */
+export function useStockHistory(symbol: string | undefined) {
+  const [data, setData] = useState<PriceBar[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    if (!symbol?.trim()) {
+      setData(null);
+      setError(null);
+      setLoading(false);
+      return;
+    }
+    const sym = symbol.trim().toUpperCase();
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const bars = await readPriceHistory(sym);
+        if (cancelled) return;
+        setData(bars);
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e : new Error('Unknown error'));
+        setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [symbol]);
+
+  return { data, loading, error };
+}
+
+/**
+ * Fetch all symbols and their metadata for the listing page.
+ * For <=100 symbols, a simple fan-out is acceptable.
+ *
+ * @returns {Promise<StockIndexItem[]>}
+ */
+async function readAllStocksList(): Promise<StockIndexItem[]> {
+  const stocksSnap = await getDocs(collection(db, 'stocks'));
+  if (stocksSnap.empty) return [];
+
+  const symbols = stocksSnap.docs.map((d) => d.id);
+  const items = await Promise.all(
+    symbols.map(async (sym) => {
+      try {
+        const meta = await readMetadata(sym);
+        return { symbol: sym, ...meta };
+      } catch {
+        return null;
+      }
+    })
+  );
+  return items.filter(Boolean) as StockIndexItem[];
+}
+
+/**
+ * Hook to fetch all stocks + metadata for a listing.
+ * One-time fetch; no caching.
+ *
+ * @returns {{
+ *   data: StockIndexItem[] | null,
+ *   loading: boolean,
+ *   error: Error | null
+ * }}
+ * @example
+ * const { data: stocks } = useStocksList();
+ */
+export function useStocksList() {
+  const [data, setData] = useState<StockIndexItem[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const list = await readAllStocksList();
+        if (cancelled) return;
+        setData(list);
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e : new Error('Unknown error'));
+        setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { data, loading, error };
+}
