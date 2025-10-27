@@ -72,10 +72,6 @@ export default function ForgotPasswordPage() {
 	};
 
 	const navigate = useNavigate();
-	const dispatchNavigate = (to: "home" | "login") => {
-		if (to === "login") return navigate("/login");
-		return navigate("/");
-	};
 
 	return (
 		<Container maxWidth="sm" sx={{ minHeight: "100dvh", display: "grid", placeItems: "center" }}>
@@ -122,7 +118,7 @@ export default function ForgotPasswordPage() {
 								Send reset link
 							</Button>
 
-							<Button type="button" variant="text" onClick={() => dispatchNavigate("login")}>
+							<Button type="button" variant="text" onClick={() => navigate("/login") }>
 								Back to login
 							</Button>
 						</Stack>
@@ -148,11 +144,11 @@ export default function ForgotPasswordPage() {
 								Try a different email
 							</Button>
 
-							<Button variant="contained" color="inherit" onClick={() => dispatchNavigate("login")}>
+							<Button variant="contained" color="inherit" onClick={() => navigate("/login") }>
 								Back to login
 							</Button>
 
-							<Button variant="outlined" onClick={() => dispatchNavigate("home")}>
+							<Button variant="outlined" onClick={() => navigate("/") }>
 								Back to home
 							</Button>
 						</Stack>
