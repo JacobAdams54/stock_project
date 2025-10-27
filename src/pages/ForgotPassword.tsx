@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
 			<Paper elevation={4} sx={{ width: "100%", p: { xs: 2, sm: 3 }, borderRadius: 3 }}>
 				<Box display="flex" alignItems="center" justifyContent="center" gap={1} mb={2}>
 					<Logo size="lg" variant="dark" />
-					<Box alignItems="left" justifyContent="left">
+					<Box alignItems="flex-start" justifyContent="flex-start">
 						<Typography variant="h6" color="black" gutterBottom textAlign="left">
 							STALK.AI
 						</Typography>
