@@ -1,7 +1,7 @@
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import Footer from './components/layout/Footer';
-import SignupForm from './components/auth/SignupForm';
 import Header from './components/layout/Header';
+import Hero from './components/layout/Hero'
 
 function App() {
   return (
@@ -15,6 +15,7 @@ function App() {
           p: 3,
         }}
       >
+        <Hero />
         <Box
           sx={{
             flex: 1, // fills the available vertical space
@@ -23,12 +24,7 @@ function App() {
             alignItems: 'center',
           }}
         >
-          <Typography variant="h4" component="h1">
-            Stock Predictor - Coming Soon
-          </Typography>
-          <Box sx={{ mt: 4, width: '100%', maxWidth: 400 }}>
-            <SignupForm />
-          </Box>
+          <Box sx={{ mt: 4, width: '100%', maxWidth: 400 }}></Box>
         </Box>
       </Box>
       <Footer />
