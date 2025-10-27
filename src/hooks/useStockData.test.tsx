@@ -50,7 +50,17 @@ const {
 } = require('./useStockData');
 
 /**
- * Helper: create a Firestore DocumentSnapshot-like object.
+ * Creates a minimal Firestore DocumentSnapshot-like mock for tests.
+ * Useful for stubbing getDoc results without importing Firestore types.
+ * @param {Object} params - Snapshot options.
+ * @param {boolean} [params.exists=true] - Whether exists() should return true.
+ * @param {string} [params.id=''] - Document identifier exposed as id.
+ * @param {any} [params.data={}] - Payload returned by data().
+ * @returns {{ id: string; exists: () => boolean; data: () => any }} Mock snapshot object.
+ * @example
+ * const snap = makeDocSnap({ id: 'AAPL', data: { companyName: 'Apple' } });
+ * expect(snap.exists()).toBe(true);
+ * expect(snap.data().companyName).toBe('Apple');
  */
 function makeDocSnap({
   exists = true,
@@ -69,7 +79,15 @@ function makeDocSnap({
 }
 
 /**
- * Helper: create a Firestore QuerySnapshot-like object.
+ * Creates a minimal Firestore QuerySnapshot-like mock for tests.
+ * Useful for stubbing getDocs results without importing Firestore types.
+ * @param {Array<{ id: string; data: any }>} docs - Raw document entries used to build the snapshot.
+ * @returns {{ empty: boolean; docs: Array<{ id: string; exists: () => boolean; data: () => any }> }} Mock query snapshot object.
+ * @example
+ * const snap = makeQuerySnap([{ id: 'AAPL', data: { c: 100 } }]);
+ * expect(snap.empty).toBe(false);
+ * expect(snap.docs[0].id).toBe('AAPL');
+ * expect(snap.docs[0].data().c).toBe(100);
  */
 function makeQuerySnap(docs: Array<{ id: string; data: any }>) {
   return {
