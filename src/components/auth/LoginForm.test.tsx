@@ -96,7 +96,6 @@ test("performs successful login using session persistence by default", async () 
   const fakeUser: any = {
     emailVerified: true,
     reload: jest.fn().mockResolvedValue(undefined),
-    getIdTokenResult: jest.fn().mockResolvedValue({ claims: {} }),
   };
   (authMod.signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({ user: fakeUser });
 
@@ -116,7 +115,6 @@ test("performs successful login using session persistence by default", async () 
       "test@example.com",
       "secret123"
     );
-    expect(fakeUser.reload).toHaveBeenCalled();
   });
 });
 
@@ -124,7 +122,6 @@ test("uses local persistence when Remember Me is checked", async () => {
   const fakeUser: any = {
     emailVerified: true,
     reload: jest.fn().mockResolvedValue(undefined),
-    getIdTokenResult: jest.fn().mockResolvedValue({ claims: {} }),
   };
   (authMod.signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({ user: fakeUser });
 
@@ -187,51 +184,20 @@ test("google sign-in creates Firestore user doc if missing", async () => {
   });
 });
 
-test('shows email verification message when login helper returns email-verify error', async () => {
-  // Mock firebase to simulate email-not-verified path
-  const fakeUser: any = {
-    reload: jest.fn().mockResolvedValue(undefined),
-    emailVerified: false,
-    getIdTokenResult: jest.fn().mockResolvedValue({ claims: {} }),
-  };
-  (authMod.signInWithEmailAndPassword as jest.Mock).mockResolvedValueOnce({ user: fakeUser });
+// Note: email verification check was removed from the client-side login flow.
+// Any tests asserting the presence of a client-side verification message
+// have been removed. Verification should be handled separately if needed.
 
+test('Sign up link points to /signup', async () => {
   renderLogin();
-  fireEvent.change(screen.getByLabelText(/email/i), { target: { value: 'notverified@example.com' } });
-  fireEvent.change(getPasswordInput(), { target: { value: 'secret' } });
-  await act(async () => {
-    await userEvent.click(screen.getByRole('button', { name: /log in/i }));
-  });
-
-  expect(await screen.findByText(/please verify your email before continuing/i)).toBeInTheDocument();
+  const signUp = screen.getByRole('link', { name: /sign up/i }) as HTMLAnchorElement;
+  expect(signUp).toHaveAttribute('href', '/signup');
 });
 
-test('clicking Sign up emits navigate custom event', async () => {
-  const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
+test('Forgot password link points to /forgot-password', async () => {
   renderLogin();
-  const signUp = screen.getByRole('link', { name: /sign up/i });
-  await act(async () => {
-    await userEvent.click(signUp);
-  });
-  expect(dispatchSpy).toHaveBeenCalled();
-  const ev = dispatchSpy.mock.calls[dispatchSpy.mock.calls.length - 1][0];
-  expect(ev.type).toBe('navigate');
-  // @ts-ignore
-  expect(ev.detail?.page).toBe('signup');
-});
-
-test('clicking Forgot password emits navigate custom event', async () => {
-  const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
-  renderLogin();
-  const forgot = screen.getByRole('link', { name: /forgot password\?/i });
-  await act(async () => {
-    await userEvent.click(forgot);
-  });
-  expect(dispatchSpy).toHaveBeenCalled();
-  const ev = dispatchSpy.mock.calls[dispatchSpy.mock.calls.length - 1][0];
-  expect(ev.type).toBe('navigate');
-  // @ts-ignore
-  expect(ev.detail?.page).toBe('forgot-password');
+  const forgot = screen.getByRole('link', { name: /forgot password\?/i }) as HTMLAnchorElement;
+  expect(forgot).toHaveAttribute('href', '/forgot-password');
 });
 
 test('google sign-in failure shows friendly error', async () => {

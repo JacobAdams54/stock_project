@@ -17,9 +17,43 @@
  * @requires firebase/auth
  * @requires @mui/material
  */
-
+/**
+ * Attempt to sign a user in with email/password and return a normalized result.
+ *
+ * Behavior summary:
+ * - Sets persistence based on the `remember` flag (local vs session).
+ * - Authenticates the user via Firebase Auth (email/password).
+ * - Fetches the user's Firestore profile document when available.
+ *
+ * Notes on removed behavior:
+ * - Client-side email verification (`user.reload()` / `user.emailVerified`) was
+ *   intentionally removed from this function to keep the login path simple. If
+ *   your app requires enforced verification, check verification on the server or
+ *   surface it in a separate UI flow.
+ * - Client-side custom-claims (ID token) inspection was removed. Role/claim
+ *   checks should be performed server-side or via a dedicated profile/roles
+ *   endpoint when needed.
+ *
+ * @param {{email: string, password: string, remember: boolean}} params
+ * @returns {Promise<Object>} Object with shape:
+ *   {
+ *     ok: boolean,
+ *     error?: string,
+ *     uid?: string,
+ *     email?: string | null,
+ *     displayName?: string | null,
+ *     profile?: any | null
+ *   }
+ */
 /* eslint-disable react-refresh/only-export-components */
 
+/*
+  NOTE: This file exports a helper `login()` in addition to the default
+  React component. The react-refresh rule `only-export-components` warns
+  in development when a file exports non-component values alongside
+  components. We deliberately keep the helper here for simplicity in the
+  examples/tests; disable the rule for this file.
+*/
 import {
   signInWithEmailAndPassword,
   setPersistence,
@@ -71,15 +105,6 @@ function mapAuthError(code?: string): string {
   }
 }
 
-/**
- * Attempt to sign a user in with email/password and return a normalized result.
- * - Sets persistence based on `remember`.
- * - Verifies email is confirmed.
- * - Reads custom claims and Firestore profile when available.
- *
- * @param {{email: string, password: string, remember: boolean}} params
- * @returns {Promise<Object>} Object with shape { ok: boolean, error?: string, uid?: string, email?: string, displayName?: string, isAdmin?: boolean, profile?: any }
- */
 export async function login({
   email,
   password,
@@ -93,15 +118,15 @@ export async function login({
     const cred = await signInWithEmailAndPassword(auth, email, password);
     const user = cred.user;
 
-    // 3) (Optional) require email verification
-    await user.reload();
-    if (!user.emailVerified) {
-      return { ok: false, error: "Please verify your email before continuing." };
-    }
+    // 3) (Optional) email verification: removed to simplify client-side flow.
+    // Email verification should be enforced server-side or via a separate UX flow
+    // if required by the application. Removing the reload/check here reduces
+    // complexity in the login path and avoids an extra network call.
 
-    // 4) (Optional) get custom claims (e.g., admin)
-    const token = await user.getIdTokenResult(true); // force refresh
-    const isAdmin = !!token.claims.admin;
+  // 4) (Optional) get custom claims (e.g., admin)
+  // Removed client-side custom claims fetch to simplify login flow.
+  // Server-side checks or a separate profile fetch should be used if
+  // admin/role information is required.
 
     // 5) (Optional) fetch Firestore profile for UI
     const snap = await getDoc(doc(db, "users", user.uid));
@@ -113,7 +138,7 @@ export async function login({
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      isAdmin,
+  // NOTE: isAdmin intentionally omitted from the client login response
       profile, // e.g., { displayName, terms, ... }
     };
   } catch (err: any) {
@@ -126,8 +151,7 @@ export async function login({
  * Renders the email/password form, handles validation, and performs
  * authentication (email/password + Google) using Firebase.
  *
- * Emits a `CustomEvent('navigate', { detail: { page } })` prior to
- * react-router navigation to allow event-driven listeners.
+ * Navigates using react-router (programmatic `navigate` and `Link` components).
  *
  * @returns {React.ReactElement} The login form element.
  */
@@ -144,11 +168,7 @@ export default function LoginForm(): React.ReactElement {
   const navigate = useNavigate();
 
   function handleNavigation(page: 'home' | 'dashboard' | 'forgot-password' | 'signup') {
-    try {
-        window.dispatchEvent(new CustomEvent('navigate', { detail: { page } }));
-      } catch {
-        // ignore dispatch errors in older browsers or test env
-      }
+    // Use React Router's `navigate` for programmatic navigation.
     const routeMap: Record<string, string> = {
       home: '/',
       dashboard: '/dashboard',
@@ -270,12 +290,7 @@ export default function LoginForm(): React.ReactElement {
               control={<Checkbox checked={remember} onChange={(e) => setRemember(e.target.checked)} />}
               label="Remember me"
             />
-            <Link
-              component={RouterLink}
-              to="/forgot-password"
-              variant="body2"
-              onClick={() => handleNavigation('forgot-password')}
-            >
+            <Link component={RouterLink} to="/forgot-password" variant="body2">
               Forgot password?
             </Link>
           </Stack>
@@ -335,7 +350,7 @@ export default function LoginForm(): React.ReactElement {
         <Box mt={2} textAlign="center">
           <Typography variant="body2">
             Don't have an account?{" "}
-            <Link component={RouterLink} to="/signup" onClick={() => handleNavigation("signup")}>
+            <Link component={RouterLink} to="/signup">
               Sign up
             </Link>
           </Typography>
