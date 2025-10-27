@@ -1,14 +1,13 @@
-
 /**
  * @file StockCard.tsx
  * @description A reusable card component that displays a stock's ticker,
  * company name, AI prediction (UP/DOWN), confidence bar, and risk level.
- * 
+ *
  * Visual parts:
  *  - Colors change based on prediction, confidence, and risk values.
  *  - Confidence renders a progress bar (0–100%) also changes color
  */
-import { Card, CardHeader, CardContent, Typography } from "@mui/material";
+import { Card, CardHeader, CardContent, Typography } from '@mui/material';
 /**
  * Props accepted by the StockCard component.
  * @typedef {Object} StockCardProps
@@ -23,10 +22,9 @@ export type StockCardProps = {
   ticker: string;
   companyName: string;
   moneyz: number;
-  prediction: "UP" | "DOWN";
+  prediction: 'UP' | 'DOWN';
   confidence: number;
-  riskLevel: "Low" | "Moderate"| "High";
-  
+  riskLevel: 'Low' | 'Moderate' | 'High';
 };
 /**
  * A presentational card component showing key stock metrics.
@@ -40,21 +38,19 @@ export default function StockCard({
   prediction,
   confidence,
   riskLevel,
-  
 }: StockCardProps) {
   return (
-    
-    <Card 
+    <Card
       sx={{
-        backgroundColor: "white",
-        border: "1px solid #e5e7eb", 
-        boxShadow: 1,    
-        borderRadius: 3,  
-        p: 1, 
+        backgroundColor: 'white',
+        border: '1px solid #e5e7eb',
+        boxShadow: 1,
+        borderRadius: 3,
+        p: 1,
       }}
       className="w-full max-w-md"
-    > 
-    {/* Top of the card which takes the passed in ticker and displays it on the top left 
+    >
+      {/* Top of the card which takes the passed in ticker and displays it on the top left 
         Passed in company full name directly below ticker simple in smaller text
     */}
       <CardHeader
@@ -67,8 +63,6 @@ export default function StockCard({
             <span className="font-bold">{ticker}</span>
           </Typography>
         }
-
-        
         subheader={
           <Typography variant="body2" color="text.secondary">
             {companyName}
@@ -83,54 +77,66 @@ export default function StockCard({
           Risk Level: Low/Moderate/High; dymanic color based on risk red/green/yellow 
       */}
       <CardContent className="flex flex-col gap-3">
-
         <div className="flex justify-between items-center">
-        <span>Today's price:</span>
-        <span><strong>${moneyz}</strong></span>
+          <span>Today's price:</span>
+          <span>
+            <strong>${moneyz}</strong>
+          </span>
         </div>
 
         <div className="flex justify-between items-center">
-        <span>AI Prediction:</span>
-        <span
-            style={{color: prediction === 'UP' ? "#107435ff": "#df2121ff", }}
-        >
+          <span>AI Prediction:</span>
+          <span
+            style={{ color: prediction === 'UP' ? '#107435ff' : '#df2121ff' }}
+          >
             <strong>{prediction}</strong>
-        </span>
+          </span>
         </div>
 
         <div className="flex justify-between items-center">
-            <span>Confidence:</span>
+          <span>Confidence:</span>
 
-            <div className="flex items-center gap-2">
-
-            <div className="h-2 w-16 rounded" style={{ backgroundColor: "#e5e7eb" }}>
-
-                <div
+          <div className="flex items-center gap-2">
+            <div
+              className="h-2 w-16 rounded"
+              style={{ backgroundColor: '#e5e7eb' }}
+            >
+              <div
                 className="h-2 rounded"
-                style={{ 
-                    width: `${Math.min(100, Math.max(0, confidence))}%`,
-                    backgroundColor: confidence >= 57 ? "#107435ff" : confidence >= 51 ? "#e0ca08ff" : "#df2121ff",
+                style={{
+                  width: `${Math.min(100, Math.max(0, confidence))}%`,
+                  backgroundColor:
+                    confidence >= 57
+                      ? '#107435ff'
+                      : confidence >= 51
+                        ? '#e0ca08ff'
+                        : '#df2121ff',
                 }}
-                />
+              />
             </div>
 
-            <span><strong>{confidence}%</strong></span>
-            </div>
-
+            <span>
+              <strong>{confidence}%</strong>
+            </span>
+          </div>
         </div>
 
         <div className="flex justify-between items-center">
-        <span>Risk:</span>
-        <span
-            style={{color: riskLevel ==='Low' ? "#107435ff": riskLevel ==='Moderate' ? "#e0ca08ff" : "#df2121ff", }}
-        >
+          <span>Risk:</span>
+          <span
+            style={{
+              color:
+                riskLevel === 'Low'
+                  ? '#107435ff'
+                  : riskLevel === 'Moderate'
+                    ? '#e0ca08ff'
+                    : '#df2121ff',
+            }}
+          >
             <strong>{riskLevel}</strong>
-        </span>
+          </span>
         </div>
-
       </CardContent>
-
     </Card>
-
   );
 }
