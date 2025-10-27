@@ -18,6 +18,7 @@
 import { IconButton } from '@mui/material';
 import { Twitter, LinkedIn, GitHub } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
+import Logo from './Logo';
 
 export default function Footer() {
   return (
@@ -25,13 +26,8 @@ export default function Footer() {
       <div className="w-full px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div className="space-y-4">
-            {/*<Logo size="md" variant="dark" />{/* This section renders the company logo and tagline at the top left of the footer */}
-            {/* Render a placeholder logo image for now */}
-            <img
-              src="https://via.placeholder.com/150"
-              alt="Placeholder logo"
-              className="w-24 h-auto"
-            />
+            {/* This section renders the company logo and tagline at the top left of the footer to a custom size of 100px*/}
+            <Logo customSize="100px" />
 
             <p>
               Empowering investors with AI-driven insights and predictions for

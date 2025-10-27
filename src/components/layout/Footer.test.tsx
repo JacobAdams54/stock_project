@@ -33,6 +33,15 @@ jest.mock("react-router-dom", () => ({
   ),
 }));
 
+// Mock the project's Logo component so tests can assert it's rendered with expected props.
+jest.mock("./Logo", () => {
+  return (props: any) => (
+    <div data-testid="mock-logo" data-customsize={props.customSize}>
+      LOGO
+    </div>
+  );
+});
+
 import Footer from "./Footer";
 
 afterEach(() => {
@@ -59,9 +68,14 @@ describe("Footer (high-level TDD tests)", () => {
   test("left section: renders dark Logo, company description, and social icons", () => {
     render(<Footer />);
 
-  // The logo is now rendered as an <img> placeholder — assert the image is present
-  const logoImg = screen.getByRole("img", { name: /placeholder logo/i });
-  expect(logoImg).toBeInTheDocument();
+  // Logo component is rendered — assert the test id is present and size prop applied
+  const logoEl = screen.getByTestId("mock-logo");
+  expect(logoEl).toBeInTheDocument();
+  // The Footer passes customSize="100px" to Logo; either the mock exposes it
+  // as data-customsize or the real Logo exposes data-size/data-variant. Accept either.
+  const hasCustomSize = logoEl.getAttribute("data-customsize") === "100px";
+  const hasSizeAttr = logoEl.getAttribute("data-size") !== null;
+  expect(hasCustomSize || hasSizeAttr).toBeTruthy();
 
     // Company description (a short recognizable sentence expected in the design)
     expect(
