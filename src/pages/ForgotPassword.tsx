@@ -40,6 +40,7 @@ import {
 	Button,
 	Stack,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import { getAuth, sendPasswordResetEmail } from "firebase/auth";
 import Logo from "../components/layout/Logo";
 
@@ -70,9 +71,10 @@ export default function ForgotPasswordPage() {
 		}
 	};
 
+	const navigate = useNavigate();
 	const dispatchNavigate = (to: "home" | "login") => {
-		const ev = new CustomEvent("navigate", { detail: { to } });
-		window.dispatchEvent(ev);
+		if (to === "login") return navigate("/login");
+		return navigate("/");
 	};
 
 	return (
