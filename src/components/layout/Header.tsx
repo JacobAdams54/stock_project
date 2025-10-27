@@ -13,6 +13,7 @@ import Stack from '@mui/material/Stack';
 import MenuIcon from '@mui/icons-material/Menu';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import Logo from '../layout/Logo';
 
 /**
  * Navigation item used by the Header component.
@@ -105,11 +106,7 @@ export default function Header() {
               aria-label="Go to Home"
               role="link"
             >
-              <img
-                src="https://via.placeholder.com/150"
-                alt="Placeholder logo"
-                className="w-24 h-auto"
-              />
+              <Logo />
             </Box>
 
             {/* spacer */}
