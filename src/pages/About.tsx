@@ -23,7 +23,11 @@ import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import Badge from '@mui/material/Badge';
 import Avatar from '@mui/material/Avatar';
-// Inlined constants from src/pages/about.constants.ts to keep page self-contained
+/**
+ * Page-level copy and small UI values used by the About page.
+ * Keeping these as constants makes future edits easier.
+ * @type {{logoAlt: string, tagline: string, missionShort: string}}
+ */
 const ABOUT_PAGE = {
 	logoAlt: 'Stalk.ai logo',
 	tagline: 'AI-driven stock insights for smarter investing',
@@ -31,12 +35,21 @@ const ABOUT_PAGE = {
 		'We bring transparent, accessible, and innovative AI tools to investors of all levels.',
 };
 
+/**
+ * Statistics displayed on the About page. Each stat is a label/value pair and
+ * should include a stable `id` for rendering.
+ * @type {{id: string, label: string, value: string}[]}
+ */
 const STATS = [
 	{ id: 'uptime', label: 'Uptime', value: '99.99%' },
 	{ id: 'accuracy', label: 'Model Accuracy', value: 'Majority of cases' },
 	{ id: 'assets', label: 'Assets Tracked', value: '100+' },
 ];
 
+/**
+ * Content for the Our Story section.
+ * @type {{title: string, paragraphs: string[]}}
+ */
 const STORY = {
 	title: 'Our Story',
 	paragraphs: [
@@ -45,6 +58,11 @@ const STORY = {
 	],
 };
 
+/**
+ * Features displayed as cards on the page. `icon` corresponds to a lucide-react
+ * icon name (string) and is optional.
+ * @type {{id: string, title: string, description: string, icon?: string}[]}
+ */
 const FEATURES = [
 	{
 		id: 'ai-models',
@@ -78,6 +96,10 @@ const FEATURES = [
 	},
 ];
 
+/**
+ * Team members rendered on the Team section.
+ * @type {{id: string, name: string, role: string}[]}
+ */
 const TEAM = [
 	{ id: 'CW', name: 'Canaan Wihelmsson-Haack', role: 'Project Manager' },
 	{ id: 'JS', name: 'Jack Sadler', role: 'Asssistant Manager' },
@@ -88,6 +110,11 @@ const TEAM = [
 	{ id: 'RC', name: 'Ryan Carroll', role: 'Software Engineer' },
 ];
 
+/**
+ * Mission block with high-level pillars.
+ * Each pillar may optionally include a short description or icon name.
+ * @type {{title: string, statement: string, pillars: {id: string, title: string, description?: string, icon?: string}[]}}
+ */
 const MISSION = {
 	title: 'Our Mission',
 	statement:
