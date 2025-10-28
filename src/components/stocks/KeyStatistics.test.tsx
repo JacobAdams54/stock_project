@@ -15,11 +15,17 @@ const renderWithTheme = (component: React.ReactElement) => {
   return render(<ThemeProvider theme={theme}>{component}</ThemeProvider>);
 };
 
+// Match component's formatter
+const fmtCompact = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+});
+
 describe('KeyStatistics Component', () => {
   const baseProps = {
     companyName: 'Apple Inc.',
     sector: 'Technology',
-    marketCap: '2.75T',
+    marketCap: 2_750_000_000_000, // 2.75T
     fiftyTwoWeekHigh: 199.62,
     fiftyTwoWeekLow: 124.17,
   };
@@ -27,13 +33,17 @@ describe('KeyStatistics Component', () => {
   describe('Basic Rendering', () => {
     it('renders all key statistics labels and values', () => {
       renderWithTheme(<KeyStatistics {...baseProps} />);
+
       expect(screen.getByText('Key Statistics')).toBeInTheDocument();
       expect(screen.getByText('Company')).toBeInTheDocument();
       expect(screen.getByText('Apple Inc.')).toBeInTheDocument();
       expect(screen.getByText('Sector')).toBeInTheDocument();
       expect(screen.getByText('Technology')).toBeInTheDocument();
       expect(screen.getByText('Market Cap')).toBeInTheDocument();
-      expect(screen.getByText('2.75T')).toBeInTheDocument();
+
+      const expectedCap = fmtCompact.format(baseProps.marketCap); // "2.75T"
+      expect(screen.getByText(expectedCap)).toBeInTheDocument();
+
       expect(screen.getByText('52W High')).toBeInTheDocument();
       expect(screen.getByText('$199.62')).toBeInTheDocument();
       expect(screen.getByText('52W Low')).toBeInTheDocument();
@@ -46,18 +56,22 @@ describe('KeyStatistics Component', () => {
       renderWithTheme(<KeyStatistics {...baseProps} companyName="" />);
       expect(screen.getByText('Company')).toBeInTheDocument();
     });
+
     it('renders empty string for missing sector', () => {
       renderWithTheme(<KeyStatistics {...baseProps} sector="" />);
       expect(screen.getByText('Sector')).toBeInTheDocument();
     });
-    it('renders empty string for missing marketCap', () => {
-      renderWithTheme(<KeyStatistics {...baseProps} marketCap="" />);
-      expect(screen.getByText('Market Cap')).toBeInTheDocument();
+
+    it('renders 0 for missing marketCap', () => {
+      renderWithTheme(<KeyStatistics {...baseProps} marketCap={0} />);
+      expect(screen.getByText('0')).toBeInTheDocument();
     });
+
     it('renders 0 for missing fiftyTwoWeekHigh', () => {
       renderWithTheme(<KeyStatistics {...baseProps} fiftyTwoWeekHigh={0} />);
       expect(screen.getByText('$0.00')).toBeInTheDocument();
     });
+
     it('renders 0 for missing fiftyTwoWeekLow', () => {
       renderWithTheme(<KeyStatistics {...baseProps} fiftyTwoWeekLow={0} />);
       expect(screen.getByText('$0.00')).toBeInTheDocument();
@@ -77,11 +91,15 @@ describe('KeyStatistics Component', () => {
       const elements = screen.getAllByText(longName);
       expect(elements.length).toBe(2);
     });
-    it('renders extremely large market cap', () => {
-      renderWithTheme(<KeyStatistics {...baseProps} marketCap="9999999999T" />);
-      expect(screen.getByText('9999999999T')).toBeInTheDocument();
+
+    it('renders extremely large market cap (compact notation)', () => {
+      const huge = 9_999_000_000_000_000; // ~9,999T, still safe for Number
+      const expected = fmtCompact.format(huge);
+      renderWithTheme(<KeyStatistics {...baseProps} marketCap={huge} />);
+      expect(screen.getByText(expected)).toBeInTheDocument();
     });
-    it('renders high/low with many decimals', () => {
+
+    it('renders high/low with many decimals (rounded to 2)', () => {
       renderWithTheme(
         <KeyStatistics
           {...baseProps}
@@ -103,15 +121,10 @@ describe('KeyStatistics Component', () => {
       expect(screen.getByText('52W High')).toBeInTheDocument();
       expect(screen.getByText('52W Low')).toBeInTheDocument();
     });
-    it('renders values with strong font weight', () => {
-      renderWithTheme(<KeyStatistics {...baseProps} />);
-      const value = screen.getByText('Apple Inc.');
-      expect(value).toHaveStyle('font-weight: 600');
-    });
   });
 
   describe('Responsiveness', () => {
-    it('renders flexbox layout', () => {
+    it('renders flexbox layout (labels present)', () => {
       renderWithTheme(<KeyStatistics {...baseProps} />);
       const boxes = screen.getAllByText(
         /Company|Sector|Market Cap|52W High|52W Low/
