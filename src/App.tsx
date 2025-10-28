@@ -19,8 +19,8 @@ function App() {
   const homepageFeatures = [
     {
       icon: AccessTime,
-      title: 'Real-time Data',
-      description: 'Live market feeds and instant updates.',
+      title: 'Daily Updates',
+      description: 'Stay informed with daily market updates and insights.',
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
