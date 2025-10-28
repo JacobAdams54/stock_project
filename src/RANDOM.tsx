@@ -9,25 +9,10 @@ import { Routes, Route } from 'react-router-dom';
 import StockListingPage from './pages/StockListingPage';
 import StockDetail from './pages/StockDetail';
 import About from './pages/About';
-import ForgotPasswordPage from './pages/ForgotPassword';
+import ForgotPasswordPage from './pages/ForgotPassword'; // ← add this import
 import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/AdminPage';
 
-// ⬇️ NEW: bring in AuthProvider, useAuth (for the debug panel), and AdminRoute
-import { AuthProvider, useAuth, AdminRoute } from './components/layout/AuthContext.tsx';
-
-// ⬇️ NEW: tiny debug panel to confirm context values are flowing
-function DebugAuth() {
-  const { user, isAdmin, loading } = useAuth();
-  return (
-    <div style={{ background: '#f4f4f4', padding: '8px', fontSize: '14px' }}>
-      <b>Auth Debug:</b>{' '}
-      Loading: <code>{String(loading)}</code> |{' '}
-      User: <code>{user ? user.email || user.uid : 'No user'}</code> |{' '}
-      isAdmin: <code>{String(isAdmin)}</code>
-    </div>
-  );
-}
 
 function App() {
   const homepageFeatures = [
@@ -55,13 +40,8 @@ function App() {
   ];
 
   return (
-    // ⬇️ NEW: wrap the whole app so children can read auth/role via context
-    <AuthProvider>
+    <>
       <Header />
-
-      {/* ⬇️ NEW: temporary debug readout; remove before production */}
-      <DebugAuth />
-
       <Routes>
         <Route
           path="/"
@@ -75,24 +55,16 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />{' '}
+        {/* ← add this route */}
+        {/* New: Stocks listing and detail routes */}
         <Route path="/stocks" element={<StockListingPage />} />
         <Route path="/stocks/:symbol" element={<StockDetail />} />
         <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* ⬇️ UPDATED: protect /admin with the AdminRoute guard */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminPage />
-            </AdminRoute>
-          }
-        />
+        <Route path="/admin" element={<AdminPage />} /> {/* Add this route */}
       </Routes>
-
       <Footer />
-    </AuthProvider>
+    </>
   );
 }
 
