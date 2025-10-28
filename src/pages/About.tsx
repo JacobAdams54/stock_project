@@ -65,16 +65,8 @@ const FEATURES = [
   {
     id: 'ai-models',
     title: 'Advanced AI Models',
-    description:
-      'Proprietary linear regression and ensemble models tuned for market signals.',
+    description: 'Deep Learning Models for accurate predictions and insights.',
     icon: 'Cpu',
-  },
-  {
-    id: 'targeting',
-    title: 'Smart Targeting',
-    description:
-      'Personalized alerts and target-setting based on your portfolio and risk profile.',
-    icon: 'Target',
   },
   {
     id: 'risk',
@@ -88,12 +80,6 @@ const FEATURES = [
     description:
       'Fast computations and efficient UI for quick decision making.',
     icon: 'Zap',
-  },
-  {
-    id: 'community',
-    title: 'Community & Research',
-    description: 'Collaborative tools for sharing ideas and curated research.',
-    icon: 'Users',
   },
 ];
 
@@ -109,6 +95,7 @@ const TEAM = [
   { id: 'JF', name: 'Jason Floyd', role: 'Software Engineer' },
   { id: 'JV', name: 'Julian Vara', role: 'Software Engineer' },
   { id: 'RC', name: 'Ryan Carroll', role: 'Software Engineer' },
+  { id: 'AR', name: 'Anthony Ramirez', role: 'Software Engineer' },
 ];
 
 /**
@@ -164,10 +151,10 @@ const getInitials = (name = ''): string =>
 export default function About() {
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">
+      <main className="grow">
         {/* Hero */}
         <section
-          className="bg-gradient-to-r from-sky-50 via-white to-white py-16"
+          className="bg-linear-to-r from-sky-50 via-white to-white py-16"
           aria-labelledby="about-hero"
         >
           <div className="max-w-4xl mx-auto text-center px-4">
