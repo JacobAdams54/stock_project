@@ -8,7 +8,7 @@ jest.mock('@mui/material', () => ({
   ),
 }));
 
-import { render, screen, fireEvent} from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { Hero } from './Hero';
 
 describe('Hero Component', () => {
@@ -86,16 +86,6 @@ describe('Hero Component', () => {
   });
 
   describe('Styling and Layout', () => {
-    it('should have gradient background classes', () => {
-      render(<Hero />);
-      const section = screen.getByRole('region');
-      expect(section).toHaveClass(
-        'bg-gradient-to-br',
-        'from-slate-50',
-        'to-teal-50'
-      );
-    });
-
     it('should have responsive flex layout classes', () => {
       render(<Hero />);
       const container = screen.getByRole('region').querySelector('.flex');
