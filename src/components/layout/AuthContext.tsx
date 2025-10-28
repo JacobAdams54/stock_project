@@ -4,14 +4,14 @@
  * @author GPT-Mentor
  */
 
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
-import { Navigate, useLocation } from "react-router-dom";
-import { auth, db } from "../../firebase/firebase"; // adjust path if needed
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { Navigate, useLocation } from 'react-router-dom';
+import { auth, db } from '../../firebase/firebase'; // adjust path if needed
 
 type AuthContextType = {
-  user: any;              // relaxed typing to avoid importing Firebase User
+  user: any; // relaxed typing to avoid importing Firebase User
   isAdmin: boolean | null;
   loading: boolean;
 };
@@ -38,10 +38,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        const snap = await getDoc(doc(db, "users", u.uid));
+        const snap = await getDoc(doc(db, 'users', u.uid));
         setIsAdmin(Boolean(snap.data()?.isAdmin));
       } catch (error) {
-        console.error("Error checking admin status:", error);
+        alert('Error checking admin status: ' + error);
         setIsAdmin(false);
       } finally {
         setLoading(false);
@@ -58,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   return useContext(AuthContext);
 }

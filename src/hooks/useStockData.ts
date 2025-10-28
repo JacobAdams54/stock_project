@@ -23,7 +23,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs, query } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { TICKERS } from '../constants/tickers';
 import type { Ticker } from '../constants/tickers';
@@ -88,30 +88,6 @@ class DataNotFoundError extends Error {
     super(`${kind} not found${id ? `: ${id}` : ''}`);
     this.name = 'DataNotFoundError';
   }
-}
-
-/**
- * Error thrown when a value cannot be parsed into the expected type.
- */
-class InvalidDataError extends Error {
-  constructor(label: string) {
-    super(`Invalid or missing field: ${label}`);
-    this.name = 'InvalidDataError';
-  }
-}
-
-/* ----------------------------------------------------------------------------
- * Internal helpers
- * --------------------------------------------------------------------------*/
-
-/**
- * Coerce an unknown value into a number.
- * @throws {InvalidDataError} If the value is not finite.
- */
-function asNumber(v: unknown, label: string): number {
-  const n = typeof v === 'number' ? v : Number(v);
-  if (!Number.isFinite(n)) throw new InvalidDataError(label);
-  return n;
 }
 
 /**

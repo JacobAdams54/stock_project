@@ -19,6 +19,7 @@ type Props = {
   range: Range;
   height?: number;
   /** Called when the user selects a new range */
+  // eslint-disable-next-line no-unused-vars
   onRangeChange?: (next: Range) => void;
 };
 
