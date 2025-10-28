@@ -1,4 +1,3 @@
-import { Box } from '@mui/material';
 import Footer from './components/layout/Footer';
 import Header from './components/layout/Header';
 import Hero from './components/layout/Hero';
@@ -38,41 +37,21 @@ function App() {
   return (
     <>
       <Header />
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          minHeight: '100vh',
-          p: 3,
-        }}
-      >
-        {/* Routes control which page renders */}
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <>
-                <Hero />
-                <FeatureCards features={homepageFeatures} />
-                <Box
-                  sx={{
-                    flex: 1,
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Box sx={{ mt: 4, width: '100%', maxWidth: 400 }}></Box>
-                </Box>
-              </>
-            }
-          />
-          <Route path="/signup" element={<SignupForm />} />
-          {/* New: Stocks listing and detail routes */}
-          <Route path="/stocks" element={<StockListingPage />} />
-          <Route path="/stocks/:symbol" element={<StockDetail />} />
-        </Routes>
-      </Box>
+      <Routes>
+        <Route
+          path="/"
+          element={
+            <>
+              <Hero />
+              <FeatureCards features={homepageFeatures} />
+            </>
+          }
+        />
+        <Route path="/signup" element={<SignupForm />} />
+        {/* New: Stocks listing and detail routes */}
+        <Route path="/stocks" element={<StockListingPage />} />
+        <Route path="/stocks/:symbol" element={<StockDetail />} />
+      </Routes>
       <Footer />
     </>
   );
