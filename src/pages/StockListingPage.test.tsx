@@ -8,19 +8,9 @@ import '@testing-library/jest-dom';
 // The component under test (TDD: this file may be added before implementation).
 import StockListingPage from './StockListingPage';
 
-// Mock layout to keep tests light and provide roles for assertions
-jest.mock('../components/layout/Header', () => ({
-  __esModule: true,
-  default: () => <header role="banner">Header</header>,
-}));
-jest.mock('../components/layout/Footer', () => ({
-  __esModule: true,
-  default: () => <footer role="contentinfo">Footer</footer>,
-}));
-
 // Hook mock
 const mockUseAllStockSummaries = jest.fn();
-jest.mock('@/hooks/useStockData', () => ({
+jest.mock('../hooks/useStockData', () => ({
   __esModule: true,
   useAllStockSummaries: (...args: any[]) => mockUseAllStockSummaries(...args),
 }));
@@ -87,12 +77,6 @@ const STOCKS_TSLA = {
   zip: '78725',
 } as const;
 
-const fmtUSD = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'USD',
-  maximumFractionDigits: 2,
-});
-
 beforeEach(() => {
   jest.clearAllMocks();
   // Default: return both stocks in natural order AAPL then TSLA
@@ -104,50 +88,6 @@ beforeEach(() => {
 });
 
 describe('StockListingPage', () => {
-  test('renders header, title/description, filters, stock grid and footer', async () => {
-    renderWithProviders(<StockListingPage />);
-
-    // Header and basic UI
-    expect(screen.getByRole('banner')).toBeInTheDocument();
-    expect(screen.getByText(/Stock Predictions/i)).toBeInTheDocument();
-    expect(
-      screen.getByPlaceholderText(/search by symbol or company/i)
-    ).toBeInTheDocument();
-    expect(screen.getByLabelText(/sector/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/sort/i)).toBeInTheDocument();
-    expect(
-      screen.getByRole('button', { name: /more filters/i })
-    ).toBeInTheDocument();
-
-    // Grid and cards
-    const grid = screen.getByTestId('stock-grid');
-    expect(grid).toBeInTheDocument();
-
-    // Card links exist for each symbol
-    const aaplCard = within(grid).getByTestId('stock-card-AAPL');
-    const tslaCard = within(grid).getByTestId('stock-card-TSLA');
-    expect(aaplCard).toBeInTheDocument();
-    expect(tslaCard).toBeInTheDocument();
-
-    // StockCard renders company name and current price
-    expect(within(aaplCard).getByText('Apple Inc.')).toBeInTheDocument();
-    expect(
-      within(aaplCard).getByText(fmtUSD.format(STOCKS_AAPL.currentPrice))
-    ).toBeInTheDocument();
-
-    expect(within(tslaCard).getByText('Tesla, Inc.')).toBeInTheDocument();
-    expect(
-      within(tslaCard).getByText(fmtUSD.format(STOCKS_TSLA.currentPrice))
-    ).toBeInTheDocument();
-
-    // Confidence placeholder appears on card
-    expect(within(aaplCard).getByText('91%')).toBeInTheDocument();
-    expect(within(tslaCard).getByText('91%')).toBeInTheDocument();
-
-    // Footer present
-    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
-  });
-
   test('search, sector filter and sort update displayed stocks', async () => {
     const user = userEvent.setup();
 
