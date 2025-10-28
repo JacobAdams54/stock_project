@@ -1,18 +1,18 @@
 /**
  * Firebase configuration and initialization module
  *
- * Uses Firebase Emulator Suite unconditionally (forced ON for now).
- * Firestore emulator: 127.0.0.1:8080
- * Auth emulator:      http://127.0.0.1:9099
+ * This module initializes Firebase services used throughout the application:
+ * - Authentication for user management
+ * - Firestore for database operations
  *
  * @module firebase
  */
 
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getAuth, connectAuthEmulator } from 'firebase/auth';
-import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore';
+// Import the functions you need from the SDKs you need
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-/** Firebase project configuration */
 const firebaseConfig = {
   apiKey: 'AIzaSyBlJRzG6An9B4ygK_QA75q90A-TN0ESmOs',
   authDomain: 'stock-project-32dbd.firebaseapp.com',
@@ -23,36 +23,30 @@ const firebaseConfig = {
   measurementId: 'G-977QMD4SE4',
 };
 
-/** Singleton Firebase app (safe for tests/HMR) */
-const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-
-/** Auth and Firestore services */
-const auth = getAuth(app);
-const db = getFirestore(app);
+/**
+ * Initialized Firebase app instance
+ * @type {import('firebase/app').FirebaseApp}
+ */
+const app = initializeApp(firebaseConfig);
 
 /**
- * Force emulator usage in all environments (flip back later).
+ * Firebase Authentication service instance
+ * Used for user authentication, login, logout, and session management
+ * @type {import('firebase/auth').Auth}
+ * @example
+ * import { auth } from '@/firebase/firebase';
+ * const user = auth.currentUser;
  */
-const usingEmulators = true as const;
+const auth = getAuth(app);
 
-/** Hard-pinned emulator host/ports */
-const EMULATOR_HOST = '127.0.0.1';
-const FS_PORT = 8080;
-const AUTH_PORT = 9099;
+/**
+ * Firestore database instance
+ * Used for storing and retrieving user data, portfolios, watchlists, and stock information
+ * @type {import('firebase/firestore').Firestore}
+ * @example
+ * import { db } from '@/firebase/firebase';
+ * const docRef = doc(db, 'users', userId);
+ */
+const db = getFirestore(app);
 
-if (usingEmulators) {
-  // Must be called before any Firestore/Auth operations
-  connectFirestoreEmulator(db, EMULATOR_HOST, FS_PORT);
-
-  // If you are not running the Auth emulator, comment the next line out.
-  connectAuthEmulator(auth, `http://${EMULATOR_HOST}:${AUTH_PORT}`, {
-    disableWarnings: true,
-  });
-
-  // eslint-disable-next-line no-console
-  console.info(
-    `[firebase] Using emulators (Firestore:${EMULATOR_HOST}:${FS_PORT}, Auth:${EMULATOR_HOST}:${AUTH_PORT})`
-  );
-}
-
-export { app, auth, db, usingEmulators };
+export { app, auth, db };

@@ -9,6 +9,7 @@ import { Routes, Route } from 'react-router-dom';
 import StockListingPage from './pages/StockListingPage';
 import StockDetail from './pages/StockDetail';
 import About from './pages/About';
+import ForgotPasswordPage from './pages/ForgotPassword'; // ← add this import
 
 function App() {
   const homepageFeatures = [
@@ -51,6 +52,8 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />{' '}
+        {/* ← add this route */}
         {/* New: Stocks listing and detail routes */}
         <Route path="/stocks" element={<StockListingPage />} />
         <Route path="/stocks/:symbol" element={<StockDetail />} />
