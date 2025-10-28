@@ -27,7 +27,7 @@ import {
 import { useStockSummaryDoc, usePriceHistory } from '../hooks/useStockData';
 import KeyStatistics from '../components/stocks/KeyStatistics';
 import StockChart from '../components/charts/StockChart';
-
+import type { Range, Point } from '../components/charts/StockChart';
 /**
  * StockDetail
  * -----------------------------------------------------------------------------
@@ -60,6 +60,63 @@ export default function StockDetail(): React.ReactElement {
     loading: loadingHistory,
     error: errorHistory,
   } = usePriceHistory(symbol);
+
+  // New: chart range state
+  const [range] = React.useState<Range>('3M');
+
+  /**
+   * Normalize raw history rows to {date, price} and sort ascending.
+   * - date: prefers row.date (YYYY-MM-DD), otherwise uses row.ts Timestamp.
+   * - price: close -> price -> open -> 0
+   */
+  const allPoints = React.useMemo<Point[]>(() => {
+    const rows = Array.isArray(history) ? history : [];
+    const out: Point[] = rows
+      .map((row: any) => {
+        // prefer normalized row.date; fallback to row.id (if provided)
+        const date: string | undefined =
+          typeof row?.date === 'string'
+            ? row.date
+            : typeof row?.id === 'string'
+              ? row.id
+              : undefined;
+
+        const price = Number(
+          row?.close ?? row?.c ?? row?.price ?? row?.open ?? row?.o ?? 0
+        );
+        return date ? { date, price } : null;
+      })
+      .filter((p): p is Point => !!p);
+    out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    return out;
+  }, [history]);
+
+  /**
+   * Filter normalized points according to the selected range.
+   */
+  const rangePoints = React.useMemo<Point[]>(() => {
+    if (!allPoints.length) return [];
+    const now = new Date();
+    const days =
+      range === '1W'
+        ? 7
+        : range === '1M'
+          ? 30
+          : range === '3M'
+            ? 90
+            : range === '1Y'
+              ? 365
+              : 365 * 5;
+
+    const cutoff = new Date(now);
+    cutoff.setUTCDate(now.getUTCDate() - days);
+
+    // Keep points whose date >= cutoff; if not enough data, return all.
+    const filtered = allPoints.filter(
+      (p) => new Date(p.date + 'T00:00:00Z') >= cutoff
+    );
+    return filtered.length ? filtered : allPoints;
+  }, [allPoints, range]);
 
   if (loadingSummary) {
     return (
@@ -221,13 +278,18 @@ export default function StockDetail(): React.ReactElement {
           </Grid>
         </Paper>
 
-        {/* Placeholder for chart/history */}
-        <StockChart
-          symbol={symbol}
-          history={history}
-          loading={loadingHistory}
-          error={errorHistory}
-        />
+        {/* Price chart */}
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
+          {errorHistory ? (
+            <Alert severity="error">{errorHistory.message}</Alert>
+          ) : loadingHistory ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <StockChart ticker={symbol} data={rangePoints} range={range} />
+          )}
+        </Paper>
       </Box>
     </Box>
   );

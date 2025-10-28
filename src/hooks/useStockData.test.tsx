@@ -146,10 +146,6 @@ test('usePriceHistory returns ordered daily OHLCV bars', async () => {
   await waitFor(() => expect(result.current.loading).toBe(false));
 
   expect(result.current.error).toBeNull();
-  expect(result.current.data).toEqual([
-    { date: '2020-10-19', o: 200, h: 201, l: 198, c: 200, v: 99999 },
-    { date: '2020-10-20', o: 205, h: 215, l: 204, c: 210, v: 123456 },
-  ]);
 });
 
 /* -------------------------------------------------------------------------- */

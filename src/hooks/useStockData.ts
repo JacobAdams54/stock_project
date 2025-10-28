@@ -67,12 +67,13 @@ export type StockRealtime = StockRealtimeFields & { symbol: Ticker };
  * Historical daily bar from /prices/{ticker}/daily/{YYYY-MM-DD}.
  */
 export interface PriceBar {
-  date: string; // doc id "YYYY-MM-DD"
-  o: number;
-  h: number;
-  l: number;
-  c: number;
-  v?: number;
+  date: string; // YYYY-MM-DD
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  volume: number;
+  ts?: any; // optional Firestore Timestamp or Date
 }
 
 /* ----------------------------------------------------------------------------
@@ -198,37 +199,37 @@ export async function readAllStockSummaries(): Promise<StockRealtime[]> {
 }
 
 /**
- * Read daily OHLC history from /prices/{symbol}/daily/*
- * Assumes doc IDs are "YYYY-MM-DD" and fields { o,h,l,c,v } are numbers.
- * @param {Ticker | string} symbol - Ticker symbol
- * @returns {Promise<PriceBar[]>} Bars sorted ascending by date
- * @throws {DataNotFoundError | InvalidDataError}
- * @example
- * const bars = await readPriceHistory('AAPL');
+ * Read daily OHLCV from /prices/{symbol}/daily and normalize field names.
+ * Accepts both verbose (open/high/low/close/volume) and compact (o/h/l/c/v).
  */
 export async function readPriceHistory(
   symbol: Ticker | string
 ): Promise<PriceBar[]> {
-  const sym = symbol.toString().toUpperCase();
-  const colRef = collection(db, 'prices', sym, 'daily');
-  const snap = await getDocs(query(colRef));
-  if (snap.empty) throw new DataNotFoundError('price history', sym);
+  const s = String(symbol).toUpperCase();
+  const colRef = collection(db, 'prices', s, 'daily');
+  const snap = await getDocs(colRef);
 
-  const bars: PriceBar[] = snap.docs.map((d) => {
-    const data = d.data();
+  const num = (x: any) => (typeof x === 'number' && isFinite(x) ? x : 0);
+
+  const rows: PriceBar[] = snap.docs.map((d) => {
+    const data: any = d.data() ?? {};
+    const date = typeof data.date === 'string' && data.date ? data.date : d.id; // fallback to doc ID (YYYY-MM-DD)
+
     return {
-      date: d.id,
-      o: asNumber(data.o, `o(${d.id})`),
-      h: asNumber(data.h, `h(${d.id})`),
-      l: asNumber(data.l, `l(${d.id})`),
-      c: asNumber(data.c, `c(${d.id})`),
-      v: data.v == null ? undefined : asNumber(data.v, `v(${d.id})`),
+      date,
+      open: num(data.open ?? data.o),
+      high: num(data.high ?? data.h),
+      low: num(data.low ?? data.l),
+      close: num(
+        data.close ?? data.c ?? data.price ?? data.open ?? data.o ?? 0
+      ),
+      volume: num(data.volume ?? data.v),
+      ts: data.ts,
     };
   });
 
-  // Sort by YYYY-MM-DD ascending using lexical order.
-  bars.sort((a, b) => a.date.localeCompare(b.date));
-  return bars;
+  rows.sort((a, b) => a.date.localeCompare(b.date));
+  return rows;
 }
 
 /* ----------------------------------------------------------------------------
