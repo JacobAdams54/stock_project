@@ -21,12 +21,12 @@ import {
   Alert,
   Paper,
   Grid,
-  Divider,
   Chip,
   Link as MUILink,
 } from '@mui/material';
 import { useStockSummaryDoc, usePriceHistory } from '../hooks/useStockData';
 import KeyStatistics from '../components/stocks/KeyStatistics';
+import StockChart from '../components/charts/StockChart';
 
 /**
  * StockDetail
@@ -222,23 +222,12 @@ export default function StockDetail(): React.ReactElement {
         </Paper>
 
         {/* Placeholder for chart/history */}
-        <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 700, mb: 1.5 }}>
-            Price History (placeholder)
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-            Daily OHLC data is fetched from /prices/{symbol}/daily but the chart
-            is not implemented yet.
-          </Typography>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="caption" color="text.secondary">
-            {loadingHistory
-              ? 'Loading history…'
-              : errorHistory
-                ? `Failed to load history: ${errorHistory.message}`
-                : `Loaded ${history?.length ?? 0} daily bars`}
-          </Typography>
-        </Paper>
+        <StockChart
+          symbol={symbol}
+          history={history}
+          loading={loadingHistory}
+          error={errorHistory}
+        />
       </Box>
     </Box>
   );
