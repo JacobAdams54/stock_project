@@ -1,10 +1,19 @@
 //Hero.tsx
 import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
+/**
+ * Hero section for the landing page.
+ * Navigates users to the sign-up flow from the primary CTA.
+ * @returns {JSX.Element} Hero section with call-to-action
+ * @example
+ * <Hero />
+ */
 function Hero() {
-  const handleGetStarted = () => {
-    const event = new CustomEvent('navigate', { detail: { page: 'signup' } });
-    window.dispatchEvent(event);
+  const navigate = useNavigate();
+
+  const handleGetStarted = (): void => {
+    navigate('/signup');
   };
 
   return (
@@ -16,11 +25,15 @@ function Hero() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-center justify-between">
           <div className="lg:w-1/2 mb-10 lg:mb-0">
-            <h1 id="hero-heading" className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <h1
+              id="hero-heading"
+              className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6"
+            >
               AI-Powered Stock Predictions
             </h1>
             <p className="text-xl text-gray-700 mb-8">
-              Make smarter investment decisions with real-time insights and explainable forecasts.
+              Make smarter investment decisions with real-time insights and
+              explainable forecasts.
             </p>
             <Button onClick={handleGetStarted} aria-label="Get Started">
               Get Started
@@ -29,7 +42,7 @@ function Hero() {
 
           <div className="lg:w-1/2">
             <img
-              src="https://placehold.co/1080x720?text=Stock+Prediction+AI"
+              src="src/assets/hero_image.png"
               alt="Stock market chart illustration"
               loading="lazy"
               className="w-full h-auto rounded-xl shadow-lg"
@@ -41,5 +54,5 @@ function Hero() {
   );
 }
 
-export default Hero;  
-export { Hero };      
+export default Hero;
+export { Hero };

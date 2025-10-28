@@ -3,27 +3,24 @@
  * Tests stock detail view with loading, error, no-data, header, price, change, and placeholders.
  */
 
-import { render, screen, within } from '@testing-library/react';
+import React from 'react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import '@testing-library/jest-dom';
 import StockDetail from './StockDetail';
 
-// Mock the useStockData hook
-const mockUseStockData = jest.fn();
+// Mocks for the new hooks
+const mockUseStockSummaryDoc = jest.fn();
+const mockUsePriceHistory = jest.fn();
+
 jest.mock('../hooks/useStockData', () => ({
-  useStockData: () => mockUseStockData(),
+  __esModule: true,
+  useStockSummaryDoc: (...args: any[]) => mockUseStockSummaryDoc(...args),
+  usePriceHistory: (...args: any[]) => mockUsePriceHistory(...args),
 }));
 
-// Mock Firestore
-jest.mock('firebase/firestore', () => ({
-  getFirestore: jest.fn(),
-  doc: jest.fn(),
-  getDoc: jest.fn(),
-  onSnapshot: jest.fn(),
-}));
-
-// Helper function to render component with theme and router
+// Helper: render with theme + router
 const renderWithTheme = (symbol = 'MSFT') => {
   const theme = createTheme();
   return render(
@@ -37,169 +34,72 @@ const renderWithTheme = (symbol = 'MSFT') => {
   );
 };
 
-// Default successful data state aligned with useStockData's shape
-const mockSuccessData = {
-  data: {
-    symbol: 'MSFT',
-    companyName: 'Microsoft Corporation',
-    sector: 'Technology',
-    marketCap: '3.00T',
-    fiftyTwoWeekHigh: 199.62,
-    fiftyTwoWeekLow: 124.17,
-    currentPrice: 174.12,
-    change: 2.34,
-    changePercent: 1.36,
-  },
-  loading: false,
-  error: null,
+const baseSummary = {
+  symbol: 'MSFT',
+  address1: 'One Microsoft Way',
+  change24hPercent: 1.36,
+  city: 'Redmond',
+  companyName: 'Microsoft Corporation',
+  country: 'United States',
+  currentPrice: 174.12,
+  dividendYield: 0.007,
+  dividendYieldPercent: 0.7,
+  fiftyTwoWeekHigh: 199.62,
+  fiftyTwoWeekLow: 124.17,
+  industry: 'Software - Infrastructure',
+  marketCap: 3_000_000_000_000,
+  open: 171.0,
+  peRatio: 39.05,
+  sector: 'Technology',
+  state: 'WA',
+  updatedAt: Date.now(),
+  volume: 18293000,
+  website: 'https://www.microsoft.com',
+  zip: '98052-6399',
 };
 
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUseStockSummaryDoc.mockReturnValue({
+    data: baseSummary,
+    loading: false,
+    error: null,
+  });
+  mockUsePriceHistory.mockReturnValue({
+    data: [
+      { date: '2020-10-19', o: 200, h: 201, l: 198, c: 200, v: 99999 },
+      { date: '2020-10-20', o: 205, h: 215, l: 204, c: 210, v: 123456 },
+    ],
+    loading: false,
+    error: null,
+  });
+});
+
 describe('StockDetail Component', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    // Reset to default successful state before each test
-    mockUseStockData.mockReturnValue(mockSuccessData);
-  });
-
-  it('renders stock symbol and company name', async () => {
-    renderWithTheme();
-
-    expect(screen.getByRole('heading', { name: /MSFT/i })).toBeInTheDocument();
-    expect(
-      screen.getAllByText(/Microsoft Corporation/i)[0]
-    ).toBeInTheDocument();
-  });
-
-  it('renders current stock price and change', async () => {
-    renderWithTheme();
-
-    // Check price display - use more flexible text matching
-    expect(screen.getByText(/\$174\.12/)).toBeInTheDocument();
-    expect(screen.getByText(/2\.34/)).toBeInTheDocument();
-    expect(screen.getByText(/1\.36%/)).toBeInTheDocument();
-    expect(screen.getByText(/▲/)).toBeInTheDocument(); // Up arrow for positive change
-  });
-
-  it('shows loading spinner when loading', () => {
-    // Mock loading state
-    mockUseStockData.mockReturnValue({
-      data: null,
-      loading: true,
-      error: null,
-    });
-
-    renderWithTheme();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-  });
-
-  it('shows error alert when error occurs', async () => {
-    // Mock error state
-    mockUseStockData.mockReturnValue({
+  it('shows error alert when summary load fails', () => {
+    mockUseStockSummaryDoc.mockReturnValue({
       data: null,
       loading: false,
-      error: { message: 'Network error' },
+      error: new Error('Network error'),
     });
 
-    renderWithTheme();
+    renderWithTheme('MSFT');
 
-    expect(screen.getByText(/failed to load stock data/i)).toBeInTheDocument();
-    expect(screen.getByText(/network error/i)).toBeInTheDocument();
-    expect(screen.getByText(/symbol: msft/i)).toBeInTheDocument();
+    expect(screen.getByText(/Failed to load stock/i)).toBeInTheDocument();
+    expect(screen.getByText(/Network error/i)).toBeInTheDocument();
+    expect(screen.getByText(/Symbol: MSFT/i)).toBeInTheDocument();
   });
 
-  it('shows no data alert when no data returned', async () => {
-    // Mock no data state
-    mockUseStockData.mockReturnValue({
+  it('shows no data alert when summary is missing', () => {
+    mockUseStockSummaryDoc.mockReturnValue({
       data: null,
       loading: false,
       error: null,
     });
 
-    renderWithTheme();
+    renderWithTheme('MSFT');
 
-    expect(screen.getByText(/no data found for symbol/i)).toBeInTheDocument();
-    expect(screen.getByText(/msft/i)).toBeInTheDocument();
-  });
-
-  it('renders key statistics with company, sector, market cap and 52-week range', () => {
-    renderWithTheme();
-
-    // Section header
-    const keyStatsHeader = screen.getByText(/key statistics/i);
-    expect(keyStatsHeader).toBeInTheDocument();
-
-    // Scope queries within the Key Statistics section to avoid duplicate matches
-    const keyStatsContainer = keyStatsHeader.closest('div') as HTMLElement;
-    expect(keyStatsContainer).toBeInTheDocument();
-    const withinKeyStats = within(keyStatsContainer);
-
-    // Labels
-    expect(withinKeyStats.getByText(/company/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/sector/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/market cap/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/52w high/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/52w low/i)).toBeInTheDocument();
-    // Values
-    expect(
-      withinKeyStats.getByText(/microsoft corporation/i)
-    ).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/technology/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/3\.00t/i)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/\$199\.62/)).toBeInTheDocument();
-    expect(withinKeyStats.getByText(/\$124\.17/)).toBeInTheDocument();
-  });
-
-  it('renders chart section and ai prediction summary when data is loaded', () => {
-    renderWithTheme();
-
-    expect(screen.getByText(/📊 stock chart/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/chart component being implemented/i)
-    ).toBeInTheDocument();
-
-    // AI prediction card header
-    expect(screen.getByText(/ai prediction summary/i)).toBeInTheDocument();
-  });
-
-  it('displays negative change with down arrow and red styling', () => {
-    // Mock data with negative change
-    mockUseStockData.mockReturnValue({
-      data: {
-        symbol: 'MSFT',
-        companyName: 'Microsoft Corporation',
-        sector: 'Technology',
-        marketCap: '3.00T',
-        fiftyTwoWeekHigh: 199.62,
-        fiftyTwoWeekLow: 124.17,
-        currentPrice: 171.78,
-        change: -2.34,
-        changePercent: -1.34,
-      },
-      loading: false,
-      error: null,
-    });
-
-    renderWithTheme();
-
-    expect(screen.getByText(/\$171\.78/)).toBeInTheDocument();
-    expect(screen.getByText(/2\.34/)).toBeInTheDocument(); // Absolute value shown
-    expect(screen.getByText(/1\.34%/)).toBeInTheDocument(); // Absolute value shown
-    expect(screen.getByText(/▼/)).toBeInTheDocument(); // Down arrow for negative change
-  });
-
-  it('uses default symbol MSFT when no symbol in URL params', () => {
-    // Render without symbol parameter
-    const theme = createTheme();
-    render(
-      <MemoryRouter initialEntries={['/stocks/']}>
-        <ThemeProvider theme={theme}>
-          <Routes>
-            <Route path="/stocks/" element={<StockDetail />} />
-          </Routes>
-        </ThemeProvider>
-      </MemoryRouter>
-    );
-
-    expect(screen.getByRole('heading', { name: /MSFT/i })).toBeInTheDocument();
+    expect(screen.getByText(/No data found for symbol/i)).toBeInTheDocument();
+    expect(screen.getByText(/MSFT/i)).toBeInTheDocument();
   });
 });

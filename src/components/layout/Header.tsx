@@ -13,6 +13,7 @@ import Stack from '@mui/material/Stack';
 import MenuIcon from '@mui/icons-material/Menu';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import Logo from '../layout/Logo';
 
 /**
  * Navigation item used by the Header component.
@@ -105,11 +106,7 @@ export default function Header() {
               aria-label="Go to Home"
               role="link"
             >
-              <img
-                src="https://via.placeholder.com/150"
-                alt="Placeholder logo"
-                className="w-24 h-auto"
-              />
+              <Logo />
             </Box>
 
             {/* spacer */}
@@ -131,12 +128,9 @@ export default function Header() {
                       key={to}
                       component={RouterLink}
                       to={to}
-                      color="inherit"
-                      sx={{
-                        fontWeight: isActive(to) ? 600 : undefined,
-                        // Also set aria-current for screen readers
-                      }}
-                      aria-current={isActive(to) ? 'page' : undefined}
+                      color={isActive(to) ? 'primary' : 'inherit'}
+                      variant={isActive(to) ? 'contained' : 'text'}
+                      size="small"
                     >
                       {label}
                     </Button>
@@ -147,39 +141,18 @@ export default function Header() {
 
                 {/* Auth/Admin */}
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <Button
-                    component={RouterLink}
-                    to="/login"
-                    color="inherit"
-                    aria-current={isActive('/login') ? 'page' : undefined}
-                  >
-                    Login
-                  </Button>
-                  <Button
-                    component={RouterLink}
-                    to="/admin"
-                    color="inherit"
-                    size="small"
-                    sx={{ textTransform: 'none' }}
-                    aria-current={isActive('/admin') ? 'page' : undefined}
-                  >
-                    Admin
-                  </Button>
-                  <Button
-                    component={RouterLink}
-                    to="/signup"
-                    variant="contained"
-                    size="small"
-                    sx={{
-                      // Teal CTA — swap to theme.primary if you’ve themed it
-                      bgcolor: '#14b8a6',
-                      ':hover': { bgcolor: '#0d9488' },
-                      textTransform: 'none',
-                    }}
-                    aria-current={isActive('/signup') ? 'page' : undefined}
-                  >
-                    Sign Up
-                  </Button>
+                  {AUTH_LINKS.map(({ label, to }) => (
+                    <Button
+                      key={to}
+                      component={RouterLink}
+                      to={to}
+                      color={label === 'Sign Up' ? 'primary' : 'inherit'}
+                      variant={label === 'Sign Up' ? 'contained' : 'text'}
+                      size="small"
+                    >
+                      {label}
+                    </Button>
+                  ))}
                 </Stack>
               </Stack>
             ) : (

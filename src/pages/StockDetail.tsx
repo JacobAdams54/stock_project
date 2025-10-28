@@ -1,187 +1,301 @@
-import { useParams } from 'react-router-dom';
-import { Box, Typography, CircularProgress, Alert, Paper } from '@mui/material';
-import { useStockData } from '../hooks/useStockData';
-import KeyStatistics from '../components/stocks/KeyStatistics';
-import PredictionCard from '../components/stocks/PredictionCard';
-
 /**
- * Stock detail page component
+ * StockDetail
+ * -----------------------------------------------------------------------------
+ * Fetches a single stock summary from /stocks/{ticker} and its historical
+ * daily prices from /prices/{ticker}/daily using the new hooks:
+ *  - useStockSummaryDoc(symbol)
+ *  - usePriceHistory(symbol)
  *
- * @description
- * Main page for displaying comprehensive stock information. Follows "Smart Page, Dumb Components"
- * pattern where the page fetches all data and passes it down to presentational components.
- * This prevents duplicate API calls and coordinates loading/error states.
+ * The page lists ALL available summary fields and shows a placeholder for the
+ * future chart (history is fetched but not rendered as a chart yet).
  *
- * Note: Key statistics are powered by the useStockData hook and rendered via the KeyStatistics component.
- * Future sections (chart and AI prediction) are placeholders to be implemented by respective teams.
- *
- * @returns {JSX.Element} Stock detail page with header and placeholders for future components
- *
- * @example
- * // Accessed via route: /stock/:symbol
- * // URL: /stock/MSFT shows Microsoft stock header with live key statistics
+ * @returns {JSX.Element} Stock detail page for a single symbol
  */
-const StockDetail = () => {
-  const { symbol } = useParams<{ symbol: string }>();
-  const stockSymbol = symbol || 'MSFT';
 
-  // 🎯 ARCHITECTURAL DECISION: Fetch ALL data here at page level
-  // This prevents child components from making duplicate API calls
-  const { data, loading, error } = useStockData(stockSymbol);
+import React from 'react';
+import { useParams } from 'react-router-dom';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Paper,
+  Grid,
+  Chip,
+  Link as MUILink,
+} from '@mui/material';
+import { useStockSummaryDoc, usePriceHistory } from '../hooks/useStockData';
+import KeyStatistics from '../components/stocks/KeyStatistics';
+import StockChart from '../components/charts/StockChart';
+import type { Range, Point } from '../components/charts/StockChart';
+/**
+ * StockDetail
+ * -----------------------------------------------------------------------------
+ * Fetch a single stock summary and its daily history.
+ * Lists all summary fields and shows a placeholder for the future chart.
+ */
+const fmtUSD = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  maximumFractionDigits: 2,
+});
+const fmtCompact = new Intl.NumberFormat('en-US', {
+  notation: 'compact',
+  maximumFractionDigits: 2,
+});
+const fmtInt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const fmtPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`;
 
-  // 🎨 LOADING STATE - Single loading state for entire page
-  if (loading) {
+export default function StockDetail(): React.ReactElement {
+  const { symbol: routeSymbol } = useParams<{ symbol: string }>();
+  const symbol = (routeSymbol ?? 'AAPL').toUpperCase();
+
+  const {
+    data: summary,
+    loading: loadingSummary,
+    error: errorSummary,
+  } = useStockSummaryDoc(symbol);
+  const {
+    data: history,
+    loading: loadingHistory,
+    error: errorHistory,
+  } = usePriceHistory(symbol);
+
+  // New: chart range state
+  const [range, setRange] = React.useState<Range>('3M');
+
+  /**
+   * Normalize raw history rows to {date, price} and sort ascending.
+   * - date: prefers row.date (YYYY-MM-DD), otherwise uses row.ts Timestamp.
+   * - price: close -> price -> open -> 0
+   */
+  const allPoints = React.useMemo<Point[]>(() => {
+    const rows = Array.isArray(history) ? history : [];
+    const out: Point[] = rows
+      .map((row: any) => {
+        // prefer normalized row.date; fallback to row.id (if provided)
+        const date: string | undefined =
+          typeof row?.date === 'string'
+            ? row.date
+            : typeof row?.id === 'string'
+              ? row.id
+              : undefined;
+
+        const price = Number(
+          row?.close ?? row?.c ?? row?.price ?? row?.open ?? row?.o ?? 0
+        );
+        return date ? { date, price } : null;
+      })
+      .filter((p): p is Point => !!p);
+    out.sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
+    return out;
+  }, [history]);
+
+  /**
+   * Filter normalized points according to the selected range.
+   */
+  const rangePoints = React.useMemo<Point[]>(() => {
+    if (!allPoints.length) return [];
+    const now = new Date();
+    const days =
+      range === '1W'
+        ? 7
+        : range === '1M'
+          ? 30
+          : range === '3M'
+            ? 90
+            : range === '1Y'
+              ? 365
+              : 365 * 5;
+
+    const cutoff = new Date(now);
+    cutoff.setUTCDate(now.getUTCDate() - days);
+
+    // Keep points whose date >= cutoff; if not enough data, return all.
+    const filtered = allPoints.filter(
+      (p) => new Date(p.date + 'T00:00:00Z') >= cutoff
+    );
+    return filtered.length ? filtered : allPoints;
+  }, [allPoints, range]);
+
+  if (loadingSummary) {
     return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '50vh',
-        }}
-      >
-        <CircularProgress size={60} />
+      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+        <CircularProgress size={56} />
       </Box>
     );
   }
 
-  // 🛡️ ERROR STATE - Graceful error handling
-  if (error) {
+  if (errorSummary) {
     return (
       <Box sx={{ p: 4 }}>
         <Alert severity="error">
-          <Typography variant="h6">Failed to load stock data</Typography>
-          <Typography variant="body2">{error.message}</Typography>
-          <Typography variant="caption" sx={{ mt: 1, display: 'block' }}>
-            Symbol: {stockSymbol}
+          <Typography variant="h6" gutterBottom>
+            Failed to load stock
+          </Typography>
+          <Typography variant="body2">{errorSummary.message}</Typography>
+          <Typography variant="caption" sx={{ display: 'block', mt: 1 }}>
+            Symbol: {symbol}
           </Typography>
         </Alert>
       </Box>
     );
   }
-
-  // ⚠️ NO DATA STATE
-  if (!data) {
+  if (!summary) {
     return (
       <Box sx={{ p: 4 }}>
-        <Alert severity="warning">
-          No data found for symbol: <strong>{stockSymbol}</strong>
-        </Alert>
+        <Alert severity="warning">No data found for symbol: {symbol}</Alert>
       </Box>
     );
   }
 
-  // ✅ SUCCESS STATE - Pass data down to "dumb" components
+  const isUp = summary.change24hPercent >= 0;
+  const arrow = isUp ? '▲' : '▼';
+  const updated =
+    typeof summary.updatedAt === 'number'
+      ? new Date(summary.updatedAt)
+      : typeof summary.updatedAt === 'string'
+        ? new Date(summary.updatedAt)
+        : summary.updatedAt;
+
+  const detailsLeft = [
+    { label: 'Current Price', value: fmtUSD.format(summary.currentPrice) },
+    { label: 'Open', value: fmtUSD.format(summary.open) },
+    { label: '24h Change', value: fmtPct(summary.change24hPercent) },
+    {
+      label: 'P/E Ratio',
+      value: summary.peRatio?.toFixed?.(2) ?? String(summary.peRatio),
+    },
+    {
+      label: 'Dividend Yield %',
+      value: `${summary.dividendYieldPercent.toFixed(1)}%`,
+    },
+    { label: 'Dividend Yield (raw)', value: summary.dividendYield.toFixed(4) },
+    { label: '52 Week High', value: fmtUSD.format(summary.fiftyTwoWeekHigh) },
+    { label: '52 Week Low', value: fmtUSD.format(summary.fiftyTwoWeekLow) },
+    { label: 'Market Cap', value: fmtCompact.format(summary.marketCap) },
+    { label: 'Volume', value: fmtInt.format(summary.volume) },
+  ];
+
+  const detailsRight = [
+    { label: 'Industry', value: summary.industry },
+    { label: 'Sector', value: summary.sector },
+    { label: 'Company', value: summary.companyName },
+    { label: 'Website', value: summary.website },
+    {
+      label: 'Address',
+      value: `${summary.address1}, ${summary.city}, ${summary.state} ${summary.zip}, ${summary.country}`,
+    },
+    {
+      label: 'Last Updated',
+      value:
+        updated instanceof Date ? updated.toLocaleString() : String(updated),
+    },
+  ];
+
   return (
-    <Box sx={{ minHeight: '100vh', backgroundColor: '#fafafa' }}>
-      {/* Stock Header Section - Full width, clean design */}
-      <Paper elevation={0} sx={{ p: 3, mb: 0, borderRadius: 0 }}>
+    <Box sx={{ minHeight: '100vh', backgroundColor: '#fafafa', py: 2 }}>
+      {/* Header */}
+      <Paper elevation={0} sx={{ p: 3, mb: 2, borderRadius: 0 }}>
         <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
-          {/* Symbol and Company Name */}
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{ fontWeight: 600, mb: 1 }}
-          >
-            {data.symbol}
-          </Typography>
-
-          <Typography variant="body1" color="text.secondary" gutterBottom>
-            {/* Use companyName from data object */}
-            {data.companyName}
-          </Typography>
-
-          {/* Price and Change Display */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-            <Typography variant="h4" component="div" sx={{ fontWeight: 600 }}>
-              ${data.currentPrice.toFixed(2)}
+          <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+            <Typography variant="h3" component="h1" sx={{ fontWeight: 700 }}>
+              {symbol}
             </Typography>
+            <Chip
+              label={summary.sector}
+              size="small"
+              sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}
+            />
+          </Box>
+          <Typography variant="body1" color="text.secondary">
+            {summary.companyName}
+          </Typography>
 
-            <Box
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
+            <Typography variant="h4" component="div" sx={{ fontWeight: 700 }}>
+              {fmtUSD.format(summary.currentPrice)}
+            </Typography>
+            <Typography
+              variant="h6"
               sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 0.5,
-                color: data.change >= 0 ? 'success.main' : 'error.main',
+                fontWeight: 600,
+                color: isUp ? 'success.main' : 'error.main',
               }}
             >
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {data.change >= 0 ? '▲' : '▼'}$
-                {Math.abs(data.change).toFixed(2)} (
-                {data.changePercent >= 0 ? '+' : ''}
-                {data.changePercent.toFixed(2)}%)
-              </Typography>
-            </Box>
+              {arrow} {fmtPct(summary.change24hPercent)}
+            </Typography>
           </Box>
         </Box>
       </Paper>
 
-      {/* Key Statistics Section - Now with real data! */}
-      <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, pt: 3, pb: 2 }}>
+      {/* Key Statistics summary row */}
+      <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3, mb: 2 }}>
         <KeyStatistics
-          companyName={data.companyName}
-          sector={data.sector}
-          marketCap={data.marketCap}
-          fiftyTwoWeekHigh={data.fiftyTwoWeekHigh}
-          fiftyTwoWeekLow={data.fiftyTwoWeekLow}
+          companyName={summary.companyName}
+          sector={summary.sector}
+          marketCap={summary.marketCap}
+          fiftyTwoWeekHigh={summary.fiftyTwoWeekHigh}
+          fiftyTwoWeekLow={summary.fiftyTwoWeekLow}
         />
       </Box>
 
-      {/* Main Content Container - Future home of chart and AI predictions */}
-      <Box sx={{ maxWidth: 1400, mx: 'auto', p: 3, pt: 2 }}>
-        {/*
-          🎯 TEAM NOTE: Chart and AI components will be implemented by other teams
-          - StockChart component (Jason + Anthony)
-          - AIPredictionCard component (Anthony)
-          Once ready, they'll be integrated in the grid layout below
-        */}
+      {/* Details grid (all summary fields) */}
+      <Box sx={{ maxWidth: 1400, mx: 'auto', px: 3 }}>
+        <Paper elevation={0} sx={{ p: 3, mb: 3, borderRadius: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 700, mb: 2 }}>
+            Company Summary
+          </Typography>
+          <Grid container spacing={2}>
+            {detailsLeft.map((row) => (
+              <Grid key={row.label}>
+                <Box display="flex" justifyContent="space-between" gap={2}>
+                  <Typography color="text.secondary">{row.label}</Typography>
+                  <Typography fontWeight={600}>{row.value}</Typography>
+                </Box>
+              </Grid>
+            ))}
+            {detailsRight.map((row) => (
+              <Grid key={row.label}>
+                <Box display="flex" justifyContent="space-between" gap={2}>
+                  <Typography color="text.secondary">{row.label}</Typography>
+                  {row.label === 'Website' ? (
+                    <MUILink
+                      href={summary.website}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {summary.website}
+                    </MUILink>
+                  ) : (
+                    <Typography fontWeight={600} textAlign="right">
+                      {row.value}
+                    </Typography>
+                  )}
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Paper>
 
-        {/* Placeholder: Chart and AI Prediction sections coming soon */}
-        <Box
-          sx={{
-            display: 'grid',
-            gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' },
-            gap: 3,
-          }}
-        >
-          {/* Chart Section Placeholder */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              borderRadius: 2,
-              textAlign: 'center',
-              border: '2px dashed',
-              borderColor: 'grey.300',
-              backgroundColor: 'grey.50',
-            }}
-          >
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              📊 Stock Chart
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Chart component being implemented by chart team
-            </Typography>
-          </Paper>
-
-          {/* AI Prediction Card Placeholder */}
-          <Paper
-            elevation={0}
-            sx={{
-              p: 4,
-              borderRadius: 2,
-              textAlign: 'center',
-              border: '2px dashed',
-              borderColor: 'grey.300',
-              backgroundColor: 'grey.50',
-            }}
-          >
-            <PredictionCard trend="Bullish" confidence={0.9} />
-          </Paper>
-        </Box>
+        {/* Price chart */}
+        <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
+          {errorHistory ? (
+            <Alert severity="error">{errorHistory.message}</Alert>
+          ) : loadingHistory ? (
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+              <CircularProgress />
+            </Box>
+          ) : (
+            <StockChart
+              ticker={symbol}
+              data={rangePoints}
+              range={range}
+              onRangeChange={setRange}
+            />
+          )}
+        </Paper>
       </Box>
     </Box>
   );
-};
-
-export default StockDetail;
+}
