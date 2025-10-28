@@ -62,7 +62,7 @@ export default function StockDetail(): React.ReactElement {
   } = usePriceHistory(symbol);
 
   // New: chart range state
-  const [range] = React.useState<Range>('3M');
+  const [range, setRange] = React.useState<Range>('3M');
 
   /**
    * Normalize raw history rows to {date, price} and sort ascending.
@@ -287,7 +287,12 @@ export default function StockDetail(): React.ReactElement {
               <CircularProgress />
             </Box>
           ) : (
-            <StockChart ticker={symbol} data={rangePoints} range={range} />
+            <StockChart
+              ticker={symbol}
+              data={rangePoints}
+              range={range}
+              onRangeChange={setRange}
+            />
           )}
         </Paper>
       </Box>

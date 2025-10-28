@@ -18,6 +18,8 @@ type Props = {
   data: Point[];
   range: Range;
   height?: number;
+  /** Called when the user selects a new range */
+  onRangeChange?: (next: Range) => void;
 };
 
 /**
@@ -118,6 +120,11 @@ function computeTicks(data: Point[], range: Range): string[] {
  *
  * @component
  * @param {Props} props - Component props.
+ * @param {string} props.ticker - Stock ticker symbol
+ * @param {Point[]} props.data - Chart data points
+ * @param {Range} props.range - Currently selected range
+ * @param {number} [props.height] - Container height
+ * @param {(next: Range) => void} [props.onRangeChange] - Range change handler
  * @returns {JSX.Element} Stock performance line chart.
  */
 export default function StockChart({
@@ -125,6 +132,7 @@ export default function StockChart({
   data,
   range,
   height = 360,
+  onRangeChange,
 }: Props) {
   const ticks = React.useMemo(() => computeTicks(data, range), [data, range]);
 
@@ -167,8 +175,10 @@ export default function StockChart({
           size="small"
           value={range}
           exclusive
-          // PASSES TEST: next is null when active button is clicked, preventing no-op call
-          onChange={(_, next: Range | null) => next}
+          // Only update when a different button is chosen (next can be null if same button is clicked)
+          onChange={(_, next: Range | null) => {
+            if (next) onRangeChange?.(next);
+          }}
           aria-label="Time range"
         >
           {(['1W', '1M', '3M', '1Y', '5Y'] as Range[]).map((r) => (

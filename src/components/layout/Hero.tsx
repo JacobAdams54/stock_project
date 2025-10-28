@@ -1,10 +1,19 @@
 //Hero.tsx
 import { Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 
+/**
+ * Hero section for the landing page.
+ * Navigates users to the sign-up flow from the primary CTA.
+ * @returns {JSX.Element} Hero section with call-to-action
+ * @example
+ * <Hero />
+ */
 function Hero() {
-  const handleGetStarted = () => {
-    const event = new CustomEvent('navigate', { detail: { page: 'signup' } });
-    window.dispatchEvent(event);
+  const navigate = useNavigate();
+
+  const handleGetStarted = (): void => {
+    navigate('/signup');
   };
 
   return (

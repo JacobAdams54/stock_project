@@ -4,10 +4,11 @@ import Hero from './components/layout/Hero';
 import { FeatureCards } from './components/layout/FeatureCard';
 import { AccessTime, Psychology, Visibility } from '@mui/icons-material';
 import SignupForm from './components/auth/SignupForm';
-// import LoginForm from './components/auth/LoginForm';
+import LoginForm from './components/auth/LoginForm';
 import { Routes, Route } from 'react-router-dom';
 import StockListingPage from './pages/StockListingPage';
 import StockDetail from './pages/StockDetail';
+import About from './pages/About';
 
 function App() {
   const homepageFeatures = [
@@ -47,6 +48,8 @@ function App() {
             </>
           }
         />
+        <Route path="/about" element={<About />} />
+        <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
         {/* New: Stocks listing and detail routes */}
         <Route path="/stocks" element={<StockListingPage />} />
