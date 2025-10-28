@@ -114,45 +114,38 @@ function asNumber(v: unknown, label: string): number {
 }
 
 /**
- * Normalize Firestore Timestamp-like to Date | string | number.
+ * Normalize a raw Firestore stock doc into the shape the UI expects.
+ * Falls back to sensible defaults when fields are missing.
  */
-function normalizeUpdatedAt(v: any): Date | string | number {
-  if (v && typeof v === 'object' && typeof v.toDate === 'function') {
-    return v.toDate();
-  }
-  return v;
-}
+function normalizeSummary(symbol: string, raw: any): StockRealtime {
+  const dy = typeof raw?.dividendYield === 'number' ? raw.dividendYield : 0;
+  const dyPct =
+    typeof raw?.dividendYieldPercent === 'number'
+      ? raw.dividendYieldPercent
+      : dy * 100;
 
-/**
- * Validate and normalize a /stocks/{ticker} document.
- * @throws {InvalidDataError}
- */
-function parseStockRealtimeDoc(d: any): StockRealtimeFields {
-  if (!d) throw new InvalidDataError('document');
   return {
-    address1: String(d.address1 ?? ''),
-    change24hPercent: asNumber(d.change24hPercent, 'change24hPercent'),
-    city: String(d.city ?? ''),
-    companyName: String(d.companyName ?? ''),
-    country: String(d.country ?? ''),
-    currentPrice: asNumber(d.currentPrice, 'currentPrice'),
-    dividendYield: asNumber(d.dividendYield, 'dividendYield'),
-    dividendYieldPercent: asNumber(
-      d.dividendYieldPercent,
-      'dividendYieldPercent'
-    ),
-    fiftyTwoWeekHigh: asNumber(d.fiftyTwoWeekHigh, 'fiftyTwoWeekHigh'),
-    fiftyTwoWeekLow: asNumber(d.fiftyTwoWeekLow, 'fiftyTwoWeekLow'),
-    industry: String(d.industry ?? ''),
-    marketCap: asNumber(d.marketCap, 'marketCap'),
-    open: asNumber(d.open, 'open'),
-    peRatio: asNumber(d.peRatio, 'peRatio'),
-    sector: String(d.sector ?? ''),
-    state: String(d.state ?? ''),
-    updatedAt: normalizeUpdatedAt(d.updatedAt),
-    volume: asNumber(d.volume, 'volume'),
-    website: String(d.website ?? ''),
-    zip: String(d.zip ?? ''),
+    symbol: symbol as Ticker,
+    address1: String(raw?.address1 ?? ''),
+    change24hPercent: Number(raw?.change24hPercent ?? 0),
+    city: String(raw?.city ?? ''),
+    companyName: String(raw?.companyName ?? symbol),
+    country: String(raw?.country ?? ''),
+    currentPrice: Number(raw?.currentPrice ?? raw?.close ?? raw?.open ?? 0),
+    dividendYield: Number(dy),
+    dividendYieldPercent: Number(dyPct),
+    fiftyTwoWeekHigh: Number(raw?.fiftyTwoWeekHigh ?? 0),
+    fiftyTwoWeekLow: Number(raw?.fiftyTwoWeekLow ?? 0),
+    industry: String(raw?.industry ?? ''),
+    marketCap: Number(raw?.marketCap ?? 0),
+    open: Number(raw?.open ?? 0),
+    peRatio: Number(raw?.peRatio ?? 0),
+    sector: String(raw?.sector ?? ''),
+    state: String(raw?.state ?? ''),
+    updatedAt: raw?.updatedAt ?? Date.now(),
+    volume: Number(raw?.volume ?? 0),
+    website: String(raw?.website ?? ''),
+    zip: String(raw?.zip ?? ''),
   };
 }
 
@@ -171,11 +164,11 @@ function parseStockRealtimeDoc(d: any): StockRealtimeFields {
 export async function readStockSummary(
   symbol: Ticker | string
 ): Promise<StockRealtime> {
-  const sym = symbol.toString().toUpperCase() as Ticker;
-  const snap = await getDoc(doc(db, 'stocks', sym));
-  if (!snap.exists()) throw new DataNotFoundError('stock doc', sym);
-  const fields = parseStockRealtimeDoc(snap.data());
-  return { symbol: sym, ...fields };
+  const s = String(symbol).toUpperCase();
+  const snap = await getDoc(doc(db, 'stocks', s));
+  if (!snap.exists()) throw new DataNotFoundError('stock doc', s);
+  const out = normalizeSummary(s, snap.data());
+  return out;
 }
 
 /**
@@ -186,16 +179,22 @@ export async function readStockSummary(
  * const all = await readAllStockSummaries();
  */
 export async function readAllStockSummaries(): Promise<StockRealtime[]> {
-  const results = await Promise.all(
-    TICKERS.map(async (sym) => {
-      try {
-        return await readStockSummary(sym);
-      } catch {
-        return null;
-      }
-    })
-  );
-  return results.filter(Boolean) as StockRealtime[];
+  const symbols = TICKERS;
+  const tasks = symbols.map(async (s) => {
+    const snap = await getDoc(doc(db, 'stocks', s));
+    if (!snap.exists()) return null;
+    return normalizeSummary(s, snap.data());
+  });
+
+  const results = (await Promise.allSettled(tasks))
+    .filter(
+      (r): r is PromiseFulfilledResult<StockRealtime | null> =>
+        r.status === 'fulfilled'
+    )
+    .map((r) => r.value)
+    .filter((v): v is StockRealtime => v != null);
+
+  return results;
 }
 
 /**
