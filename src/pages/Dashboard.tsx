@@ -1,5 +1,5 @@
 import Sidebar from '../components/layout/Sidebar.tsx';
-import StockDetail from './StockDetail.tsx';
+import StockDetail from './StockDetail';
 import React from 'react';
 /**
  * Dashboard component displaying the main user interface for logged-in users.
