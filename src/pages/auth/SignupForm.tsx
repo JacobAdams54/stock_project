@@ -53,9 +53,8 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../firebase/firebase';
-import Logo from '../layout/Logo';
+import Logo from '../../components/layout/Logo';
 import { Link as RouterLink } from 'react-router-dom';
-
 
 export default function SignupForm() {
   // state
@@ -400,10 +399,10 @@ export default function SignupForm() {
           Continue with Google
         </Button>
         <Typography sx={{ mt: 3 }}>
-        Already a User?{' '}
-        <Link component={RouterLink} to="/login" underline="hover">
+          Already a User?{' '}
+          <Link component={RouterLink} to="/login" underline="hover">
             Login
-        </Link>
+          </Link>
         </Typography>
       </Paper>
 

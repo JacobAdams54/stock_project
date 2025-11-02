@@ -3,8 +3,8 @@ import Header from './components/layout/Header';
 import Hero from './components/layout/Hero';
 import { FeatureCards } from './components/layout/FeatureCard';
 import { AccessTime, Psychology, Visibility } from '@mui/icons-material';
-import SignupForm from './components/auth/SignupForm';
-import LoginForm from './components/auth/LoginForm';
+import SignupForm from './pages/auth/SignupForm';
+import LoginForm from './pages/auth/LoginForm';
 import { Routes, Route } from 'react-router-dom';
 import StockListingPage from './pages/StockListingPage';
 import StockDetail from './pages/StockDetail';
@@ -12,7 +12,6 @@ import About from './pages/About';
 import ForgotPasswordPage from './pages/ForgotPassword'; // ← add this import
 import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/AdminPage';
-
 
 function App() {
   const homepageFeatures = [
