@@ -56,13 +56,6 @@ function makeDocSnap({
   };
 }
 
-function makeQuerySnap(docs: Array<{ id: string; data: any }>) {
-  return {
-    empty: docs.length === 0,
-    docs: docs.map((d) => makeDocSnap({ id: d.id, data: d.data })),
-  };
-}
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
