@@ -4,9 +4,9 @@
  * Fetches all available stocks using useAllStockSummaries (from /stocks/{ticker})
  * and renders them in a searchable, filterable grid of StockCard components.
  *
- * Data source
- * - useAllStockSummaries() → reads all tickers from constants/tickers.ts
- *   and loads /stocks/{ticker} docs (normalized to StockRealtime).
+ * Reads behavior:
+ * - useAllStockSummaries performs one document read per ticker in TICKERS.
+ *   This is the minimum necessary with per-ticker docs in Firestore.
  *
  * Notes
  * - This page is presentation-focused; Firestore logic lives in useStockData.

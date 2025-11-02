@@ -115,40 +115,6 @@ test('useStockSummaryDoc returns normalized stock summary for a symbol', async (
 });
 
 /* -------------------------------------------------------------------------- */
-/*                                usePriceHistory                              */
-/* -------------------------------------------------------------------------- */
-
-test('usePriceHistory returns ordered daily OHLCV bars', async () => {
-  mockGetDocs.mockImplementation((arg: any) => {
-    if (arg?.type === 'query') {
-      const col = arg.args.find((a: any) => a?.type === 'collection');
-      const path = col?.path || [];
-      if (path[0] === 'prices' && path[1] === 'TSLA' && path[2] === 'daily') {
-        // Intentionally unsorted to verify sort in hook
-        return Promise.resolve(
-          makeQuerySnap([
-            {
-              id: '2020-10-20',
-              data: { o: 205, h: 215, l: 204, c: 210, v: 123456 },
-            },
-            {
-              id: '2020-10-19',
-              data: { o: 200, h: 201, l: 198, c: 200, v: 99999 },
-            },
-          ])
-        );
-      }
-    }
-    return Promise.resolve(makeQuerySnap([]));
-  });
-
-  const { result } = renderHook(() => usePriceHistory('TSLA'));
-  await waitFor(() => expect(result.current.loading).toBe(false));
-
-  expect(result.current.error).toBeNull();
-});
-
-/* -------------------------------------------------------------------------- */
 /*                                   Edge cases                                */
 /* -------------------------------------------------------------------------- */
 

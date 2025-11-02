@@ -4,12 +4,12 @@
  * Purpose
  * - Minimal data layer for Stalk.ai.
  * - Fetches stock summaries from /stocks/{ticker} and daily history from
- *   /prices/{ticker}/daily/* in Firestore.
+ *   /stock_prices/{ticker}.daily (single document read) in Firestore.
  *
  * What’s included
  * - readStockSummary(symbol)          → single /stocks/{symbol}
  * - readAllStockSummaries()           → all symbols from constants/tickers.ts
- * - readPriceHistory(symbol)          → daily bars from /prices/{symbol}/daily/*
+ * - readPriceHistory(symbol)          → daily bars from /stock_prices/{symbol}
  * - Hooks: useStockSummaryDoc, useAllStockSummaries, usePriceHistory
  *
  * What was removed
@@ -23,7 +23,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase/firebase';
 import { TICKERS } from '../constants/tickers';
 import type { Ticker } from '../constants/tickers';
@@ -64,7 +64,7 @@ export interface StockRealtimeFields {
 export type StockRealtime = StockRealtimeFields & { symbol: Ticker };
 
 /**
- * Historical daily bar from /prices/{ticker}/daily/{YYYY-MM-DD}.
+ * Historical daily bar from /stock_prices/{ticker}.daily map entries.
  */
 export interface PriceBar {
   date: string; // YYYY-MM-DD
@@ -175,36 +175,54 @@ export async function readAllStockSummaries(): Promise<StockRealtime[]> {
 }
 
 /**
- * Read daily OHLCV from /prices/{symbol}/daily and normalize field names.
- * Accepts both verbose (open/high/low/close/volume) and compact (o/h/l/c/v).
+ * Read daily OHLCV from /stock_prices/{symbol}.
+ * Expects a single document per ticker with a "daily" map whose keys are "YYYY-MM-DD"
+ * and values are compact { o, h, l, c, v } (verbose fields also accepted).
+ *
+ * One Firestore read returns all daily bars.
+ *
+ * @param {Ticker | string} symbol - Ticker symbol (e.g., "AAPL")
+ * @returns {Promise<PriceBar[]>} Normalized, date-sorted OHLCV rows
+ * @throws {DataNotFoundError} if the stock_prices doc does not exist
+ * @example
+ * const bars = await readPriceHistory('AAPL');
  */
 export async function readPriceHistory(
   symbol: Ticker | string
 ): Promise<PriceBar[]> {
   const s = String(symbol).toUpperCase();
-  const colRef = collection(db, 'prices', s, 'daily');
-  const snap = await getDocs(colRef);
 
-  const num = (x: any) => (typeof x === 'number' && isFinite(x) ? x : 0);
+  // Single doc: /stock_prices/{symbol}
+  const snap = await getDoc(doc(db, 'stock_prices', s));
+  if (!snap.exists()) throw new DataNotFoundError('stock_prices doc', s);
 
-  const rows: PriceBar[] = snap.docs.map((d) => {
-    const data: any = d.data() ?? {};
-    const date = typeof data.date === 'string' && data.date ? data.date : d.id; // fallback to doc ID (YYYY-MM-DD)
+  const data = snap.data() as any;
+  const daily = data?.daily as Record<string, any> | undefined;
 
-    return {
-      date,
-      open: num(data.open ?? data.o),
-      high: num(data.high ?? data.h),
-      low: num(data.low ?? data.l),
-      close: num(
-        data.close ?? data.c ?? data.price ?? data.open ?? data.o ?? 0
-      ),
-      volume: num(data.volume ?? data.v),
-      ts: data.ts,
-    };
-  });
+  // Coerce to numbers; accepts numeric strings to be defensive.
+  const num = (x: any) => {
+    const n = typeof x === 'number' ? x : typeof x === 'string' ? Number(x) : 0;
+    return Number.isFinite(n) ? n : 0;
+  };
 
-  rows.sort((a, b) => a.date.localeCompare(b.date));
+  if (!daily || typeof daily !== 'object') return [];
+
+  const rows: PriceBar[] = Object.keys(daily)
+    .filter((date) => daily[date] && typeof daily[date] === 'object')
+    .map((date) => {
+      const d = daily[date] as any;
+      return {
+        date,
+        open: num(d.open ?? d.o),
+        high: num(d.high ?? d.h),
+        low: num(d.low ?? d.l),
+        close: num(d.close ?? d.c ?? d.price ?? d.open ?? d.o ?? 0),
+        volume: num(d.volume ?? d.v),
+        ts: d.ts,
+      };
+    })
+    .sort((a, b) => a.date.localeCompare(b.date));
+
   return rows;
 }
 

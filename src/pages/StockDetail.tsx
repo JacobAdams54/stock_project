@@ -2,12 +2,11 @@
  * StockDetail
  * -----------------------------------------------------------------------------
  * Fetches a single stock summary from /stocks/{ticker} and its historical
- * daily prices from /prices/{ticker}/daily using the new hooks:
+ * daily prices from /stock_prices/{ticker}.daily using the hooks:
  *  - useStockSummaryDoc(symbol)
  *  - usePriceHistory(symbol)
  *
- * The page lists ALL available summary fields and shows a placeholder for the
- * future chart (history is fetched but not rendered as a chart yet).
+ * One read for the summary, one read for all daily prices.
  *
  * @returns {JSX.Element} Stock detail page for a single symbol
  */
