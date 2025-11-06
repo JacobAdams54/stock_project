@@ -1,6 +1,6 @@
 // src/components/Header.tsx
 import * as React from 'react';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
+import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Container from '@mui/material/Container';
@@ -14,6 +14,9 @@ import MenuIcon from '@mui/icons-material/Menu';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
 import Logo from '../layout/Logo';
+import { useAuth } from '../layout/AuthContext';
+import { signOut } from 'firebase/auth';
+import { auth } from '../../firebase/firebase';
 
 /**
  * Navigation item used by the Header component.
@@ -30,11 +33,7 @@ const NAV_LINKS: NavItem[] = [
   { label: 'About', to: '/about' },
 ];
 
-const AUTH_LINKS: NavItem[] = [
-  { label: 'Login', to: '/login' },
-  { label: 'Admin', to: '/admin' },
-  { label: 'Sign Up', to: '/signup' },
-];
+// auth links are defined inline as needed; AUTH_LINKS removed because it was unused
 
 /**
  * Top-level site header with primary navigation and auth links.
@@ -58,9 +57,8 @@ export default function Header() {
   const open = Boolean(anchorEl);
   const menuId = 'primary-navigation-menu';
 
-  const openMenu = (e: React.MouseEvent<HTMLElement>) =>
-    setAnchorEl(e.currentTarget);
-  const closeMenu = () => setAnchorEl(null);
+  const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+  const closeMenu = React.useCallback(() => setAnchorEl(null), []);
 
   /**
    * Returns true when the given route should be considered active based on the
@@ -76,126 +74,171 @@ export default function Header() {
     return pathname === to || (to !== '/' && pathname.startsWith(to));
   };
 
-  return (
-    <header role="banner" data-testid="header">
-      <AppBar
-        component="div"
-        position="sticky"
-        color="transparent"
-        elevation={0}
-        sx={{
-          bgcolor: 'background.paper',
-          borderBottom: 1,
-          borderColor: 'divider',
-          zIndex: (t) => t.zIndex.appBar,
-        }}
-      >
-        <Container maxWidth="lg">
-          <Toolbar disableGutters sx={{ minHeight: 64, gap: 2 }}>
-            {/* Logo (Home link) */}
-            <Box
-              data-testid="logo"
-              component={RouterLink}
-              to="/"
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                cursor: 'pointer',
-                textDecoration: 'none',
-              }}
-              aria-label="Go to Home"
-              role="link"
+  const { user, isAdmin, loading } = useAuth();
+  const navigate = useNavigate();
+  // Modify AUTH_LINKS based on auth state
+  const handleLogOut = React.useCallback(async () => {
+    try {
+      await signOut(auth);
+      navigate('/');
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.warn('Error signing out:', error);
+    }
+    finally {
+      closeMenu();
+    }
+  }, [closeMenu, navigate]);
+
+  //Conditional Rendering of Auth Links
+  const authButtons = () => {
+    if (loading) return null;
+    if (!user) {
+      return (
+        <>
+          <Button component={RouterLink} to="/login" color="inherit" variant="text" size="small">
+            Login
+          </Button>
+          <Button component={RouterLink} to="/signup" color="primary" variant="contained" size="small">
+            Sign Up
+          </Button>
+        </>
+      );
+    }
+
+    // Authenticated user: show Admin (if admin) and Log Out
+    return (
+      <Stack direction="row" spacing={1}>
+        {isAdmin && (
+          <Button component={RouterLink} to="/admin">Admin</Button>
+        )}
+        <Button onClick={handleLogOut}>Log Out</Button>
+      </Stack>
+    );
+  };
+
+return (
+  <header role="banner" data-testid="header">
+    <AppBar
+      component="div"
+      position="sticky"
+      color="transparent"
+      elevation={0}
+      sx={{
+        bgcolor: 'background.paper',
+        borderBottom: 1,
+        borderColor: 'divider',
+        zIndex: (t) => t.zIndex.appBar,
+      }}
+    >
+      <Container maxWidth="lg">
+        <Toolbar disableGutters sx={{ minHeight: 64, gap: 2 }}>
+          {/* Logo (Home link) */}
+          <Box
+            data-testid="logo"
+            component={RouterLink}
+            to="/"
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              cursor: 'pointer',
+              textDecoration: 'none',
+            }}
+            aria-label="Go to Home"
+            role="link"
+          >
+            <Logo />
+          </Box>
+
+          {/* spacer */}
+          <Box sx={{ flexGrow: 1 }} />
+
+          {/* Desktop nav */}
+          {isDesktop ? (
+            <Stack
+              direction="row"
+              spacing={2}
+              alignItems="center"
+              component="nav"
+              aria-label="Main navigation"
             >
-              <Logo />
-            </Box>
-
-            {/* spacer */}
-            <Box sx={{ flexGrow: 1 }} />
-
-            {/* Desktop nav */}
-            {isDesktop ? (
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                component="nav"
-                aria-label="Main navigation"
-              >
-                {/* Primary nav */}
-                <Stack direction="row" spacing={1}>
-                  {NAV_LINKS.map(({ label, to }) => (
-                    <Button
-                      key={to}
-                      component={RouterLink}
-                      to={to}
-                      color={isActive(to) ? 'primary' : 'inherit'}
-                      variant={isActive(to) ? 'contained' : 'text'}
-                      size="small"
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </Stack>
-
-                <Box sx={{ width: 8 }} />
-
-                {/* Auth/Admin */}
-                <Stack direction="row" spacing={1} alignItems="center">
-                  {AUTH_LINKS.map(({ label, to }) => (
-                    <Button
-                      key={to}
-                      component={RouterLink}
-                      to={to}
-                      color={label === 'Sign Up' ? 'primary' : 'inherit'}
-                      variant={label === 'Sign Up' ? 'contained' : 'text'}
-                      size="small"
-                    >
-                      {label}
-                    </Button>
-                  ))}
-                </Stack>
+              {/* Primary nav */}
+              <Stack direction="row" spacing={1}>
+                {NAV_LINKS.map(({ label, to }) => (
+                  <Button
+                    key={to}
+                    component={RouterLink}
+                    to={to}
+                    color={isActive(to) ? 'primary' : 'inherit'}
+                    variant={isActive(to) ? 'contained' : 'text'}
+                    size="small"
+                  >
+                    {label}
+                  </Button>
+                ))}
               </Stack>
-            ) : (
-              // Mobile: hamburger
-              <IconButton
-                size="small"
-                edge="end"
-                aria-label="Open navigation menu"
-                aria-controls={open ? menuId : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={openMenu}
-              >
-                <MenuIcon />
-              </IconButton>
-            )}
 
-            {/* Mobile Menu (uses RouterLink in MenuItem) */}
-            <Menu
-              id={menuId}
-              anchorEl={anchorEl}
-              open={open}
-              onClose={closeMenu}
-              keepMounted
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              <Box sx={{ width: 8 }} />
+
+              {/* Auth/Admin */}
+              <Stack direction="row" spacing={1} alignItems="center">
+                {authButtons()}
+              </Stack>
+            </Stack>
+          ) : (
+            // Mobile: hamburger
+            <IconButton
+              size="small"
+              edge="end"
+              aria-label="Open navigation menu"
+              aria-controls={open ? menuId : undefined}
+              aria-haspopup="true"
+              aria-expanded={open ? 'true' : undefined}
+              onClick={openMenu}
             >
-              {[...NAV_LINKS, ...AUTH_LINKS].map(({ label, to }) => (
-                <MenuItem
-                  key={to}
-                  component={RouterLink}
-                  to={to}
-                  onClick={closeMenu}
-                  selected={isActive(to)}
-                  aria-current={isActive(to) ? 'page' : undefined}
-                >
-                  {label}
+              <MenuIcon />
+            </IconButton>
+          )}
+
+          {/* Mobile Menu (uses RouterLink in MenuItem) */}
+          <Menu
+            id={menuId}
+            anchorEl={anchorEl}
+            open={open}
+            onClose={closeMenu}
+            keepMounted
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            {NAV_LINKS.map(({ label, to }) => (
+              <MenuItem
+                key={to}
+                component={RouterLink}
+                to={to}
+                onClick={closeMenu}
+                selected={isActive(to)}
+                aria-current={isActive(to) ? 'page' : undefined}
+              >
+                {label}
+              </MenuItem>
+            ))}
+            {/* Auth/Admin Links */}
+            {!loading && user && (
+              <>
+                {isAdmin && (
+                  <MenuItem component={RouterLink} to="/admin" onClick={closeMenu} selected={isActive('/admin')} aria-current={isActive('/admin') ? 'page' : undefined}>
+                    Admin
+                  </MenuItem>
+                )}
+                <MenuItem onClick={() => handleLogOut()}>
+                  Log Out
                 </MenuItem>
-              ))}
-            </Menu>
-          </Toolbar>
-        </Container>
-      </AppBar>
-    </header>
-  );
+              </>
+            )}
+          </Menu>
+        </Toolbar>
+      </Container>
+    </AppBar>
+  </header>
+);
 }
