@@ -4,14 +4,23 @@
  * This module initializes Firebase services used throughout the application:
  * - Authentication for user management
  * - Firestore for database operations
+ * - (NEW) Analytics for event tracking
  *
  * @module firebase
  */
 
-// Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app';
+// Import Firebase core + services
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+
+// Analytics imports
+import {
+  getAnalytics,
+  isSupported,
+  logEvent,
+  type Analytics,
+} from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBlJRzG6An9B4ygK_QA75q90A-TN0ESmOs',
@@ -23,30 +32,44 @@ const firebaseConfig = {
   measurementId: 'G-977QMD4SE4',
 };
 
-/**
- * Initialized Firebase app instance
- * @type {import('firebase/app').FirebaseApp}
- */
-const app = initializeApp(firebaseConfig);
 
-/**
- * Firebase Authentication service instance
- * Used for user authentication, login, logout, and session management
- * @type {import('firebase/auth').Auth}
- * @example
- * import { auth } from '@/firebase/firebase';
- * const user = auth.currentUser;
- */
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+
+
 const auth = getAuth(app);
 
-/**
- * Firestore database instance
- * Used for storing and retrieving user data, portfolios, watchlists, and stock information
- * @type {import('firebase/firestore').Firestore}
- * @example
- * import { db } from '@/firebase/firebase';
- * const docRef = doc(db, 'users', userId);
- */
+
 const db = getFirestore(app);
 
-export { app, auth, db };
+/**
+ * Analytics instance
+ * Initialized only if supported (browser, measurementId present, no SSR)
+ */
+let analytics: Analytics | null = null;
+
+if (typeof window !== 'undefined') {
+  isSupported()
+    .then((ok) => {
+      if (ok) {
+        analytics = getAnalytics(app);
+      }
+    })
+    .catch(() => {
+      // Analytics unsupported in this environment — safe to ignore
+    });
+}
+
+export function logAppEvent(
+  eventName: string,
+  params?: Record<string, any>
+): void {
+  try {
+    if (analytics) {
+      logEvent(analytics, eventName, params);
+    }
+  } catch {
+    // swallow analytics errors in production — do not break UI
+  }
+}
+
+export { app, auth, db, analytics };
