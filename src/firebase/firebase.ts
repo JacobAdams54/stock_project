@@ -4,17 +4,15 @@
  * This module initializes Firebase services used throughout the application:
  * - Authentication for user management
  * - Firestore for database operations
- * - (NEW) Analytics for event tracking
+ * - Analytics for event tracking (optional)
  *
  * @module firebase
  */
 
-// Import Firebase core + services
+// Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-
-// Analytics imports
 import {
   getAnalytics,
   isSupported,
@@ -32,18 +30,30 @@ const firebaseConfig = {
   measurementId: 'G-977QMD4SE4',
 };
 
-
+/**
+ * Initialized Firebase app instance
+ * Use getApps()/getApp() to avoid double init in dev/hot-reload.
+ * @type {import('firebase/app').FirebaseApp}
+ */
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-
+/**
+ * Firebase Authentication service instance
+ * Used for user authentication, login, logout, and session management
+ * @type {import('firebase/auth').Auth}
+ */
 const auth = getAuth(app);
 
-
+/**
+ * Firestore database instance
+ * Used for storing and retrieving user data, portfolios, watchlists, and stock information
+ * @type {import('firebase/firestore').Firestore}
+ */
 const db = getFirestore(app);
 
+
 /**
- * Analytics instance
- * Initialized only if supported (browser, measurementId present, no SSR)
+ * Analytics instance (browser-only, optional)
  */
 let analytics: Analytics | null = null;
 
@@ -55,10 +65,21 @@ if (typeof window !== 'undefined') {
       }
     })
     .catch(() => {
-      // Analytics unsupported in this environment — safe to ignore
+      // Analytics not supported in this environment (SSR, no measurementId, etc.)
+      // Safe to ignore.
     });
 }
 
+/**
+ * Log a Firebase Analytics event if Analytics is available.
+ * Safe no-op in unsupported environments.
+ *
+ * @param {string} eventName - Event name (e.g., 'admin_test_click')
+ * @param {Record<string, any>} [params] - Optional event params
+ *
+ * @example
+ * logAppEvent('add_to_watchlist', { ticker: 'AAPL' });
+ */
 export function logAppEvent(
   eventName: string,
   params?: Record<string, any>
@@ -68,7 +89,7 @@ export function logAppEvent(
       logEvent(analytics, eventName, params);
     }
   } catch {
-    // swallow analytics errors in production — do not break UI
+    // Swallow analytics errors to avoid breaking the UI
   }
 }
 
