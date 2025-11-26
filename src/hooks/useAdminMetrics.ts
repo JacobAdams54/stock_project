@@ -98,15 +98,12 @@ export function useAdminMetrics() {
 
       setLoading(true);
       setError(null);
-
-      try {
+      //beginning of error
+            try {
         const usersCol = collection(db, 'users');
-
-        // Accurate total user count
         const countSnap = await getCountFromServer(usersCol);
         const totalUsers = countSnap.data().count as number;
 
-        // Approximate watchlist metrics from first 500 users
         const usersQuery = query(usersCol, limit(500));
         const usersSnap = await getDocs(usersQuery);
 
@@ -148,7 +145,7 @@ export function useAdminMetrics() {
             topTickers,
           });
         }
-      } catch (e) {
+      } catch {
         if (!cancelled) {
           setError('Failed to load admin metrics');
           setMetrics(DEFAULT_METRICS);
@@ -158,6 +155,7 @@ export function useAdminMetrics() {
           setLoading(false);
         }
       }
+      //end point of error
     }
 
     loadMetrics();
