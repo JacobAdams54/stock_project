@@ -86,7 +86,7 @@ describe('useAdminMetrics', () => {
     });
 
     const fakeSnap = {
-      forEach: (cb: (doc: any) => void) => {
+      forEach: (cb: (_doc: any) => void) => {
         cb({ data: () => ({ watchlist: ['AAPL', 'TSLA'] }) });
         cb({ data: () => ({ watchlist: ['AAPL'] }) });
         cb({ data: () => ({ watchlist: [] }) });
