@@ -7,7 +7,7 @@ import { Box, Typography, Paper } from '@mui/material';
 interface KeyStatisticsProps {
   companyName: string;
   sector: string;
-  marketCap: string;
+  marketCap: number; // number from summary; formatted internally
   fiftyTwoWeekHigh: number;
   fiftyTwoWeekLow: number;
 }
@@ -22,18 +22,13 @@ interface KeyStatisticsProps {
  * Responsive design: wraps to 2 columns on mobile, single row on desktop.
  *
  * @param {KeyStatisticsProps} props - Component props
- * @param {string} props.companyName - Full company name (e.g., "Apple Inc.")
- * @param {string} props.sector - Business sector (e.g., "Technology")
- * @param {string} props.marketCap - Formatted market cap (e.g., "2.75T")
- * @param {number} props.fiftyTwoWeekHigh - 52-week high price
- * @param {number} props.fiftyTwoWeekLow - 52-week low price
  * @returns {JSX.Element} Key statistics display component
  *
  * @example
  * <KeyStatistics
  *   companyName="Apple Inc."
  *   sector="Technology"
- *   marketCap="2.75T"
+ *   marketCap={2750000000000}
  *   fiftyTwoWeekHigh={199.62}
  *   fiftyTwoWeekLow={124.17}
  * />
@@ -45,6 +40,11 @@ const KeyStatistics = ({
   fiftyTwoWeekHigh,
   fiftyTwoWeekLow,
 }: KeyStatisticsProps) => {
+  const fmtCompact = new Intl.NumberFormat('en-US', {
+    notation: 'compact',
+    maximumFractionDigits: 2,
+  });
+
   return (
     <Paper elevation={0} sx={{ p: 3, borderRadius: 2 }}>
       <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
@@ -97,7 +97,7 @@ const KeyStatistics = ({
             Market Cap
           </Typography>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
-            {marketCap}
+            {fmtCompact.format(marketCap)}
           </Typography>
         </Box>
 

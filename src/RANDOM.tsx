@@ -3,24 +3,22 @@ import Header from './components/layout/Header';
 import Hero from './components/layout/Hero';
 import { FeatureCards } from './components/layout/FeatureCard';
 import { AccessTime, Psychology, Visibility } from '@mui/icons-material';
-import SignupForm from './pages/auth/SignupForm.tsx';
-import LoginForm from './pages/auth/LoginForm.tsx';
+import SignupForm from './pages/auth/SignupForm';
+import LoginForm from './pages/auth/LoginForm';
 import { Routes, Route } from 'react-router-dom';
 import StockListingPage from './pages/StockListingPage';
 import StockDetail from './pages/StockDetail';
 import About from './pages/About';
-import ForgotPasswordPage from './pages/ForgotPassword';
+import ForgotPasswordPage from './pages/ForgotPassword'; // ← add this import
 import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/AdminPage';
-
-import { AuthProvider, AdminRoute } from './components/layout/AuthContext.tsx';
 
 function App() {
   const homepageFeatures = [
     {
       icon: AccessTime,
-      title: 'Daily Updates',
-      description: 'Stay informed with daily market updates and insights.',
+      title: 'Real-time Data',
+      description: 'Live market feeds and instant updates.',
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
@@ -41,7 +39,7 @@ function App() {
   ];
 
   return (
-    <AuthProvider>
+    <>
       <Header />
       <Routes>
         <Route
@@ -56,24 +54,16 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/login" element={<LoginForm />} />
         <Route path="/signup" element={<SignupForm />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />{' '}
+        {/* ← add this route */}
+        {/* New: Stocks listing and detail routes */}
         <Route path="/stocks" element={<StockListingPage />} />
         <Route path="/stocks/:symbol" element={<StockDetail />} />
         <Route path="/dashboard" element={<Dashboard />} />
-
-        {/* ⬇️ UPDATED: protect /admin with the AdminRoute guard */}
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminPage />
-            </AdminRoute>
-          }
-        />
+        <Route path="/admin" element={<AdminPage />} /> {/* Add this route */}
       </Routes>
-
       <Footer />
-    </AuthProvider>
+    </>
   );
 }
 
