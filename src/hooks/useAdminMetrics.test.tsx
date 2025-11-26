@@ -86,12 +86,12 @@ describe('useAdminMetrics', () => {
     });
 
     const fakeSnap = {
-      forEach: (cb: (_doc: any) => void) => {
-        cb({ data: () => ({ watchlist: ['AAPL', 'TSLA'] }) });
-        cb({ data: () => ({ watchlist: ['AAPL'] }) });
-        cb({ data: () => ({ watchlist: [] }) });
-      },
-    };
+  forEach: (cb: any) => {
+    cb({ data: () => ({ watchlist: ['AAPL', 'TSLA'] }) });
+    cb({ data: () => ({ watchlist: ['AAPL'] }) });
+    cb({ data: () => ({ watchlist: [] }) });
+  },
+};
     (getDocs as jest.Mock).mockResolvedValue(fakeSnap);
 
     render(<HookTester />);
