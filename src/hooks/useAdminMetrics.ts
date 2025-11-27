@@ -37,17 +37,21 @@ const DEFAULT_METRICS: AdminMetrics = {
 };
 
 /**
- * useAdminMetrics
- * Loads lightweight admin metrics and feature flags from Firestore.
- * - Metrics are approximate (caps reads to avoid large costs).
- * - Flags live at config/flags.
+ * Custom hook for loading admin metrics and feature flags from Firestore.
+ * Metrics are approximate (capped to 500 users) to avoid large Firestore costs.
+ * Flags live at config/flags and are real-time synced.
  *
- * Returns:
- * - metrics: aggregated counts and top tickers
- * - flags: feature flags
- * - setFlag: helper to update a flag
- * - loading: loading state
- * - error: optional error message
+ * @returns {Object} Admin metrics and flags with management functions
+ * @returns {AdminMetrics} returns.metrics - Aggregated user and watchlist counts, including totalUsers, totalWatchlistItems, avgWatchlistSize, and topTickers
+ * @returns {Flags} returns.flags - Feature flags (maintenanceMode, experimentalCharts)
+ * @returns {Function} returns.setFlag - Helper to update a feature flag by key and value
+ * @returns {boolean} returns.loading - Whether data is loading
+ * @returns {string | null} returns.error - Error message if loading failed, or null if no error
+ * @example
+ * const { metrics, flags, setFlag, loading, error } = useAdminMetrics();
+ * if (loading) return <Spinner />;
+ * if (error) return <ErrorMessage message={error} />;
+ * // Use metrics and flags as needed
  */
 export function useAdminMetrics() {
   const { isAdmin } = useAuth();
