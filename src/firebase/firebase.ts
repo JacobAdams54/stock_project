@@ -18,6 +18,7 @@ import {
   isSupported,
   logEvent,
   type Analytics,
+  type EventParams,
 } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -75,14 +76,14 @@ if (typeof window !== 'undefined') {
  * Safe no-op in unsupported environments.
  *
  * @param {string} eventName - Event name (e.g., 'admin_test_click')
- * @param {Record<string, any>} [params] - Optional event params
+ * @param {EventParams} [params] - Optional event params
  *
  * @example
  * logAppEvent('add_to_watchlist', { ticker: 'AAPL' });
  */
 export function logAppEvent(
   eventName: string,
-  params?: Record<string, any>
+  params?: EventParams
 ): void {
   try {
     if (analytics) {
