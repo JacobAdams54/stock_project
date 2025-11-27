@@ -15,7 +15,6 @@ import {
 } from '@mui/material';
 
 import { useAuth } from '../components/layout/AuthContext';
-import Sidebar from '../components/layout/Sidebar';
 import useAdminMetrics from '../hooks/useAdminMetrics';
 import { logAppEvent } from '../firebase/firebase';
 
