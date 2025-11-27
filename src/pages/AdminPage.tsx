@@ -10,7 +10,6 @@ import {
   Chip,
   Container,
   FormControlLabel,
-  Grid,
   Stack,
   Typography,
 } from '@mui/material';
@@ -57,9 +56,9 @@ export default function AdminPage(): React.JSX.Element {
       <Container maxWidth="lg" sx={{ py: 4 }}>
         {/* Header + test event button */}
         <Stack
-          direction="row"
+          direction={{ xs: 'column', md: 'row' }}
           justifyContent="space-between"
-          alignItems="flex-start"
+          alignItems={{ xs: 'flex-start', md: 'center' }}
           mb={3}
           spacing={2}
         >
@@ -81,157 +80,153 @@ export default function AdminPage(): React.JSX.Element {
           </Button>
         </Stack>
 
-        <Grid container spacing={3}>
-          {/* Sidebar – hidden on small screens via CSS but still in DOM */}
-          <Grid
-            item
-            lg={3}
-            sx={{ display: { xs: 'none', lg: 'block' } }}
-          >
-            {/* Adjust props here if your real Sidebar expects them */}
+        <Stack
+          direction={{ xs: 'column', lg: 'row' }}
+          spacing={3}
+          alignItems="flex-start"
+        >
+          {/* Sidebar (hidden on small screens in real app via CSS) */}
+          <Box sx={{ display: { xs: 'none', lg: 'block' }, minWidth: 220 }}>
+            {/* Adjust props if your real Sidebar expects different ones */}
             <Sidebar open={false} onClose={() => {}} />
-          </Grid>
+          </Box>
 
           {/* Main content */}
-          <Grid item xs={12} lg={9}>
-            <Grid container spacing={3}>
-              {/* Metrics cards */}
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardHeader title="Total users" />
-                  <CardContent>
-                    <Typography variant="h3">
-                      {loading ? '—' : metrics.totalUsers ?? 0}
+          <Stack flex={1} spacing={3}>
+            {/* Metrics row */}
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={3}
+            >
+              <Card sx={{ flex: 1 }}>
+                <CardHeader title="Total users" />
+                <CardContent>
+                  <Typography variant="h3">
+                    {loading ? '—' : metrics.totalUsers ?? 0}
+                  </Typography>
+                  {error && (
+                    <Typography color="error" variant="caption">
+                      {error}
                     </Typography>
-                    {error && (
-                      <Typography color="error" variant="caption">
-                        {error}
-                      </Typography>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
+                  )}
+                </CardContent>
+              </Card>
 
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardHeader title="Watchlist items" />
-                  <CardContent>
-                    <Typography variant="h3">
-                      {loading ? '—' : metrics.totalWatchlistItems ?? 0}
-                    </Typography>
-                    <Typography color="text.secondary" variant="caption">
-                      Approximate (sampled, max 500 users)
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
+              <Card sx={{ flex: 1 }}>
+                <CardHeader title="Watchlist items" />
+                <CardContent>
+                  <Typography variant="h3">
+                    {loading ? '—' : metrics.totalWatchlistItems ?? 0}
+                  </Typography>
+                  <Typography color="text.secondary" variant="caption">
+                    Approximate (sampled, max 500 users)
+                  </Typography>
+                </CardContent>
+              </Card>
 
-              <Grid item xs={12} md={4}>
-                <Card>
-                  <CardHeader title="Avg. watchlist size" />
-                  <CardContent>
-                    <Typography variant="h3">
-                      {loading ? '—' : metrics.avgWatchlistSize ?? 0}
-                    </Typography>
-                    <Typography color="text.secondary" variant="caption">
-                      Approximate over sampled users
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
+              <Card sx={{ flex: 1 }}>
+                <CardHeader title="Avg. watchlist size" />
+                <CardContent>
+                  <Typography variant="h3">
+                    {loading ? '—' : metrics.avgWatchlistSize ?? 0}
+                  </Typography>
+                  <Typography color="text.secondary" variant="caption">
+                    Approximate over sampled users
+                  </Typography>
+                </CardContent>
+              </Card>
+            </Stack>
 
-              {/* Top tickers */}
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardHeader title="Top tickers in watchlists" />
-                  <CardContent>
-                    {loading ? (
-                      <Typography color="text.secondary">Loading…</Typography>
-                    ) : metrics.topTickers.length === 0 ? (
-                      <Typography color="text.secondary">No data</Typography>
-                    ) : (
-                      <Stack direction="row" flexWrap="wrap" gap={1}>
-                        {metrics.topTickers.map((t) => (
+            {/* Top tickers + flags */}
+            <Stack
+              direction={{ xs: 'column', md: 'row' }}
+              spacing={3}
+            >
+              <Card sx={{ flex: 1 }}>
+                <CardHeader title="Top tickers in watchlists" />
+                <CardContent>
+                  {loading ? (
+                    <Typography color="text.secondary">Loading…</Typography>
+                  ) : metrics.topTickers.length === 0 ? (
+                    <Typography color="text.secondary">No data</Typography>
+                  ) : (
+                    <Stack direction="row" flexWrap="wrap" gap={1}>
+                      {metrics.topTickers.map(
+                        (t: { ticker: string; count: number }) => (
                           <Chip
                             key={t.ticker}
                             label={`${t.ticker} (${t.count})`}
                           />
-                        ))}
-                      </Stack>
-                    )}
-                  </CardContent>
-                </Card>
-              </Grid>
-
-              {/* Feature flags */}
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardHeader title="Feature flags" />
-                  <CardContent>
-                    <Stack spacing={1}>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={flags.maintenanceMode}
-                            onChange={(_, v) => setFlag('maintenanceMode', v)}
-                          />
-                        }
-                        label="Maintenance mode"
-                      />
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={flags.experimentalCharts}
-                            onChange={(_, v) =>
-                              setFlag('experimentalCharts', v)
-                            }
-                          />
-                        }
-                        label="Experimental charts"
-                      />
-                      <Typography color="text.secondary" variant="caption">
-                        Flags are stored at <code>config/flags</code> in
-                        Firestore.
-                      </Typography>
+                        )
+                      )}
                     </Stack>
-                  </CardContent>
-                </Card>
-              </Grid>
+                  )}
+                </CardContent>
+              </Card>
 
-              {/* Tips card */}
-              <Grid item xs={12}>
-                <Card>
-                  <CardHeader title="Admin tips (for students)" />
-                  <CardContent>
-                    <ul>
-                      <li>
-                        Instrument key user actions with <code>logAppEvent</code>{' '}
-                        (e.g., <code>login</code>, <code>add_to_watchlist</code>
-                        , <code>view_stock_detail</code>).
-                      </li>
-                      <li>
-                        Export watchlists to CSV for class analysis
-                        (client-only, no PII).
-                      </li>
-                      <li>
-                        Add a “Refresh demo data” stub that just logs an
-                        Analytics event.
-                      </li>
-                      <li>
-                        Cap Firestore reads for metrics and label them as
-                        approximate.
-                      </li>
-                      <li>
-                        Add quick links to Firebase Console for Analytics and
-                        Firestore.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-              </Grid>
-            </Grid>
-          </Grid>
-        </Grid>
+              <Card sx={{ flex: 1 }}>
+                <CardHeader title="Feature flags" />
+                <CardContent>
+                  <Stack spacing={1}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={flags.maintenanceMode}
+                          onChange={(_, v) => setFlag('maintenanceMode', v)}
+                        />
+                      }
+                      label="Maintenance mode"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={flags.experimentalCharts}
+                          onChange={(_, v) =>
+                            setFlag('experimentalCharts', v)
+                          }
+                        />
+                      }
+                      label="Experimental charts"
+                    />
+                    <Typography color="text.secondary" variant="caption">
+                      Flags are stored at <code>config/flags</code> in Firestore.
+                    </Typography>
+                  </Stack>
+                </CardContent>
+              </Card>
+            </Stack>
+
+            {/* Tips card */}
+            <Card>
+              <CardHeader title="Admin tips (for students)" />
+              <CardContent>
+                <ul>
+                  <li>
+                    Instrument key user actions with <code>logAppEvent</code> (e.g.,{' '}
+                    <code>login</code>, <code>add_to_watchlist</code>,{' '}
+                    <code>view_stock_detail</code>).
+                  </li>
+                  <li>
+                    Export watchlists to CSV for class analysis (client-only, no
+                    PII).
+                  </li>
+                  <li>
+                    Add a “Refresh demo data” stub that just logs an Analytics
+                    event.
+                  </li>
+                  <li>
+                    Cap Firestore reads for metrics and label them as
+                    approximate.
+                  </li>
+                  <li>
+                    Add quick links to Firebase Console for Analytics and
+                    Firestore.
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+          </Stack>
+        </Stack>
       </Container>
     </Box>
   );
