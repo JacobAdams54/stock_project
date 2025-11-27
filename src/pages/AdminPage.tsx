@@ -90,12 +90,6 @@ export default function AdminPage(): React.JSX.Element {
           spacing={3}
           alignItems="flex-start"
         >
-          {/* Sidebar (hidden on small screens in real app via CSS) */}
-          <Box sx={{ display: { xs: 'none', lg: 'block' }, minWidth: 220 }}>
-            {/* Adjust props if your real Sidebar expects different ones */}
-            <Sidebar open={false} onClose={() => {}} />
-          </Box>
-
           {/* Main content */}
           <Stack flex={1} spacing={3}>
             {/* Metrics row */}
