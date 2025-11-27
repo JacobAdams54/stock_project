@@ -26,6 +26,11 @@ import { logAppEvent } from '../firebase/firebase';
  * - Shows basic metrics
  * - Toggles feature flags
  * - Provides an Analytics test action
+ *
+ * @returns {React.JSX.Element} Rendered admin dashboard page
+ * @example
+ * // Usage in a route
+ * <AdminPage />
  */
 export default function AdminPage(): React.JSX.Element {
   const { user, isAdmin } = useAuth();
