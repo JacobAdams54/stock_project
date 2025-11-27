@@ -1,4 +1,5 @@
 // src/pages/AdminPage.tsx
+import * as React from 'react';
 import {
   Box,
   Button,
@@ -27,7 +28,7 @@ import { logAppEvent } from '../firebase/firebase';
  * - Toggles feature flags
  * - Provides an Analytics test action
  */
-export default function AdminPage(): JSX.Element {
+export default function AdminPage(): React.JSX.Element {
   const { user, isAdmin } = useAuth();
   const { metrics, flags, setFlag, loading, error } = useAdminMetrics();
 
@@ -87,7 +88,8 @@ export default function AdminPage(): JSX.Element {
             lg={3}
             sx={{ display: { xs: 'none', lg: 'block' } }}
           >
-            <Sidebar />
+            {/* Adjust props here if your real Sidebar expects them */}
+            <Sidebar open={false} onClose={() => {}} />
           </Grid>
 
           {/* Main content */}
