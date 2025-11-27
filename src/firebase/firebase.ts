@@ -4,14 +4,22 @@
  * This module initializes Firebase services used throughout the application:
  * - Authentication for user management
  * - Firestore for database operations
+ * - Analytics for event tracking (optional)
  *
  * @module firebase
  */
 
 // Import the functions you need from the SDKs you need
-import { initializeApp } from 'firebase/app';
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import {
+  getAnalytics,
+  isSupported,
+  logEvent,
+  type Analytics,
+  type EventParams,
+} from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyBlJRzG6An9B4ygK_QA75q90A-TN0ESmOs',
@@ -25,17 +33,15 @@ const firebaseConfig = {
 
 /**
  * Initialized Firebase app instance
+ * Use getApps()/getApp() to avoid double init in dev/hot-reload.
  * @type {import('firebase/app').FirebaseApp}
  */
-const app = initializeApp(firebaseConfig);
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 /**
  * Firebase Authentication service instance
  * Used for user authentication, login, logout, and session management
  * @type {import('firebase/auth').Auth}
- * @example
- * import { auth } from '@/firebase/firebase';
- * const user = auth.currentUser;
  */
 const auth = getAuth(app);
 
@@ -43,10 +49,49 @@ const auth = getAuth(app);
  * Firestore database instance
  * Used for storing and retrieving user data, portfolios, watchlists, and stock information
  * @type {import('firebase/firestore').Firestore}
- * @example
- * import { db } from '@/firebase/firebase';
- * const docRef = doc(db, 'users', userId);
  */
 const db = getFirestore(app);
 
-export { app, auth, db };
+
+/**
+ * Analytics instance (browser-only, optional)
+ */
+let analytics: Analytics | null = null;
+
+if (typeof window !== 'undefined') {
+  isSupported()
+    .then((ok) => {
+      if (ok) {
+        analytics = getAnalytics(app);
+      }
+    })
+    .catch(() => {
+      // Analytics not supported in this environment (SSR, no measurementId, etc.)
+      // Safe to ignore.
+    });
+}
+
+/**
+ * Log a Firebase Analytics event if Analytics is available.
+ * Safe no-op in unsupported environments.
+ *
+ * @param {string} eventName - Event name (e.g., 'admin_test_click')
+ * @param {EventParams} [params] - Optional event params
+ *
+ * @example
+ * logAppEvent('add_to_watchlist', { ticker: 'AAPL' });
+ */
+export function logAppEvent(
+  eventName: string,
+  params?: EventParams
+): void {
+  try {
+    if (analytics) {
+      logEvent(analytics, eventName, params);
+    }
+  } catch {
+    // Swallow analytics errors to avoid breaking the UI
+  }
+}
+
+export { app, auth, db, analytics };
