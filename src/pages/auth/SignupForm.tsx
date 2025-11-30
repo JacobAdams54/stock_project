@@ -51,14 +51,16 @@ import {
   updateProfile,
   sendEmailVerification,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth, db } from '../../firebase/firebase';
 import Logo from '../../components/layout/Logo';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 
 export default function SignupForm() {
+  const navigate = useNavigate();
+
   // state
   const [displayName, setDisplayName] = useState('');
   const [email, setEmail] = useState('');
@@ -102,58 +104,61 @@ export default function SignupForm() {
 
   // helper (keep near the component or in a utils file)
 
-async function createUserDoc(uid: string, name: string) {
-  const userRef = doc(db, 'users', uid);
-  await setDoc(
-    userRef,
-    {
-      displayName: name,
-      isAdmin: false,
-      terms: {
-        accepted: true,
-        version: TERMS_VERSION,
-        acceptedAt: serverTimestamp(),
+  async function createUserDoc(uid: string, name: string) {
+    const userRef = doc(db, 'users', uid);
+    await setDoc(
+      userRef,
+      {
+        displayName: name,
+        isAdmin: false,
+        terms: {
+          accepted: true,
+          version: TERMS_VERSION,
+          acceptedAt: serverTimestamp(),
+        },
+        createdAt: serverTimestamp(),
       },
-      createdAt: serverTimestamp(),
-    },
-    { merge: true }
-  );
-}
-
-async function handleGoogleSignup(): Promise<void> {
-  setError(null);
-  setSuccess(null);
-
-  // Reuse the same Terms requirement for Google users
-  if (!acceptedTos) {
-    setError('Please accept Terms to continue.');
-    return;
+      { merge: true }
+    );
   }
 
-  try {
-    setLoading(true);
+  async function handleGoogleSignup(): Promise<void> {
+    setError(null);
+    setSuccess(null);
 
-    const provider = new GoogleAuthProvider();
-    const result = await signInWithPopup(auth, provider);
-    const user = result.user;
+    // Reuse the same Terms requirement for Google users
+    if (!acceptedTos) {
+      setError('Please accept Terms to continue.');
+      return;
+    }
 
-    // Use Google displayName if available, fall back to whatever is in the name field
-    const nameFromGoogle = user.displayName || displayName || 'New User';
+    try {
+      setLoading(true);
 
-    // Create/merge Firestore user profile (idempotent)
-    await createUserDoc(user.uid, nameFromGoogle);
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
 
-    setSuccess('Signed up with Google successfully!');
-  } catch (err: any) {
-    const msg =
-      err?.code === 'auth/popup-closed-by-user'
-        ? 'The Google sign-in popup was closed before completing.'
-        : err?.message || 'Google sign-in failed. Please try again.';
-    setError(msg);
-  } finally {
-    setLoading(false);
+      // Use Google displayName if available, fall back to whatever is in the name field
+      const nameFromGoogle = user.displayName || displayName || 'New User';
+
+      // Create/merge Firestore user profile (idempotent)
+      await createUserDoc(user.uid, nameFromGoogle);
+
+      setSuccess('Signed up with Google successfully!');
+
+      // Redirect to dashboard after successful signup
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } catch (err: any) {
+      const msg =
+        err?.code === 'auth/popup-closed-by-user'
+          ? 'The Google sign-in popup was closed before completing.'
+          : err?.message || 'Google sign-in failed. Please try again.';
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
   // REPLACE your existing handleSubmit with this
   async function handleSubmit(e: React.FormEvent) {
@@ -194,6 +199,9 @@ async function handleGoogleSignup(): Promise<void> {
       setPassword('');
       setConfirmPassword('');
       setAcceptedTos(false);
+
+      // Redirect to dashboard after successful signup
+      setTimeout(() => navigate('/dashboard'), 1500);
     } catch (err: any) {
       // map Firebase error codes to friendly messages if you have a mapper
       const code = err?.code as string | undefined;
@@ -210,8 +218,6 @@ async function handleGoogleSignup(): Promise<void> {
       setLoading(false);
     }
   }
-
-  
 
   return (
     <Container
@@ -440,7 +446,7 @@ async function handleGoogleSignup(): Promise<void> {
         </Button>
         <Typography sx={{ mt: 3 }}>
           Already a User?{' '}
-          <Link component={RouterLink} to="/login" under line="hover">
+          <Link component={RouterLink} to="/login" underline="hover">
             Login
           </Link>
         </Typography>
