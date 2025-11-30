@@ -19,11 +19,22 @@ import { Box, Container, Typography, TextField, Select } from '@mui/material';
 import { Link } from 'react-router-dom';
 
 import StockCard from '../components/stocks/StockCard';
-import { useAllStockSummaries } from '../hooks/useStockData';
+import {
+  useAllStockSummaries,
+  useArimaxPredictions,
+  // useDLPredictions, // TODO: Uncomment when adding model selection feature
+} from '../hooks/useStockData';
 
 export default function StockListingPage() {
   // Load all stock summaries from /stocks/{ticker}
   const { data, loading, error } = useAllStockSummaries();
+
+  // Load AI predictions (both models)
+  const { data: arimaxData } = useArimaxPredictions();
+  // const { data: dlData } = useDLPredictions(); // TODO: Add user preference to switch models
+
+  // For now, default to ARIMAX. Later you can add user preference.
+  const activePredictions = arimaxData;
 
   // Local UI state
   const [query, setQuery] = React.useState('');
@@ -125,37 +136,41 @@ export default function StockListingPage() {
           ) : (
             <div data-testid="stock-grid" className="overflow-auto">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {filtered.map((s) => (
-                  <Link
-                    key={s.symbol}
-                    to={`/stocks/${s.symbol}`}
-                    data-testid={`stock-card-${s.symbol}`}
-                    className="block cursor-pointer"
-                  >
-                    <StockCard
-                      address1={s.address1}
-                      change24hPercent={s.change24hPercent}
-                      city={s.city}
-                      companyName={s.companyName}
-                      country={s.country}
-                      currentPrice={s.currentPrice}
-                      dividendYield={s.dividendYield}
-                      dividendYieldPercent={s.dividendYieldPercent}
-                      fiftyTwoWeekHigh={s.fiftyTwoWeekHigh}
-                      fiftyTwoWeekLow={s.fiftyTwoWeekLow}
-                      industry={s.industry}
-                      marketCap={s.marketCap}
-                      open={s.open}
-                      peRatio={s.peRatio}
-                      sector={s.sector}
-                      state={s.state}
-                      updatedAt={s.updatedAt}
-                      volume={s.volume}
-                      website={s.website}
-                      zip={s.zip}
-                    />
-                  </Link>
-                ))}
+                {filtered.map((s) => {
+                  const prediction = activePredictions?.predicted?.[s.symbol];
+                  return (
+                    <Link
+                      key={s.symbol}
+                      to={`/stocks/${s.symbol}`}
+                      data-testid={`stock-card-${s.symbol}`}
+                      className="block cursor-pointer"
+                    >
+                      <StockCard
+                        address1={s.address1}
+                        change24hPercent={s.change24hPercent}
+                        city={s.city}
+                        companyName={s.companyName}
+                        country={s.country}
+                        currentPrice={s.currentPrice}
+                        dividendYield={s.dividendYield}
+                        dividendYieldPercent={s.dividendYieldPercent}
+                        fiftyTwoWeekHigh={s.fiftyTwoWeekHigh}
+                        fiftyTwoWeekLow={s.fiftyTwoWeekLow}
+                        industry={s.industry}
+                        marketCap={s.marketCap}
+                        open={s.open}
+                        peRatio={s.peRatio}
+                        sector={s.sector}
+                        state={s.state}
+                        updatedAt={s.updatedAt}
+                        volume={s.volume}
+                        website={s.website}
+                        zip={s.zip}
+                        aiPrediction={prediction}
+                      />
+                    </Link>
+                  );
+                })}
               </div>
             </div>
           ))}
