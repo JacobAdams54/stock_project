@@ -138,6 +138,16 @@ export default function StockListingPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {filtered.map((s) => {
                   const prediction = activePredictions?.predicted?.[s.symbol];
+                  // Normalize updatedAt so it's a Date | string | number (handle Firestore Timestamp)
+                  const updatedAtValue =
+                    s.updatedAt && typeof s.updatedAt === 'object' && 'toDate' in s.updatedAt
+                      ? (s.updatedAt as any).toDate()
+                      : typeof s.updatedAt === 'number'
+                      ? new Date(s.updatedAt)
+                      : typeof s.updatedAt === 'string'
+                      ? new Date(s.updatedAt)
+                      : (s.updatedAt as any);
+
                   return (
                     <Link
                       key={s.symbol}
@@ -162,7 +172,7 @@ export default function StockListingPage() {
                         peRatio={s.peRatio}
                         sector={s.sector}
                         state={s.state}
-                        updatedAt={s.updatedAt}
+                        updatedAt={updatedAtValue}
                         volume={s.volume}
                         website={s.website}
                         zip={s.zip}

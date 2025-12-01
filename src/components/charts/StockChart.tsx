@@ -16,9 +16,10 @@ export type Point = { date: string; price: number };
 
 type Props = {
   ticker: string;
-  data: Point[];              // Daily points for selected range
+  data: Point[]; // Daily points for selected range
   range: Range;
   height?: number;
+  // eslint-disable-next-line no-unused-vars
   onRangeChange?: (next: Range) => void;
 };
 
@@ -28,7 +29,7 @@ function parseUTC(dateStr: string): Date {
 }
 
 /** Format timestamps (ms) into axis labels like Google/Yahoo Finance */
-export function formatLabelFromMs(ms: number, range: Range): string {
+function formatLabelFromMs(ms: number, range: Range): string {
   const d = new Date(ms);
   const baseOpts = { timeZone: 'UTC' as const };
 
@@ -71,12 +72,12 @@ function computeTicksMs(
     range === '1W'
       ? Math.min(7, n)
       : range === '1M'
-      ? 6
-      : range === '3M'
-      ? 6
-      : range === '1Y'
-      ? 6
-      : 5; // 5Y
+        ? 6
+        : range === '3M'
+          ? 6
+          : range === '1Y'
+            ? 6
+            : 5; // 5Y
 
   const step = Math.max(1, Math.floor(n / approxCount));
   const ticks: number[] = [];
@@ -189,9 +190,7 @@ export default function StockChart({
                 type="number"
                 domain={['dataMin', 'dataMax']}
                 ticks={ticks}
-                tickFormatter={(ms) =>
-                  formatLabelFromMs(Number(ms), range)
-                }
+                tickFormatter={(ms) => formatLabelFromMs(Number(ms), range)}
                 stroke="#6b7280"
                 tickMargin={6}
               />
