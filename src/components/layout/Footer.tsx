@@ -15,8 +15,6 @@
  * @returns {JSX.Element} The rendered footer component
  */
 
-import { IconButton } from '@mui/material';
-import { Twitter, LinkedIn, GitHub } from '@mui/icons-material';
 import { Link } from 'react-router-dom';
 import Logo from './Logo';
 import Container from '@mui/material/Container';
@@ -38,27 +36,13 @@ export default function Footer() {
                 Empowering investors with AI-driven insights and predictions for
                 smarter trading decisions in the stock market.
               </p>
-
-              <h3 className="text-white font-semibold text-lg">Follow Us</h3>
-              <div>
-                {/* This section creates the social media icons on the lower left of the footer */}
-                <IconButton aria-label="Twitter" color="inherit">
-                  <Twitter />
-                </IconButton>
-                <IconButton aria-label="LinkedIn" color="inherit">
-                  <LinkedIn />
-                </IconButton>
-                <IconButton aria-label="GitHub" color="inherit">
-                  <GitHub />
-                </IconButton>
-              </div>
             </div>
 
             <div className="space-y-4 md:col-span-3">
               <h3 className="text-white font-semibold text-lg">Quick Links</h3>
               <div className="flex flex-col space-y-2">
                 <Link
-                  to="/home"
+                  to="/"
                   className="text-white hover:underline hover:text-gray-400 inline w-max"
                 >
                   Home
@@ -80,38 +64,6 @@ export default function Footer() {
                   className="text-white hover:underline hover:text-gray-400 inline w-max"
                 >
                   About
-                </Link>
-              </div>
-            </div>
-
-            {/* Right: Support aligned with container right edge */}
-            <div className="space-y-4 md:col-span-3">
-              {/* This section creates the Support links in the right column of the footer */}
-              <h3 className="text-white font-semibold text-lg">Support</h3>
-              <div className="flex flex-col space-y-2">
-                <Link
-                  to="/help"
-                  className="text-white hover:underline hover:text-gray-400 inline w-max"
-                >
-                  Help Center
-                </Link>
-                <Link
-                  to="/contact"
-                  className="text-white hover:underline hover:text-gray-400 inline w-max"
-                >
-                  Contact Us
-                </Link>
-                <Link
-                  to="/privacy"
-                  className="text-white hover:underline hover:text-gray-400 inline w-max"
-                >
-                  Privacy Policy
-                </Link>
-                <Link
-                  to="/terms"
-                  className="text-white hover:underline hover:text-gray-400 inline w-max"
-                >
-                  Terms of Service
                 </Link>
               </div>
             </div>
