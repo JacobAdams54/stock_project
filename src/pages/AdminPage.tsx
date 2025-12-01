@@ -18,6 +18,7 @@ import { useAuth } from '../components/layout/AuthContext';
 import useAdminMetrics from '../hooks/useAdminMetrics';
 import { logAppEvent } from '../firebase/firebase';
 import StockVisibilityManager from '../components/admin/StockVisibilityManager';
+import UserModelManager from '../components/admin/UserModelManager';
 
 /**
  * AdminPage
@@ -190,6 +191,9 @@ export default function AdminPage(): React.JSX.Element {
 
             {/* Stock Visibility Management */}
             <StockVisibilityManager />
+
+            {/* User AI Model Access Management */}
+            <UserModelManager />
           </Stack>
         </Stack>
       </Container>
