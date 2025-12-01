@@ -76,6 +76,12 @@ export default function Footer() {
                   Stocks
                 </Link>
                 <Link
+                  to="/gettingstarted"
+                  className="text-white hover:underline hover:text-gray-400 inline wa-max"
+                >
+                  Getting Started
+                </Link>
+                <Link
                   to="/about"
                   className="text-white hover:underline hover:text-gray-400 inline w-max"
                 >

@@ -12,6 +12,7 @@ import About from './pages/About';
 import ForgotPasswordPage from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/AdminPage';
+import GettingStarted from './pages/gettingStarted.tsx';
 
 import { AuthProvider, AdminRoute } from './components/layout/AuthContext.tsx';
 
@@ -60,6 +61,7 @@ function App() {
         <Route path="/stocks" element={<StockListingPage />} />
         <Route path="/stocks/:symbol" element={<StockDetail />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/gettingstarted" element={<GettingStarted />} />
 
         {/* ⬇️ UPDATED: protect /admin with the AdminRoute guard */}
         <Route
