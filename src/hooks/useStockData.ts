@@ -24,6 +24,7 @@
 
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
+import type { Timestamp } from 'firebase/firestore'; 
 import { db } from '../firebase/firebase';
 import { TICKERS } from '../constants/tickers';
 import type { Ticker } from '../constants/tickers';
@@ -52,7 +53,7 @@ export interface StockRealtimeFields {
   peRatio: number;
   sector: string;
   state: string;
-  updatedAt: Date | string | number;
+  updatedAt: Date | string | number | Timestamp;
   volume: number;
   website: string;
   zip: string;

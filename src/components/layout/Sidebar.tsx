@@ -14,17 +14,14 @@ import * as React from 'react';
 import { useLocation, Link as RouterLink } from 'react-router-dom';
 import Box from '@mui/material/Box';
 import CssBaseline from '@mui/material/CssBaseline';
-import Divider from '@mui/material/Divider';
 import Drawer from '@mui/material/Drawer';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import Toolbar from '@mui/material/Toolbar';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import MovingIcon from '@mui/icons-material/Moving';
-import BookmarksIcon from '@mui/icons-material/Bookmarks';
 import SettingsIcon from '@mui/icons-material/Settings';
 
 /**
@@ -66,10 +63,9 @@ export default function Sidebar(props: Props) {
    * @constant {MenuItem[]}
    */
   const menuItems: MenuItem[] = [
-    { icon: DashboardIcon, label: 'Dashboard', path: '/' },
+    { icon: DashboardIcon, label: 'Dashboard', path: '/dashboard' },
     { icon: MovingIcon, label: 'Predictions', path: '/predictions' },
-    { icon: BookmarksIcon, label: 'Watchlist', path: '/watchlist' },
-    { icon: SettingsIcon, label: 'Settings', path: '/settings' },
+    { icon: SettingsIcon, label: 'Preferences', path: '/settings' },
   ];
 
   /**
@@ -77,85 +73,108 @@ export default function Sidebar(props: Props) {
    * @constant {JSX.Element}
    */
   const drawer = (
-    <div>
-      <Toolbar />
-      <Divider />
-      <List>
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          const selected = location.pathname === item.path;
-          return (
-            <ListItem key={item.path} disablePadding>
-              <ListItemButton
-                component={RouterLink}
-                to={item.path}
-                selected={selected}
-                onClick={onClose}
-                aria-current={selected ? 'page' : undefined}
-                sx={{
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  ...(selected && {
-                    backgroundColor: 'rgba(0,128,128,0.06)',
-                    borderLeft: '4px solid',
-                    borderColor: 'teal',
-                    '& .MuiListItemIcon-root': { color: 'teal' },
-                  }),
-                }}
-              >
-                <ListItemIcon>
-                  <Icon aria-hidden />
-                </ListItemIcon>
-                <ListItemText primary={item.label} />
-              </ListItemButton>
-            </ListItem>
-          );
-        })}
-      </List>
-    </div>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      {/* Navigation section */}
+      <Box sx={{ flexGrow: 1, py: 2 }}>
+        <List sx={{ px: 1.5 }}>
+          {menuItems.map((item) => {
+            const Icon = item.icon;
+            const selected = location.pathname === item.path;
+            return (
+              <ListItem key={item.path} disablePadding sx={{ mb: 0.5 }}>
+                <ListItemButton
+                  component={RouterLink}
+                  to={item.path}
+                  selected={selected}
+                  onClick={onClose}
+                  aria-current={selected ? 'page' : undefined}
+                  sx={{
+                    borderRadius: 1.5,
+                    textDecoration: 'none',
+                    color: 'text.secondary',
+                    transition: 'all 0.2s ease-in-out',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 128, 128, 0.08)',
+                      transform: 'translateX(4px)',
+                    },
+                    ...(selected && {
+                      backgroundColor: 'rgba(0, 128, 128, 0.12)',
+                      color: 'rgb(0, 128, 128)',
+                      fontWeight: 600,
+                      '& .MuiListItemIcon-root': {
+                        color: 'rgb(0, 128, 128)',
+                      },
+                      '&:hover': {
+                        backgroundColor: 'rgba(0, 128, 128, 0.16)',
+                      },
+                    }),
+                  }}
+                >
+                  <ListItemIcon
+                    sx={{
+                      minWidth: 40,
+                      color: 'inherit',
+                    }}
+                  >
+                    <Icon aria-hidden />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontSize: '0.95rem',
+                      fontWeight: selected ? 600 : 500,
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            );
+          })}
+        </List>
+      </Box>
+    </Box>
   );
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <>
       <CssBaseline />
+      {/* Mobile drawer */}
+      <Drawer
+        variant="temporary"
+        open={open}
+        onClose={onClose}
+        ModalProps={{ keepMounted: true }}
+        sx={{
+          display: { xs: 'block', md: 'none' },
+          '& .MuiDrawer-paper': {
+            boxSizing: 'border-box',
+            width: drawerWidth,
+            bgcolor: 'background.default',
+            borderRight: '1px solid',
+            borderColor: 'divider',
+          },
+        }}
+      >
+        {drawer}
+      </Drawer>
+
+      {/* Desktop static sidebar */}
       <Box
         component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{
+          display: { xs: 'none', md: 'block' },
+          width: drawerWidth,
+          flexShrink: 0,
+          bgcolor: 'background.default',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          borderRadius: 2,
+          overflow: 'hidden',
+        }}
         aria-label="dashboard navigation"
       >
-        {/* Temporary drawer for mobile (< 600px) */}
-        <Drawer
-          variant="temporary"
-          open={open}
-          onClose={onClose}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-
-        {/* Permanent drawer for desktop (≥ 600px) */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: drawerWidth,
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
+        {drawer}
       </Box>
-    </Box>
+    </>
   );
 }
 
