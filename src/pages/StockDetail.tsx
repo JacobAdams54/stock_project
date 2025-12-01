@@ -81,29 +81,6 @@ export default function StockDetail(): React.ReactElement {
   // New: chart range state
   const [range, setRange] = React.useState<Range>('3M');
 
-  // Format timestamp properly - must be before any conditional returns
-  const formattedTimestamp = React.useMemo(() => {
-    if (!summary) return 'N/A';
-    const updated =
-      typeof summary.updatedAt === 'number'
-        ? new Date(summary.updatedAt)
-        : typeof summary.updatedAt === 'string'
-          ? new Date(summary.updatedAt)
-          : summary.updatedAt;
-
-    if (updated instanceof Date && !isNaN(updated.getTime())) {
-      return updated.toLocaleString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-      });
-    }
-    return 'N/A';
-  }, [summary]);
-
   /**
    * Normalize raw history rows to {date, price} and sort ascending.
    * - date: prefers row.date (YYYY-MM-DD), otherwise uses row.ts Timestamp.
@@ -226,10 +203,6 @@ const rangePoints = React.useMemo<Point[]>(() => {
     {
       label: 'Address',
       value: `${summary.address1}, ${summary.city}, ${summary.state} ${summary.zip}, ${summary.country}`,
-    },
-    {
-      label: 'Last Updated',
-      value: formattedTimestamp,
     },
   ];
 
