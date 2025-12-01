@@ -157,13 +157,17 @@ const rangePoints = React.useMemo<Point[]>(() => {
 
   const isUp = summary.change24hPercent >= 0;
   const arrow = isUp ? '▲' : '▼';
-  const updated =
-    typeof summary.updatedAt === 'number'
-      ? new Date(summary.updatedAt)
-      : typeof summary.updatedAt === 'string'
-        ? new Date(summary.updatedAt)
-        : summary.updatedAt;
 
+
+  const updated =
+  summary.updatedAt instanceof Date
+    ? summary.updatedAt
+    : typeof summary.updatedAt === "number"
+    ? new Date(summary.updatedAt)
+    : typeof summary.updatedAt === "string"
+    ? new Date(summary.updatedAt)
+    : summary.updatedAt?.toDate?.() ?? null;
+    
   const detailsLeft = [
     { label: 'Current Price', value: fmtUSD.format(summary.currentPrice) },
     { label: 'Open', value: fmtUSD.format(summary.open) },
@@ -305,4 +309,3 @@ const rangePoints = React.useMemo<Point[]>(() => {
     </Box>
   );
 }
-
