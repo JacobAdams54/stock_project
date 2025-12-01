@@ -111,36 +111,36 @@ export default function StockDetail(): React.ReactElement {
   /**
    * Filter normalized points according to the selected range.
    */
-const rangePoints = React.useMemo<Point[]>(() => {
-  if (!allPoints.length) return [];
+  const rangePoints = React.useMemo<Point[]>(() => {
+    if (!allPoints.length) return [];
 
-  // Anchor ranges to the last available data point,
-  // not to "today" (which might be far after the last quote).
-  const last = allPoints[allPoints.length - 1];
-  const lastDate = new Date(last.date + 'T00:00:00Z');
+    // Anchor ranges to the last available data point,
+    // not to "today" (which might be far after the last quote).
+    const last = allPoints[allPoints.length - 1];
+    const lastDate = new Date(last.date + 'T00:00:00Z');
 
-  const days =
-    range === '1W'
-      ? 7
-      : range === '1M'
-        ? 30
-        : range === '3M'
-          ? 90
-          : range === '1Y'
-            ? 365
-            : 365 * 5;
+    const days =
+      range === '1W'
+        ? 7
+        : range === '1M'
+          ? 30
+          : range === '3M'
+            ? 90
+            : range === '1Y'
+              ? 365
+              : 365 * 5;
 
-  const cutoff = new Date(lastDate);
-  cutoff.setUTCDate(lastDate.getUTCDate() - days);
+    const cutoff = new Date(lastDate);
+    cutoff.setUTCDate(lastDate.getUTCDate() - days);
 
-  const filtered = allPoints.filter(
-    (p) => new Date(p.date + 'T00:00:00Z') >= cutoff
-  );
+    const filtered = allPoints.filter(
+      (p) => new Date(p.date + 'T00:00:00Z') >= cutoff
+    );
 
-  // If somehow we filtered out everything (e.g., sparse data),
-  // fall back to the full history so the chart never goes blank.
-  return filtered.length ? filtered : allPoints;
-}, [allPoints, range]);
+    // If somehow we filtered out everything (e.g., sparse data),
+    // fall back to the full history so the chart never goes blank.
+    return filtered.length ? filtered : allPoints;
+  }, [allPoints, range]);
 
   if (loadingSummary) {
     return (
