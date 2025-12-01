@@ -117,6 +117,33 @@ export default function StockChart({
     [chartData, range]
   );
 
+  /** Dynamic Y-axis domain so short ranges don't look flat. Adjusts it so that way instead of the graph including the value 0
+      on the graph. Visually speaking since most stocks prices within a week are not likely to hit 0. Instead it will display the values that are necessary.
+      Allowing the flow of the graph to be more dynamic and easier to read. While still giving out the correct values. 
+  */
+  const [minPrice, maxPrice] = React.useMemo(() => {
+    if (!chartData.length) return [0, 0];
+
+    let min = chartData[0].price;
+    let max = chartData[0].price;
+
+    for (const p of chartData) {
+      if (p.price < min) min = p.price;
+      if (p.price > max) max = p.price;
+    }
+
+    if (min === max) {
+      // Completely flat data – give a tiny band so the line is visible
+      const pad = min === 0 ? 1 : Math.abs(min) * 0.02;
+      return [min - pad, max + pad];
+    }
+
+    const span = max - min;
+    const pad = span * 0.1; // 10% padding above/below
+
+    return [min - pad, max + pad];
+  }, [chartData]);
+
   const chartHeight = height - 70;
 
   return (
@@ -196,6 +223,7 @@ export default function StockChart({
               />
 
               <YAxis
+                domain={[minPrice, maxPrice]} // <<< dynamic Y-axis
                 tickFormatter={(v) => `$${Number(v).toFixed(2)}`}
                 stroke="#6b7280"
               />
@@ -206,7 +234,9 @@ export default function StockChart({
                   'Price',
                 ]}
                 labelFormatter={(_, payload) => {
-                  const first = payload?.[0]?.payload;
+                  const first = payload?.[0]?.payload as
+                    | (Point & { time: number })
+                    | undefined;
                   return first ? `Date: ${first.date}` : '';
                 }}
                 contentStyle={{
