@@ -1,3 +1,4 @@
+// src/components/charts/StockChart.tsx
 import * as React from 'react';
 import {
   LineChart,
@@ -15,119 +16,84 @@ export type Point = { date: string; price: number };
 
 type Props = {
   ticker: string;
-  data: Point[];
+  data: Point[];              // Daily points for selected range
   range: Range;
   height?: number;
-  /** Called when the user selects a new range */
-  // eslint-disable-next-line no-unused-vars
   onRangeChange?: (next: Range) => void;
 };
 
-/**
- * Parses a UTC date string into a JavaScript Date object.
- * Ensures consistent UTC-based date parsing for chart labels.
- *
- * @param {string} dateStr - The date string in YYYY-MM-DD format.
- * @returns {Date} A Date object representing the UTC date.
- */
-function parseUTC(dateStr: string) {
-  // Use 'T00:00:00Z' to force parsing as UTC date to match the test data generation
+/** Parse YYYY-MM-DD as UTC */
+function parseUTC(dateStr: string): Date {
   return new Date(dateStr + 'T00:00:00Z');
 }
 
-function formatLabel(dateStr: string, range: Range) {
-  const d = parseUTC(dateStr);
+/** Format timestamps (ms) into axis labels like Google/Yahoo Finance */
+export function formatLabelFromMs(ms: number, range: Range): string {
+  const d = new Date(ms);
+  const baseOpts = { timeZone: 'UTC' as const };
+
   switch (range) {
     case '1W':
     case '1M':
     case '3M':
       return new Intl.DateTimeFormat('en-US', {
+        ...baseOpts,
         month: 'short',
         day: 'numeric',
       }).format(d);
+
     case '1Y':
       return new Intl.DateTimeFormat('en-US', {
+        ...baseOpts,
         month: 'short',
         year: 'numeric',
       }).format(d);
+
     case '5Y':
-      return new Intl.DateTimeFormat('en-US', { year: 'numeric' }).format(d); // "2025"
+      return new Intl.DateTimeFormat('en-US', {
+        ...baseOpts,
+        year: 'numeric',
+      }).format(d);
   }
 }
-/**
- * Computes tick positions for the X-axis depending on the range.
- * Optimizes readability by reducing clutter for large datasets.
- *
- * @param {Point[]} data - Array of time-series data points.
- * @param {Range} range - Selected time range.
- * @returns {string[]} Array of date strings to use as tick positions.
- */
-function computeTicks(data: Point[], range: Range): string[] {
+
+/** Compute dynamic X-axis ticks based on actual dates (ms) */
+function computeTicksMs(
+  data: Array<Point & { time: number }>,
+  range: Range
+): number[] {
   if (!data.length) return [];
+
   const n = data.length;
 
-  if (range === '5Y') {
-    const seenYears = new Set<number>();
-    const ticks: string[] = [];
-    for (let i = 0; i < n; i++) {
-      const yr = parseUTC(data[i].date).getUTCFullYear();
-      if (!seenYears.has(yr)) {
-        seenYears.add(yr);
-        ticks.push(data[i].date);
-      }
-    }
-    return ticks;
+  // Target tick counts like Google Finance
+  const approxCount =
+    range === '1W'
+      ? Math.min(7, n)
+      : range === '1M'
+      ? 6
+      : range === '3M'
+      ? 6
+      : range === '1Y'
+      ? 6
+      : 5; // 5Y
+
+  const step = Math.max(1, Math.floor(n / approxCount));
+  const ticks: number[] = [];
+
+  for (let i = 0; i < n; i += step) {
+    ticks.push(data[i].time);
   }
 
-  if (range === '1Y') {
-    const seenBucket = new Set<string>();
-    const ticks: string[] = [];
-
-    for (let i = 0; i < n; i++) {
-      const d = parseUTC(data[i].date);
-      // Group by year and quarter (0, 1, 2, 3) to get four ticks per year
-      const bucket = `${d.getUTCFullYear()}-${Math.floor(d.getUTCMonth() / 4)}`;
-      if (!seenBucket.has(bucket)) {
-        seenBucket.add(bucket);
-        ticks.push(data[i].date);
-      }
-    }
-    if (ticks[ticks.length - 1] !== data[n - 1].date)
-      ticks.push(data[n - 1].date);
-
-    return ticks;
-  }
-
-  const target =
-    range === '1W' ? 7 : range === '1M' ? 6 : range === '3M' ? 8 : 10;
-
-  const step = Math.max(1, Math.ceil(n / target));
-  const ticks: string[] = [];
-  for (let i = 0; i < n; i += step) ticks.push(data[i].date);
-
-  if (ticks[ticks.length - 1] !== data[n - 1].date)
-    ticks.push(data[n - 1].date);
+  // Always include last point
+  const last = data[n - 1].time;
+  if (ticks[ticks.length - 1] !== last) ticks.push(last);
 
   return ticks;
 }
 
-/**
- * Displays a responsive stock price line chart with range selector.
- *
- * Features:
- * - Toggle between multiple time ranges.
- * - Custom date and price formatting.
- * - Adaptive tick selection for clean visuals.
- *
- * @component
- * @param {Props} props - Component props.
- * @param {string} props.ticker - Stock ticker symbol
- * @param {Point[]} props.data - Chart data points
- * @param {Range} props.range - Currently selected range
- * @param {number} [props.height] - Container height
- * @param {(next: Range) => void} [props.onRangeChange] - Range change handler
- * @returns {JSX.Element} Stock performance line chart.
- */
+const RANGE_OPTIONS: Range[] = ['1W', '1M', '3M', '1Y', '5Y'];
+
 export default function StockChart({
   ticker,
   data,
@@ -135,23 +101,34 @@ export default function StockChart({
   height = 360,
   onRangeChange,
 }: Props) {
-  const ticks = React.useMemo(() => computeTicks(data, range), [data, range]);
+  // Precompute ms timestamps for the X-axis
+  const chartData = React.useMemo(
+    () =>
+      (data || []).map((p) => ({
+        ...p,
+        time: parseUTC(p.date).getTime(),
+      })),
+    [data]
+  );
 
-  // Use a flex column layout to ensure the chart takes the remaining space
-  const chartHeight = height - 70; // Estimate space taken by header and controls
+  const ticks = React.useMemo(
+    () => computeTicksMs(chartData, range),
+    [chartData, range]
+  );
+
+  const chartHeight = height - 70;
 
   return (
     <div
       style={{
         width: '100%',
         height,
-        minWidth: 1,
-        minHeight: 1,
         padding: '16px',
         boxSizing: 'border-box',
         fontFamily: 'Inter, sans-serif',
       }}
     >
+      {/* HEADER + RANGE BUTTONS */}
       <div
         style={{
           display: 'flex',
@@ -160,7 +137,6 @@ export default function StockChart({
           marginBottom: 12,
         }}
       >
-        {/* PASSES TEST: Ticker is capitalized and range is included */}
         <h2
           style={{
             margin: 0,
@@ -176,17 +152,15 @@ export default function StockChart({
           size="small"
           value={range}
           exclusive
-          // Only update when a different button is chosen (next can be null if same button is clicked)
           onChange={(_, next: Range | null) => {
             if (next) onRangeChange?.(next);
           }}
           aria-label="Time range"
         >
-          {(['1W', '1M', '3M', '1Y', '5Y'] as Range[]).map((r) => (
+          {RANGE_OPTIONS.map((r) => (
             <ToggleButton
               key={r}
               value={r}
-              // FIX: Adds aria-current="true" to satisfy the active state test
               aria-current={r === range ? 'true' : undefined}
               style={{
                 borderRadius: '8px',
@@ -202,21 +176,24 @@ export default function StockChart({
         </ToggleButtonGroup>
       </div>
 
-      {/* FIX: Conditional rendering for empty data to prevent test failure */}
-      {data && data.length > 0 ? (
+      {/* MAIN CHART */}
+      {chartData.length > 0 ? (
         <div style={{ height: chartHeight }}>
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
-              data={data}
+              data={chartData}
               margin={{ top: 8, right: 8, bottom: 8, left: 20 }}
             >
               <XAxis
-                dataKey="date"
+                dataKey="time"
+                type="number"
+                domain={['dataMin', 'dataMax']}
                 ticks={ticks}
-                // PASSES TEST: Date formatters already configured correctly
-                tickFormatter={(v) => formatLabel(String(v), range)}
-                tickMargin={6}
+                tickFormatter={(ms) =>
+                  formatLabelFromMs(Number(ms), range)
+                }
                 stroke="#6b7280"
+                tickMargin={6}
               />
 
               <YAxis
@@ -229,7 +206,10 @@ export default function StockChart({
                   `$${Number(value).toFixed(2)}`,
                   'Price',
                 ]}
-                labelFormatter={(label) => `Date: ${label}`}
+                labelFormatter={(_, payload) => {
+                  const first = payload?.[0]?.payload;
+                  return first ? `Date: ${first.date}` : '';
+                }}
                 contentStyle={{
                   background: '#fff',
                   border: '1px solid #e5e7eb',
@@ -249,7 +229,6 @@ export default function StockChart({
           </ResponsiveContainer>
         </div>
       ) : (
-        // FIX: Display a message when data is empty
         <div
           style={{
             display: 'flex',
