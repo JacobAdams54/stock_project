@@ -56,6 +56,7 @@ export interface StockRealtimeFields {
   volume: number;
   website: string;
   zip: string;
+  isVisible: boolean;
 }
 
 /**
@@ -139,6 +140,7 @@ function normalizeSummary(symbol: string, raw: any): StockRealtime {
     volume: Number(raw?.volume ?? 0),
     website: String(raw?.website ?? ''),
     zip: String(raw?.zip ?? ''),
+    isVisible: raw.isVisible !== false, // default to true if undefined
   };
 }
 
