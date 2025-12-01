@@ -23,10 +23,15 @@ import {
   useAllStockSummaries,
   useArimaxPredictions,
   useDLPredictions,
+  filterStocksByVisibility,
 } from '../hooks/useStockData';
 import useUserSettings from '../hooks/useUserSettings';
+import { useAuth } from '../components/layout/AuthContext';
 
 export default function StockListingPage() {
+  // Get user auth state to check if admin
+  const { isAdmin } = useAuth();
+
   // Load all stock summaries from /stocks/{ticker}
   const { data, loading, error } = useAllStockSummaries();
 
@@ -49,7 +54,11 @@ export default function StockListingPage() {
   const [sort, setSort] = React.useState('');
 
   // Use fetched data or an empty array until loaded
-  const stocks = React.useMemo(() => data ?? [], [data]);
+  // Filter stocks based on visibility (admins see all, users see only visible)
+  const stocks = React.useMemo(() => {
+    const allStocks = data ?? [];
+    return filterStocksByVisibility(allStocks, isAdmin ?? false);
+  }, [data, isAdmin]);
 
   // Sector options derived from fetched data
   const sectors = React.useMemo(() => {
@@ -150,13 +159,15 @@ export default function StockListingPage() {
                   const prediction = activePredictions?.predicted?.[s.symbol];
                   // Normalize updatedAt so it's a Date | string | number (handle Firestore Timestamp)
                   const updatedAtValue =
-                    s.updatedAt && typeof s.updatedAt === 'object' && 'toDate' in s.updatedAt
+                    s.updatedAt &&
+                    typeof s.updatedAt === 'object' &&
+                    'toDate' in s.updatedAt
                       ? (s.updatedAt as any).toDate()
                       : typeof s.updatedAt === 'number'
-                      ? new Date(s.updatedAt)
-                      : typeof s.updatedAt === 'string'
-                      ? new Date(s.updatedAt)
-                      : (s.updatedAt as any);
+                        ? new Date(s.updatedAt)
+                        : typeof s.updatedAt === 'string'
+                          ? new Date(s.updatedAt)
+                          : (s.updatedAt as any);
 
                   return (
                     <Link

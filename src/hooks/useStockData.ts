@@ -499,3 +499,25 @@ export function useDLPredictions() {
 
   return { data, loading, error };
 }
+
+/**
+ * Filter stocks based on visibility settings.
+ * Admins see all stocks, regular users only see visible stocks.
+ *
+ * @param {StockRealtime[]} stocks - Array of stock data
+ * @param {boolean} isAdmin - Whether the current user is an admin
+ * @returns {StockRealtime[]} Filtered stock array
+ * @example
+ * const { user, isAdmin } = useAuth();
+ * const allStocks = await readAllStockSummaries();
+ * const visibleStocks = filterStocksByVisibility(allStocks, isAdmin);
+ */
+export function filterStocksByVisibility(
+  stocks: StockRealtime[],
+  isAdmin: boolean
+): StockRealtime[] {
+  if (isAdmin) {
+    return stocks; // Admins see all stocks
+  }
+  return stocks.filter((stock) => stock.isVisible);
+}
