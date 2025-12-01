@@ -17,6 +17,7 @@ import {
 import { useAuth } from '../components/layout/AuthContext';
 import useAdminMetrics from '../hooks/useAdminMetrics';
 import { logAppEvent } from '../firebase/firebase';
+import StockVisibilityManager from '../components/admin/StockVisibilityManager';
 
 /**
  * AdminPage
@@ -92,15 +93,12 @@ export default function AdminPage(): React.JSX.Element {
           {/* Main content */}
           <Stack flex={1} spacing={3}>
             {/* Metrics row */}
-            <Stack
-              direction={{ xs: 'column', md: 'row' }}
-              spacing={3}
-            >
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
               <Card sx={{ flex: 1 }}>
                 <CardHeader title="Total users" />
                 <CardContent>
                   <Typography variant="h3">
-                    {loading ? '—' : metrics.totalUsers ?? 0}
+                    {loading ? '—' : (metrics.totalUsers ?? 0)}
                   </Typography>
                   {error && (
                     <Typography color="error" variant="caption">
@@ -114,7 +112,7 @@ export default function AdminPage(): React.JSX.Element {
                 <CardHeader title="Watchlist items" />
                 <CardContent>
                   <Typography variant="h3">
-                    {loading ? '—' : metrics.totalWatchlistItems ?? 0}
+                    {loading ? '—' : (metrics.totalWatchlistItems ?? 0)}
                   </Typography>
                   <Typography color="text.secondary" variant="caption">
                     Approximate (sampled, max 500 users)
@@ -126,7 +124,7 @@ export default function AdminPage(): React.JSX.Element {
                 <CardHeader title="Avg. watchlist size" />
                 <CardContent>
                   <Typography variant="h3">
-                    {loading ? '—' : metrics.avgWatchlistSize ?? 0}
+                    {loading ? '—' : (metrics.avgWatchlistSize ?? 0)}
                   </Typography>
                   <Typography color="text.secondary" variant="caption">
                     Approximate over sampled users
@@ -136,10 +134,7 @@ export default function AdminPage(): React.JSX.Element {
             </Stack>
 
             {/* Top tickers + flags */}
-            <Stack
-              direction={{ xs: 'column', md: 'row' }}
-              spacing={3}
-            >
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={3}>
               <Card sx={{ flex: 1 }}>
                 <CardHeader title="Top tickers in watchlists" />
                 <CardContent>
@@ -179,50 +174,22 @@ export default function AdminPage(): React.JSX.Element {
                       control={
                         <Checkbox
                           checked={flags.experimentalCharts}
-                          onChange={(_, v) =>
-                            setFlag('experimentalCharts', v)
-                          }
+                          onChange={(_, v) => setFlag('experimentalCharts', v)}
                         />
                       }
                       label="Experimental charts"
                     />
                     <Typography color="text.secondary" variant="caption">
-                      Flags are stored at <code>config/flags</code> in Firestore.
+                      Flags are stored at <code>config/flags</code> in
+                      Firestore.
                     </Typography>
                   </Stack>
                 </CardContent>
               </Card>
             </Stack>
 
-            {/* Tips card */}
-            <Card>
-              <CardHeader title="Admin tips (for students)" />
-              <CardContent>
-                <ul>
-                  <li>
-                    Instrument key user actions with <code>logAppEvent</code> (e.g.,{' '}
-                    <code>login</code>, <code>add_to_watchlist</code>,{' '}
-                    <code>view_stock_detail</code>).
-                  </li>
-                  <li>
-                    Export watchlists to CSV for class analysis (client-only, no
-                    PII).
-                  </li>
-                  <li>
-                    Add a “Refresh demo data” stub that just logs an Analytics
-                    event.
-                  </li>
-                  <li>
-                    Cap Firestore reads for metrics and label them as
-                    approximate.
-                  </li>
-                  <li>
-                    Add quick links to Firebase Console for Analytics and
-                    Firestore.
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+            {/* Stock Visibility Management */}
+            <StockVisibilityManager />
           </Stack>
         </Stack>
       </Container>

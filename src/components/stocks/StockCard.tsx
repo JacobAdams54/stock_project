@@ -90,7 +90,6 @@ export default function StockCard({
   industry,
   sector,
   state,
-  updatedAt,
   aiPrediction,
 }: StockCardProps): React.ReactElement {
   // Formatters
@@ -110,22 +109,6 @@ export default function StockCard({
     : 91;
 
   const targetPrice = fiftyTwoWeekHigh;
-
-  // "time ago" for updatedAt
-  const analyzedAgo = (() => {
-    const date =
-      typeof updatedAt === 'number'
-        ? new Date(updatedAt)
-        : typeof updatedAt === 'string'
-          ? new Date(updatedAt)
-          : updatedAt;
-    const ms = Date.now() - (date?.getTime?.() ?? Date.now());
-    const minutes = Math.max(0, Math.floor(ms / 60000));
-    if (minutes < 1) return 'just now';
-    if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-    const hours = Math.floor(minutes / 60);
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  })();
 
   // Recommendation based on AI prediction, or fallback to 24h change
   const recLabel = aiPrediction
@@ -323,7 +306,7 @@ export default function StockCard({
             Target: {fmtUSD.format(targetPrice)}
           </Typography>
           <Typography variant="caption" sx={{ color: '#6b7280' }}>
-            Analyzed {analyzedAgo}
+            Analyzed today
           </Typography>
         </Box>
       </CardContent>
