@@ -22,19 +22,26 @@ import StockCard from '../components/stocks/StockCard';
 import {
   useAllStockSummaries,
   useArimaxPredictions,
-  // useDLPredictions, // TODO: Uncomment when adding model selection feature
+  useDLPredictions,
 } from '../hooks/useStockData';
+import useUserSettings from '../hooks/useUserSettings';
 
 export default function StockListingPage() {
   // Load all stock summaries from /stocks/{ticker}
   const { data, loading, error } = useAllStockSummaries();
 
+  // Load user preferences to determine which AI model to use
+  const { preferences, loading: prefsLoading } = useUserSettings();
+
   // Load AI predictions (both models)
   const { data: arimaxData } = useArimaxPredictions();
-  // const { data: dlData } = useDLPredictions(); // TODO: Add user preference to switch models
+  const { data: dlData } = useDLPredictions();
 
-  // For now, default to ARIMAX. Later you can add user preference.
-  const activePredictions = arimaxData;
+  // Dynamically select predictions based on user's preferred model
+  const activePredictions = React.useMemo(() => {
+    if (prefsLoading) return null;
+    return preferences.preferredModel === 'dl' ? dlData : arimaxData;
+  }, [preferences.preferredModel, arimaxData, dlData, prefsLoading]);
 
   // Local UI state
   const [query, setQuery] = React.useState('');
@@ -76,8 +83,11 @@ export default function StockListingPage() {
           Stock Predictions
         </Typography>
         <Typography variant="body1" className="mb-4">
-          AI-powered predictions for tracked stocks. Filter, sort, and search to
-          find stocks of interest.
+          AI-powered predictions for tracked stocks using{' '}
+          {!prefsLoading && preferences.preferredModel === 'dl'
+            ? 'Deep Learning'
+            : 'ARIMAX'}{' '}
+          model. Filter, sort, and search to find stocks of interest.
         </Typography>
 
         {/* Filters */}
