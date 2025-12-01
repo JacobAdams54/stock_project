@@ -104,7 +104,7 @@ export default function StockCard({
   // Derived values
   const isUp = change24hPercent >= 0;
 
-  // Use AI confidence if available, otherwise placeholder
+  // Use AI confidence if available, otherwise fallback to 91%
   const aiConfidence = aiPrediction
     ? Math.round(aiPrediction.probability * 100)
     : 91;
