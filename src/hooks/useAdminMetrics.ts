@@ -103,7 +103,7 @@ export function useAdminMetrics() {
       setLoading(true);
       setError(null);
       //beginning of error
-            try {
+      try {
         const usersCol = collection(db, 'users');
         const countSnap = await getCountFromServer(usersCol);
         const totalUsers = countSnap.data().count as number;
@@ -117,7 +117,7 @@ export function useAdminMetrics() {
 
         usersSnap.forEach((docSnap) => {
           const data = docSnap.data() as any;
-          const wl = data?.watchlist;
+          const wl = data?.preferences?.watchlist; // Updated path to match new schema
 
           if (Array.isArray(wl)) {
             sampledUsers += 1;

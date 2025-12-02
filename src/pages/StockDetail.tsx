@@ -1,5 +1,5 @@
 /**
- * StockDetail
+ * StockDetail.tsx
  * -----------------------------------------------------------------------------
  * Fetches a single stock summary from /stocks/{ticker} and its historical
  * daily prices from /stock_prices/{ticker}.daily using the hooks:
@@ -23,9 +23,16 @@ import {
   Chip,
   Link as MUILink,
 } from '@mui/material';
-import { useStockSummaryDoc, usePriceHistory } from '../hooks/useStockData';
+import {
+  useStockSummaryDoc,
+  usePriceHistory,
+  useArimaxPredictions,
+  useDLPredictions,
+} from '../hooks/useStockData';
+import useUserSettings from '../hooks/useUserSettings';
 import KeyStatistics from '../components/stocks/KeyStatistics';
 import StockChart from '../components/charts/StockChart';
+import PredictionCard from '../components/stocks/PredictionCard';
 import type { Range, Point } from '../components/charts/StockChart';
 /**
  * StockDetail
@@ -59,6 +66,17 @@ export default function StockDetail(): React.ReactElement {
     loading: loadingHistory,
     error: errorHistory,
   } = usePriceHistory(symbol);
+
+  // Load user preferences and AI predictions
+  const { preferences, loading: prefsLoading } = useUserSettings();
+  const { data: arimaxData } = useArimaxPredictions();
+  const { data: dlData } = useDLPredictions();
+
+  // Dynamically select predictions based on user's preferred model
+  const activePredictions = React.useMemo(() => {
+    if (prefsLoading) return null;
+    return preferences.preferredModel === 'dl' ? dlData : arimaxData;
+  }, [preferences.preferredModel, arimaxData, dlData, prefsLoading]);
 
   // New: chart range state
   const [range, setRange] = React.useState<Range>('3M');
@@ -95,7 +113,12 @@ export default function StockDetail(): React.ReactElement {
    */
   const rangePoints = React.useMemo<Point[]>(() => {
     if (!allPoints.length) return [];
-    const now = new Date();
+
+    // Anchor ranges to the last available data point,
+    // not to "today" (which might be far after the last quote).
+    const last = allPoints[allPoints.length - 1];
+    const lastDate = new Date(last.date + 'T00:00:00Z');
+
     const days =
       range === '1W'
         ? 7
@@ -107,13 +130,15 @@ export default function StockDetail(): React.ReactElement {
               ? 365
               : 365 * 5;
 
-    const cutoff = new Date(now);
-    cutoff.setUTCDate(now.getUTCDate() - days);
+    const cutoff = new Date(lastDate);
+    cutoff.setUTCDate(lastDate.getUTCDate() - days);
 
-    // Keep points whose date >= cutoff; if not enough data, return all.
     const filtered = allPoints.filter(
       (p) => new Date(p.date + 'T00:00:00Z') >= cutoff
     );
+
+    // If somehow we filtered out everything (e.g., sparse data),
+    // fall back to the full history so the chart never goes blank.
     return filtered.length ? filtered : allPoints;
   }, [allPoints, range]);
 
@@ -150,12 +175,6 @@ export default function StockDetail(): React.ReactElement {
 
   const isUp = summary.change24hPercent >= 0;
   const arrow = isUp ? '▲' : '▼';
-  const updated =
-    typeof summary.updatedAt === 'number'
-      ? new Date(summary.updatedAt)
-      : typeof summary.updatedAt === 'string'
-        ? new Date(summary.updatedAt)
-        : summary.updatedAt;
 
   const detailsLeft = [
     { label: 'Current Price', value: fmtUSD.format(summary.currentPrice) },
@@ -185,11 +204,6 @@ export default function StockDetail(): React.ReactElement {
       label: 'Address',
       value: `${summary.address1}, ${summary.city}, ${summary.state} ${summary.zip}, ${summary.country}`,
     },
-    {
-      label: 'Last Updated',
-      value:
-        updated instanceof Date ? updated.toLocaleString() : String(updated),
-    },
   ];
 
   return (
@@ -197,33 +211,71 @@ export default function StockDetail(): React.ReactElement {
       {/* Header */}
       <Paper elevation={0} sx={{ p: 3, mb: 2, borderRadius: 0 }}>
         <Box sx={{ maxWidth: 1400, mx: 'auto' }}>
-          <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-            <Typography variant="h3" component="h1" sx={{ fontWeight: 700 }}>
-              {symbol}
-            </Typography>
-            <Chip
-              label={summary.sector}
-              size="small"
-              sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}
-            />
-          </Box>
-          <Typography variant="body1" color="text.secondary">
-            {summary.companyName}
-          </Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: { xs: 'column', md: 'row' },
+              gap: 3,
+              alignItems: { xs: 'stretch', md: 'flex-start' },
+            }}
+          >
+            {/* Left side: Title and Price Info */}
+            <Box sx={{ flex: { xs: '1', md: '0 0 60%' } }}>
+              <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+                <Typography
+                  variant="h3"
+                  component="h1"
+                  sx={{ fontWeight: 700 }}
+                >
+                  {symbol}
+                </Typography>
+                <Chip
+                  label={summary.sector}
+                  size="small"
+                  sx={{ bgcolor: '#f3f4f6', border: '1px solid #e5e7eb' }}
+                />
+              </Box>
+              <Typography variant="body1" color="text.secondary">
+                {summary.companyName}
+              </Typography>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}>
-            <Typography variant="h4" component="div" sx={{ fontWeight: 700 }}>
-              {fmtUSD.format(summary.currentPrice)}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{
-                fontWeight: 600,
-                color: isUp ? 'success.main' : 'error.main',
-              }}
-            >
-              {arrow} {fmtPct(summary.change24hPercent)}
-            </Typography>
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2 }}
+              >
+                <Typography
+                  variant="h4"
+                  component="div"
+                  sx={{ fontWeight: 700 }}
+                >
+                  {fmtUSD.format(summary.currentPrice)}
+                </Typography>
+                <Typography
+                  variant="h6"
+                  sx={{
+                    fontWeight: 600,
+                    color: isUp ? 'success.main' : 'error.main',
+                  }}
+                >
+                  {arrow} {fmtPct(summary.change24hPercent)}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Right side: AI Prediction Card */}
+            {activePredictions?.predicted?.[symbol] && (
+              <Box sx={{ flex: { xs: '1', md: '0 0 35%' } }}>
+                <PredictionCard
+                  trend={
+                    activePredictions.predicted[symbol].direction === 'up'
+                      ? 'Bullish'
+                      : 'Bearish'
+                  }
+                  confidence={Math.round(
+                    activePredictions.predicted[symbol].probability * 100
+                  )}
+                />
+              </Box>
+            )}
           </Box>
         </Box>
       </Paper>

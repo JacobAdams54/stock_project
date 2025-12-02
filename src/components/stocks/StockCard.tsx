@@ -1,7 +1,7 @@
 /**
  * @file StockCard.tsx
- * @description Light stock summary card using only the allowed data fields.
- * Predicted price and confidence are placeholders until AI is integrated.
+ * @description Light stock summary card displaying real-time stock data and AI predictions.
+ * Shows BUY/SELL recommendations based on AI model predictions when available.
  */
 
 import React from 'react';
@@ -15,6 +15,7 @@ import {
   LinearProgress,
   Divider,
 } from '@mui/material';
+import type { PredictionData } from '../../hooks/useStockData';
 
 /**
  * Strongly typed props for the StockCard component.
@@ -41,14 +42,15 @@ export type StockCardProps = {
   volume: number;
   website: string;
   zip: string;
+  aiPrediction?: PredictionData;
 };
 
 /**
  * A presentational stock card that renders company info, price,
- * 24h change, placeholder prediction and confidence, and quick tags.
+ * 24h change, AI prediction confidence, and recommendation tags.
  *
- * - Predicted Price: placeholder derived from currentPrice
- * - Confidence: placeholder (static 91%)
+ * - Confidence: AI prediction probability when available
+ * - Recommendation: BUY/SELL based on AI prediction direction
  * - Target: uses 52-week high
  * - Sector appears as a badge
  *
@@ -88,7 +90,7 @@ export default function StockCard({
   industry,
   sector,
   state,
-  updatedAt,
+  aiPrediction,
 }: StockCardProps): React.ReactElement {
   // Formatters
   const fmtUSD = new Intl.NumberFormat('en-US', {
@@ -98,35 +100,53 @@ export default function StockCard({
   });
   const fmtPct = (v: number) => `${v >= 0 ? '+' : ''}${v.toFixed(2)}%`;
 
-  // Derived/placeholder values
+  // Derived values
   const isUp = change24hPercent >= 0;
-  const arrow = isUp ? '↗' : '↘';
-  const arrowColor = isUp ? '#16a34a' : '#dc2626';
-  // Placeholder prediction: small nudge from current price
-  const predictedPrice = currentPrice * (isUp ? 1.017 : 0.983);
-  // Placeholder confidence
-  const aiConfidence = 91;
+
+  // Use AI confidence if available, otherwise fallback to 91%
+  const aiConfidence = aiPrediction
+    ? Math.round(aiPrediction.probability * 100)
+    : 91;
 
   const targetPrice = fiftyTwoWeekHigh;
 
-  // "time ago" for updatedAt
-  const analyzedAgo = (() => {
-    const date =
-      typeof updatedAt === 'number'
-        ? new Date(updatedAt)
-        : typeof updatedAt === 'string'
-          ? new Date(updatedAt)
-          : updatedAt;
-    const ms = Date.now() - (date?.getTime?.() ?? Date.now());
-    const minutes = Math.max(0, Math.floor(ms / 60000));
-    if (minutes < 1) return 'just now';
-    if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
-    const hours = Math.floor(minutes / 60);
-    return `${hours} hour${hours === 1 ? '' : 's'} ago`;
-  })();
+  // Recommendation based on AI prediction, or fallback to 24h change
+  const recLabel = aiPrediction
+    ? aiPrediction.direction === 'up'
+      ? 'BUY'
+      : 'SELL'
+    : isUp
+      ? 'BUY'
+      : 'HOLD';
 
-  // Naive placeholder recommendation chip (not AI)
-  const recLabel = isUp ? 'BUY' : 'HOLD';
+  // Risk level based on AI confidence/probability
+  const riskLevel = aiPrediction
+    ? aiPrediction.probability < 0.25
+      ? 'High Risk'
+      : aiPrediction.probability < 0.5
+        ? 'Risky'
+        : 'Low Risk'
+    : 'Low Risk'; // fallback when no AI prediction
+
+  // Risk chip styling based on level
+  const riskChipStyle =
+    riskLevel === 'Low Risk'
+      ? {
+          bgcolor: '#e0f2fe', // sky-100
+          color: '#0c4a6e', // sky-900
+          border: '1px solid #bae6fd', // sky-200
+        }
+      : riskLevel === 'Risky'
+        ? {
+            bgcolor: '#fef3c7', // amber-100
+            color: '#78350f', // amber-900
+            border: '1px solid #fde68a', // amber-200
+          }
+        : {
+            bgcolor: '#fee2e2', // red-50
+            color: '#991b1b', // red-800
+            border: '1px solid #fecaca', // red-200
+          };
 
   return (
     <Card
@@ -192,29 +212,6 @@ export default function StockCard({
           </Typography>
         </Box>
 
-        {/* Predicted Price (placeholder) */}
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="center"
-          mb={1}
-        >
-          <Typography variant="body2" sx={{ color: '#4b5563' }}>
-            Predicted Price
-          </Typography>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Typography
-              variant="subtitle1"
-              sx={{ fontWeight: 700, color: '#111827' }}
-            >
-              {fmtUSD.format(predictedPrice)}
-            </Typography>
-            <Typography variant="body2" sx={{ color: arrowColor }}>
-              {arrow}
-            </Typography>
-          </Box>
-        </Box>
-
         {/* 24h Change */}
         <Box
           display="flex"
@@ -270,19 +267,32 @@ export default function StockCard({
             label={recLabel}
             size="small"
             sx={{
-              bgcolor: '#dcfce7', // green-50
-              color: '#166534', // green-800
-              border: '1px solid #86efac', // green-200
+              bgcolor:
+                recLabel === 'BUY'
+                  ? '#dcfce7' // green-50
+                  : recLabel === 'SELL'
+                    ? '#fee2e2' // red-50
+                    : '#f3f4f6', // gray-100 for HOLD
+              color:
+                recLabel === 'BUY'
+                  ? '#166534' // green-800
+                  : recLabel === 'SELL'
+                    ? '#991b1b' // red-800
+                    : '#374151', // gray-700 for HOLD
+              border:
+                recLabel === 'BUY'
+                  ? '1px solid #86efac' // green-200
+                  : recLabel === 'SELL'
+                    ? '1px solid #fecaca' // red-200
+                    : '1px solid #e5e7eb', // gray-200 for HOLD
               fontWeight: 700,
             }}
           />
           <Chip
-            label="Low Risk"
+            label={riskLevel}
             size="small"
             sx={{
-              bgcolor: '#e0f2fe', // sky-100
-              color: '#0c4a6e', // sky-900
-              border: '1px solid #bae6fd', // sky-200
+              ...riskChipStyle,
               fontWeight: 700,
             }}
           />
@@ -296,7 +306,7 @@ export default function StockCard({
             Target: {fmtUSD.format(targetPrice)}
           </Typography>
           <Typography variant="caption" sx={{ color: '#6b7280' }}>
-            Analyzed {analyzedAgo}
+            Analyzed today
           </Typography>
         </Box>
       </CardContent>

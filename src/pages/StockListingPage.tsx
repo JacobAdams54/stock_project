@@ -15,15 +15,47 @@
  */
 
 import React from 'react';
-import { Box, Container, Typography, TextField, Select } from '@mui/material';
-import { Link } from 'react-router-dom';
+import {
+  Box,
+  Container,
+  Typography,
+  TextField,
+  Select,
+  Alert,
+  Button,
+} from '@mui/material';
+import { Link, useNavigate } from 'react-router-dom';
 
 import StockCard from '../components/stocks/StockCard';
-import { useAllStockSummaries } from '../hooks/useStockData';
+import {
+  useAllStockSummaries,
+  useArimaxPredictions,
+  useDLPredictions,
+  filterStocksByVisibility,
+} from '../hooks/useStockData';
+import useUserSettings from '../hooks/useUserSettings';
+import { useAuth } from '../components/layout/AuthContext';
 
 export default function StockListingPage() {
+  // Get user auth state to check if admin
+  const { user, isAdmin } = useAuth();
+  const navigate = useNavigate();
+
   // Load all stock summaries from /stocks/{ticker}
   const { data, loading, error } = useAllStockSummaries();
+
+  // Load user preferences to determine which AI model to use
+  const { preferences, loading: prefsLoading } = useUserSettings();
+
+  // Load AI predictions (both models)
+  const { data: arimaxData } = useArimaxPredictions();
+  const { data: dlData } = useDLPredictions();
+
+  // Dynamically select predictions based on user's preferred model
+  const activePredictions = React.useMemo(() => {
+    if (prefsLoading) return null;
+    return preferences.preferredModel === 'dl' ? dlData : arimaxData;
+  }, [preferences.preferredModel, arimaxData, dlData, prefsLoading]);
 
   // Local UI state
   const [query, setQuery] = React.useState('');
@@ -31,7 +63,11 @@ export default function StockListingPage() {
   const [sort, setSort] = React.useState('');
 
   // Use fetched data or an empty array until loaded
-  const stocks = React.useMemo(() => data ?? [], [data]);
+  // Filter stocks based on visibility (admins see all, users see only visible)
+  const stocks = React.useMemo(() => {
+    const allStocks = data ?? [];
+    return filterStocksByVisibility(allStocks, isAdmin ?? false);
+  }, [data, isAdmin]);
 
   // Sector options derived from fetched data
   const sectors = React.useMemo(() => {
@@ -64,101 +100,144 @@ export default function StockListingPage() {
         <Typography variant="h4" component="h1" gutterBottom>
           Stock Predictions
         </Typography>
-        <Typography variant="body1" className="mb-4">
-          AI-powered predictions for tracked stocks. Filter, sort, and search to
-          find stocks of interest.
-        </Typography>
 
-        {/* Filters */}
-        <Box className="flex flex-col md:flex-row gap-3 items-start md:items-center mb-6">
-          <TextField
-            placeholder="Search by symbol or company"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            size="small"
-            slotProps={{ input: { 'aria-label': 'search stocks' } }}
-            sx={{ minWidth: 240 }}
-          />
-
-          <Select
-            native
-            value={sector}
-            onChange={(e) => setSector(String(e.target.value))}
-            size="small"
-            displayEmpty
-            inputProps={{ 'aria-label': 'sector' }}
-            sx={{ minWidth: 160 }}
+        {/* Guest user message */}
+        {!user ? (
+          <Alert
+            severity="info"
+            sx={{ mb: 4 }}
+            action={
+              <Button
+                color="inherit"
+                size="small"
+                onClick={() => navigate('/login')}
+              >
+                Log In
+              </Button>
+            }
           >
-            {sectors.map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </Select>
+            Please log in to view stock predictions and access AI-powered
+            insights.
+          </Alert>
+        ) : (
+          <>
+            <Typography variant="body1" className="mb-4">
+              AI-powered predictions for tracked stocks using{' '}
+              {!prefsLoading && preferences.preferredModel === 'dl'
+                ? 'Deep Learning'
+                : 'ARIMAX'}{' '}
+              model. Filter, sort, and search to find stocks of interest.
+            </Typography>
 
-          <Select
-            native
-            value={sort}
-            onChange={(e) => setSort(String(e.target.value))}
-            size="small"
-            displayEmpty
-            inputProps={{ 'aria-label': 'sort' }}
-            sx={{ minWidth: 200 }}
-          >
-            <option value="">None</option>
-            <option value="price-asc">Price (low → high)</option>
-            <option value="symbol-asc">Symbol (A → Z)</option>
-          </Select>
-        </Box>
+            {/* Filters */}
+            <Box className="flex flex-col md:flex-row gap-3 items-start md:items-center mb-6">
+              <TextField
+                placeholder="Search by symbol or company"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                size="small"
+                slotProps={{ input: { 'aria-label': 'search stocks' } }}
+                sx={{ minWidth: 240 }}
+              />
 
-        {/* Status */}
-        {loading && <Typography>Loading stocks…</Typography>}
-        {error && !loading && (
-          <Typography color="error">Failed to load stocks.</Typography>
-        )}
-
-        {/* Grid */}
-        {!loading &&
-          !error &&
-          (filtered.length === 0 ? (
-            <Typography>No stocks found matching your criteria.</Typography>
-          ) : (
-            <div data-testid="stock-grid" className="overflow-auto">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {filtered.map((s) => (
-                  <Link
-                    key={s.symbol}
-                    to={`/stocks/${s.symbol}`}
-                    data-testid={`stock-card-${s.symbol}`}
-                    className="block cursor-pointer"
-                  >
-                    <StockCard
-                      address1={s.address1}
-                      change24hPercent={s.change24hPercent}
-                      city={s.city}
-                      companyName={s.companyName}
-                      country={s.country}
-                      currentPrice={s.currentPrice}
-                      dividendYield={s.dividendYield}
-                      dividendYieldPercent={s.dividendYieldPercent}
-                      fiftyTwoWeekHigh={s.fiftyTwoWeekHigh}
-                      fiftyTwoWeekLow={s.fiftyTwoWeekLow}
-                      industry={s.industry}
-                      marketCap={s.marketCap}
-                      open={s.open}
-                      peRatio={s.peRatio}
-                      sector={s.sector}
-                      state={s.state}
-                      updatedAt={s.updatedAt}
-                      volume={s.volume}
-                      website={s.website}
-                      zip={s.zip}
-                    />
-                  </Link>
+              <Select
+                native
+                value={sector}
+                onChange={(e) => setSector(String(e.target.value))}
+                size="small"
+                displayEmpty
+                inputProps={{ 'aria-label': 'sector' }}
+                sx={{ minWidth: 160 }}
+              >
+                {sectors.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
                 ))}
-              </div>
-            </div>
-          ))}
+              </Select>
+
+              <Select
+                native
+                value={sort}
+                onChange={(e) => setSort(String(e.target.value))}
+                size="small"
+                displayEmpty
+                inputProps={{ 'aria-label': 'sort' }}
+                sx={{ minWidth: 200 }}
+              >
+                <option value="">None</option>
+                <option value="price-asc">Price (low → high)</option>
+                <option value="symbol-asc">Symbol (A → Z)</option>
+              </Select>
+            </Box>
+
+            {/* Status */}
+            {loading && <Typography>Loading stocks…</Typography>}
+            {error && !loading && (
+              <Typography color="error">Failed to load stocks.</Typography>
+            )}
+
+            {/* Grid */}
+            {!loading &&
+              !error &&
+              (filtered.length === 0 ? (
+                <Typography>No stocks found matching your criteria.</Typography>
+              ) : (
+                <div data-testid="stock-grid" className="overflow-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {filtered.map((s) => {
+                      const prediction =
+                        activePredictions?.predicted?.[s.symbol];
+                      // Normalize updatedAt so it's a Date | string | number (handle Firestore Timestamp)
+                      const updatedAtValue =
+                        s.updatedAt &&
+                        typeof s.updatedAt === 'object' &&
+                        'toDate' in s.updatedAt
+                          ? (s.updatedAt as any).toDate()
+                          : typeof s.updatedAt === 'number'
+                            ? new Date(s.updatedAt)
+                            : typeof s.updatedAt === 'string'
+                              ? new Date(s.updatedAt)
+                              : (s.updatedAt as any);
+
+                      return (
+                        <Link
+                          key={s.symbol}
+                          to={`/stocks/${s.symbol}`}
+                          data-testid={`stock-card-${s.symbol}`}
+                          className="block cursor-pointer"
+                        >
+                          <StockCard
+                            address1={s.address1}
+                            change24hPercent={s.change24hPercent}
+                            city={s.city}
+                            companyName={s.companyName}
+                            country={s.country}
+                            currentPrice={s.currentPrice}
+                            dividendYield={s.dividendYield}
+                            dividendYieldPercent={s.dividendYieldPercent}
+                            fiftyTwoWeekHigh={s.fiftyTwoWeekHigh}
+                            fiftyTwoWeekLow={s.fiftyTwoWeekLow}
+                            industry={s.industry}
+                            marketCap={s.marketCap}
+                            open={s.open}
+                            peRatio={s.peRatio}
+                            sector={s.sector}
+                            state={s.state}
+                            updatedAt={updatedAtValue}
+                            volume={s.volume}
+                            website={s.website}
+                            zip={s.zip}
+                            aiPrediction={prediction}
+                          />
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+          </>
+        )}
       </Container>
     </div>
   );

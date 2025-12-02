@@ -24,6 +24,7 @@
 
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
+import type { Timestamp } from 'firebase/firestore'; 
 import { db } from '../firebase/firebase';
 import { TICKERS } from '../constants/tickers';
 import type { Ticker } from '../constants/tickers';
@@ -52,10 +53,11 @@ export interface StockRealtimeFields {
   peRatio: number;
   sector: string;
   state: string;
-  updatedAt: Date | string | number;
+  updatedAt: Date | string | number | Timestamp;
   volume: number;
   website: string;
   zip: string;
+  isVisible: boolean;
 }
 
 /**
@@ -74,6 +76,22 @@ export interface PriceBar {
   close: number;
   volume: number;
   ts?: any; // optional Firestore Timestamp or Date
+}
+
+/**
+ * AI prediction data for a single stock.
+ */
+export interface PredictionData {
+  direction: 'up' | 'down';
+  probability: number;
+}
+
+/**
+ * Response from AI prediction documents containing all ticker predictions.
+ */
+export interface AIPredictionResponse {
+  predicted: Record<string, PredictionData>;
+  updatedAt: Date | null;
 }
 
 /* ----------------------------------------------------------------------------
@@ -123,6 +141,7 @@ function normalizeSummary(symbol: string, raw: any): StockRealtime {
     volume: Number(raw?.volume ?? 0),
     website: String(raw?.website ?? ''),
     zip: String(raw?.zip ?? ''),
+    isVisible: raw.isVisible !== false, // default to true if undefined
   };
 }
 
@@ -172,6 +191,48 @@ export async function readAllStockSummaries(): Promise<StockRealtime[]> {
     .filter((v): v is StockRealtime => v != null);
 
   return results;
+}
+
+/**
+ * Read ARIMAX model predictions from /stock_predictions/arimax.
+ * Returns a map of all ticker predictions and the last update timestamp.
+ *
+ * @returns {Promise<AIPredictionResponse>} Map of predictions by ticker
+ * @throws {DataNotFoundError} if the arimax document does not exist
+ * @example
+ * const { predicted, updatedAt } = await readArimaxPredictions();
+ * const aaplPrediction = predicted['AAPL'];
+ */
+export async function readArimaxPredictions(): Promise<AIPredictionResponse> {
+  const snap = await getDoc(doc(db, 'stock_predictions', 'arimax'));
+  if (!snap.exists()) throw new DataNotFoundError('arimax predictions');
+
+  const data = snap.data() as any;
+  const predicted = (data?.predicted as Record<string, any>) ?? {};
+  const updatedAt = data?.updatedAt?.toDate?.() ?? null;
+
+  return { predicted, updatedAt };
+}
+
+/**
+ * Read Deep Learning model predictions from /stock_predictions/dl.
+ * Returns a map of all ticker predictions and the last update timestamp.
+ *
+ * @returns {Promise<AIPredictionResponse>} Map of predictions by ticker
+ * @throws {DataNotFoundError} if the dl document does not exist
+ * @example
+ * const { predicted, updatedAt } = await readDLPredictions();
+ * const aaplPrediction = predicted['AAPL'];
+ */
+export async function readDLPredictions(): Promise<AIPredictionResponse> {
+  const snap = await getDoc(doc(db, 'stock_predictions', 'dl'));
+  if (!snap.exists()) throw new DataNotFoundError('dl predictions');
+
+  const data = snap.data() as any;
+  const predicted = (data?.predicted as Record<string, any>) ?? {};
+  const updatedAt = data?.updatedAt?.toDate?.() ?? null;
+
+  return { predicted, updatedAt };
 }
 
 /**
@@ -353,4 +414,110 @@ export function usePriceHistory(symbol: Ticker | string | undefined) {
   }, [symbol]);
 
   return { data, loading, error };
+}
+
+/**
+ * Hook: fetch ARIMAX model predictions for all tickers.
+ * Fetches once on mount - no real-time updates needed as predictions update daily.
+ * @returns {{ data: AIPredictionResponse | null, loading: boolean, error: Error | null }}
+ * @example
+ * const { data: arimaxData } = useArimaxPredictions();
+ * if (arimaxData) {
+ *   const aaplPrediction = arimaxData.predicted['AAPL'];
+ *   console.log(aaplPrediction.direction, aaplPrediction.probability);
+ * }
+ */
+export function useArimaxPredictions() {
+  const [data, setData] = useState<AIPredictionResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const predictions = await readArimaxPredictions();
+        if (!cancelled) setData(predictions);
+      } catch (e) {
+        if (!cancelled)
+          setError(e instanceof Error ? e : new Error('Unknown error'));
+        if (!cancelled) setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { data, loading, error };
+}
+
+/**
+ * Hook: fetch Deep Learning model predictions for all tickers.
+ * Fetches once on mount - no real-time updates needed as predictions update daily.
+ * @returns {{ data: AIPredictionResponse | null, loading: boolean, error: Error | null }}
+ * @example
+ * const { data: dlData } = useDLPredictions();
+ * if (dlData) {
+ *   const aaplPrediction = dlData.predicted['AAPL'];
+ *   console.log(aaplPrediction.direction, aaplPrediction.probability);
+ * }
+ */
+export function useDLPredictions() {
+  const [data, setData] = useState<AIPredictionResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    (async () => {
+      try {
+        const predictions = await readDLPredictions();
+        if (!cancelled) setData(predictions);
+      } catch (e) {
+        if (!cancelled)
+          setError(e instanceof Error ? e : new Error('Unknown error'));
+        if (!cancelled) setData(null);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  return { data, loading, error };
+}
+
+/**
+ * Filter stocks based on visibility settings.
+ * Admins see all stocks, regular users only see visible stocks.
+ *
+ * @param {StockRealtime[]} stocks - Array of stock data
+ * @param {boolean} isAdmin - Whether the current user is an admin
+ * @returns {StockRealtime[]} Filtered stock array
+ * @example
+ * const { user, isAdmin } = useAuth();
+ * const allStocks = await readAllStockSummaries();
+ * const visibleStocks = filterStocksByVisibility(allStocks, isAdmin);
+ */
+export function filterStocksByVisibility(
+  stocks: StockRealtime[],
+  isAdmin: boolean
+): StockRealtime[] {
+  if (isAdmin) {
+    return stocks; // Admins see all stocks
+  }
+  return stocks.filter((stock) => stock.isVisible);
 }

@@ -73,10 +73,7 @@ import {
   TextField,
   Typography,
   Alert,
-  Stack,
   Button,
-  FormControlLabel,
-  Checkbox,
   InputAdornment,
   IconButton,
   Link,
@@ -166,7 +163,6 @@ export default function LoginForm(): React.ReactElement {
   // form state
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [remember, setRemember] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -206,7 +202,7 @@ export default function LoginForm(): React.ReactElement {
     setLoading(true);
 
     try {
-      const res = await login({ email, password, remember });
+      const res = await login({ email, password, remember: false });
       setLoading(false);
 
       if (!res.ok) {
@@ -321,24 +317,11 @@ export default function LoginForm(): React.ReactElement {
             }}
           />
 
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="space-between"
-          >
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={remember}
-                  onChange={(e) => setRemember(e.target.checked)}
-                />
-              }
-              label="Remember me"
-            />
+          <Box display="flex" justifyContent="flex-end">
             <Link component={RouterLink} to="/forgot-password" variant="body2">
               Forgot password?
             </Link>
-          </Stack>
+          </Box>
 
           <Button
             type="submit"
@@ -362,10 +345,7 @@ export default function LoginForm(): React.ReactElement {
             setSuccess(null);
             setLoading(true);
             try {
-              await setPersistence(
-                auth,
-                remember ? browserLocalPersistence : browserSessionPersistence
-              );
+              await setPersistence(auth, browserSessionPersistence);
               const provider = new GoogleAuthProvider();
               const cred = await signInWithPopup(auth, provider);
               const user = cred.user;
