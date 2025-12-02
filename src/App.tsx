@@ -12,9 +12,9 @@ import About from './pages/About';
 import ForgotPasswordPage from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/AdminPage';
-import GettingStarted from './pages/gettingStarted.tsx';
-import SettingsPanel from './components/settings/SettingsPanel.tsx';
-import PredictionsPage from './pages/PredictionsPage.tsx';
+import GettingStarted from './pages/GettingStarted';
+import SettingsPanel from './components/settings/SettingsPanel';
+import PredictionsPage from './pages/PredictionsPage';
 
 import { AuthProvider, AdminRoute } from './components/layout/AuthContext.tsx';
 
