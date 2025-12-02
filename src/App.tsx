@@ -12,8 +12,9 @@ import About from './pages/About';
 import ForgotPasswordPage from './pages/ForgotPassword';
 import Dashboard from './pages/Dashboard';
 import AdminPage from './pages/AdminPage';
-import SettingsPanel from './components/settings/SettingsPanel.tsx';
-import PredictionsPage from './pages/PredictionsPage.tsx';
+import GettingStarted from './pages/GettingStarted';
+import SettingsPanel from './components/settings/SettingsPanel';
+import PredictionsPage from './pages/PredictionsPage';
 
 import { AuthProvider, AdminRoute } from './components/layout/AuthContext.tsx';
 
@@ -62,6 +63,7 @@ function App() {
         <Route path="/stocks" element={<StockListingPage />} />
         <Route path="/stocks/:symbol" element={<StockDetail />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/gettingstarted" element={<GettingStarted />} />
         <Route path="/settings" element={<SettingsPanel />} />
         <Route path="/predictions" element={<PredictionsPage />} />
 
