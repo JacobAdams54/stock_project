@@ -52,10 +52,15 @@ const GettingStarted: React.FC = () => {
               elevation={0}
               sx={{
                 height: "100%",
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper",
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+                    "&:hover": {
+                      boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                      transform: "translateY(-4px)",
+                    },
               }}
             >
               <CardContent sx={{ p: 3 }}>
@@ -88,10 +93,15 @@ const GettingStarted: React.FC = () => {
               elevation={0}
               sx={{
                 height: "100%",
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper",
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+                    "&:hover": {
+                      boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                      transform: "translateY(-4px)",
+                    },
               }}
             >
               <CardContent sx={{ p: 3 }}>
@@ -124,10 +134,15 @@ const GettingStarted: React.FC = () => {
               elevation={0}
               sx={{
                 height: "100%",
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper",
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+                    "&:hover": {
+                      boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                      transform: "translateY(-4px)",
+                    },
               }}
             >
               <CardContent sx={{ p: 3 }}>
@@ -160,10 +175,15 @@ const GettingStarted: React.FC = () => {
               elevation={0}
               sx={{
                 height: "100%",
-                borderRadius: 3,
-                border: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper",
+                    borderRadius: 3,
+                    border: "1px solid",
+                    borderColor: "divider",
+                    bgcolor: "background.paper",
+                    transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+                    "&:hover": {
+                      boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                      transform: "translateY(-4px)",
+                    },
               }}
             >
               <CardContent sx={{ p: 3 }}>
@@ -243,6 +263,11 @@ const GettingStarted: React.FC = () => {
               border: "2px solid",
               borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -277,8 +302,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(76, 175, 80, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -313,8 +343,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(255, 152, 0, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -349,8 +384,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(156, 39, 176, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -385,8 +425,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(0, 188, 212, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -421,8 +466,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(255, 193, 7, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -457,8 +507,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(63, 81, 181, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -493,8 +548,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(244, 67, 54, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -529,8 +589,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(3, 169, 244, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
@@ -565,8 +630,13 @@ const GettingStarted: React.FC = () => {
             sx={{
               borderRadius: 3,
               border: "2px solid",
-              borderColor: "rgba(156, 39, 176, 0.3)",
+              borderColor: "rgba(33, 150, 243, 0.3)",
               bgcolor: "background.paper",
+              transition: "box-shadow 0.3s ease-in-out, transform 0.3s ease-in-out",
+              "&:hover": {
+                boxShadow: "0 4px 20px 0 rgba(0,0,0,0.12)",
+                transform: "translateY(-2px)",
+              },
             }}
           >
             <CardContent sx={{ display: "flex", alignItems: "flex-start", gap: 2.5, p: 3 }}>
