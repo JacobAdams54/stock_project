@@ -14,18 +14,17 @@ import Grid from '@mui/material/Grid';
 // Icons
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import TrendingDownIcon from "@mui/icons-material/TrendingDown";
-import TimelineIcon from "@mui/icons-material/Timeline";
 import ShowChartIcon from "@mui/icons-material/ShowChart";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
-import CandlestickChartIcon from "@mui/icons-material/CandlestickChart";
 import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
 import InsightsIcon from "@mui/icons-material/Insights";
 import ShieldOutlinedIcon from "@mui/icons-material/ShieldOutlined";
 import PulseIcon from "@mui/icons-material/MultilineChart";
 import PublicIcon from "@mui/icons-material/Public";
-import PsychologyIcon from "@mui/icons-material/Psychology";
-
+import PieChartIcon from '@mui/icons-material/PieChart';
+import WaterfallChartIcon from '@mui/icons-material/WaterfallChart';
+import StackedLineChartIcon from '@mui/icons-material/StackedLineChart';
 const GettingStarted: React.FC = () => {
   return (
     <Box sx={{ bgcolor: "background.default" }}>
@@ -144,7 +143,7 @@ const GettingStarted: React.FC = () => {
                     mb: 2,
                   }}
                 >
-                  <TimelineIcon sx={{ color: "rgb(3, 169, 244)" }} />
+                  <PieChartIcon sx={{ color: "rgb(3, 169, 244)" }} />
                 </Box>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 500, mb: 1.5 }}>
                   Diversification
@@ -259,7 +258,7 @@ const GettingStarted: React.FC = () => {
                   flexShrink: 0,
                 }}
               >
-                <CandlestickChartIcon sx={{ fontSize: 28, color: "rgb(33, 150, 243)" }} />
+                <WaterfallChartIcon sx={{ fontSize: 28, color: "rgb(33, 150, 243)" }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ color: "rgb(25, 118, 210)", fontWeight: 500, mb: 0.5 }}>
@@ -583,7 +582,7 @@ const GettingStarted: React.FC = () => {
                   flexShrink: 0,
                 }}
               >
-                <PsychologyIcon sx={{ fontSize: 28, color: "rgb(123, 31, 162)" }} />
+                <StackedLineChartIcon sx={{ fontSize: 28, color: "rgb(123, 31, 162)" }} />
               </Box>
               <Box>
                 <Typography variant="h6" sx={{ color: "rgb(106, 27, 154)", fontWeight: 500, mb: 0.5 }}>
