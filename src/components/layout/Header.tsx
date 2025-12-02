@@ -10,6 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Stack from '@mui/material/Stack';
+import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
@@ -108,10 +109,13 @@ export default function Header() {
 
     // Authenticated user: show Admin (if admin) and Log Out
     return (
-      <Stack direction="row" spacing={1}>
+      <Stack direction="row" spacing={1} alignItems="center">
         {isAdmin && (
           <Button component={RouterLink} to="/admin">Admin</Button>
         )}
+        <Typography variant="body2" sx={{ color: 'text.secondary', px: 1 }}>
+          {user.displayName || user.email}
+        </Typography>
         <Button onClick={handleLogOut}>Log Out</Button>
       </Stack>
     );
@@ -230,6 +234,11 @@ return (
                     Admin
                   </MenuItem>
                 )}
+                <MenuItem disabled>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {user.displayName || user.email}
+                  </Typography>
+                </MenuItem>
                 <MenuItem onClick={() => handleLogOut()}>
                   Log Out
                 </MenuItem>
