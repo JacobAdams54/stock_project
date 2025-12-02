@@ -58,7 +58,8 @@ export default function Header() {
   const open = Boolean(anchorEl);
   const menuId = 'primary-navigation-menu';
 
-  const openMenu = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
+  const openMenu = (e: React.MouseEvent<HTMLElement>) =>
+    setAnchorEl(e.currentTarget);
   const closeMenu = React.useCallback(() => setAnchorEl(null), []);
 
   /**
@@ -85,8 +86,7 @@ export default function Header() {
     } catch (error) {
       // eslint-disable-next-line no-console
       console.warn('Error signing out:', error);
-    }
-    finally {
+    } finally {
       closeMenu();
     }
   }, [closeMenu, navigate]);
@@ -97,10 +97,22 @@ export default function Header() {
     if (!user) {
       return (
         <>
-          <Button component={RouterLink} to="/login" color="inherit" variant="text" size="small">
+          <Button
+            component={RouterLink}
+            to="/login"
+            color="inherit"
+            variant="text"
+            size="small"
+          >
             Login
           </Button>
-          <Button component={RouterLink} to="/signup" color="primary" variant="contained" size="small">
+          <Button
+            component={RouterLink}
+            to="/signup"
+            color="primary"
+            variant="contained"
+            size="small"
+          >
             Sign Up
           </Button>
         </>
@@ -111,7 +123,9 @@ export default function Header() {
     return (
       <Stack direction="row" spacing={1} alignItems="center">
         {isAdmin && (
-          <Button component={RouterLink} to="/admin">Admin</Button>
+          <Button component={RouterLink} to="/admin">
+            Admin
+          </Button>
         )}
         <Typography variant="body2" sx={{ color: 'text.secondary', px: 1 }}>
           {user.displayName || user.email}
@@ -121,133 +135,140 @@ export default function Header() {
     );
   };
 
-return (
-  <header role="banner" data-testid="header">
-    <AppBar
-      component="div"
-      position="sticky"
-      color="transparent"
-      elevation={0}
-      sx={{
-        bgcolor: 'background.paper',
-        borderBottom: 1,
-        borderColor: 'divider',
-        zIndex: (t) => t.zIndex.appBar,
-      }}
-    >
-      <Container maxWidth="lg">
-        <Toolbar disableGutters sx={{ minHeight: 64, gap: 2 }}>
-          {/* Logo (Home link) */}
-          <Box
-            data-testid="logo"
-            component={RouterLink}
-            to="/"
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              cursor: 'pointer',
-              textDecoration: 'none',
-            }}
-            aria-label="Go to Home"
-            role="link"
-          >
-            <Logo />
-          </Box>
-
-          {/* spacer */}
-          <Box sx={{ flexGrow: 1 }} />
-
-          {/* Desktop nav */}
-          {isDesktop ? (
-            <Stack
-              direction="row"
-              spacing={2}
-              alignItems="center"
-              component="nav"
-              aria-label="Main navigation"
+  return (
+    <header role="banner" data-testid="header">
+      <AppBar
+        component="div"
+        position="sticky"
+        color="transparent"
+        elevation={0}
+        sx={{
+          bgcolor: 'background.paper',
+          borderBottom: 1,
+          borderColor: 'divider',
+          zIndex: (t) => t.zIndex.appBar,
+        }}
+      >
+        <Container maxWidth="lg">
+          <Toolbar disableGutters sx={{ minHeight: 64, gap: 2 }}>
+            {/* Logo (Home link) */}
+            <Box
+              data-testid="logo"
+              component={RouterLink}
+              to="/"
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                cursor: 'pointer',
+                textDecoration: 'none',
+              }}
+              aria-label="Go to Home"
+              role="link"
             >
-              {/* Primary nav */}
-              <Stack direction="row" spacing={1}>
-                {NAV_LINKS.map(({ label, to }) => (
-                  <Button
-                    key={to}
-                    component={RouterLink}
-                    to={to}
-                    color={isActive(to) ? 'primary' : 'inherit'}
-                    variant={isActive(to) ? 'contained' : 'text'}
-                    size="small"
-                  >
-                    {label}
-                  </Button>
-                ))}
-              </Stack>
+              <Logo />
+            </Box>
 
-              <Box sx={{ width: 8 }} />
+            {/* spacer */}
+            <Box sx={{ flexGrow: 1 }} />
 
-              {/* Auth/Admin */}
-              <Stack direction="row" spacing={1} alignItems="center">
-                {authButtons()}
-              </Stack>
-            </Stack>
-          ) : (
-            // Mobile: hamburger
-            <IconButton
-              size="small"
-              edge="end"
-              aria-label="Open navigation menu"
-              aria-controls={open ? menuId : undefined}
-              aria-haspopup="true"
-              aria-expanded={open ? 'true' : undefined}
-              onClick={openMenu}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-
-          {/* Mobile Menu (uses RouterLink in MenuItem) */}
-          <Menu
-            id={menuId}
-            anchorEl={anchorEl}
-            open={open}
-            onClose={closeMenu}
-            keepMounted
-            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          >
-            {NAV_LINKS.map(({ label, to }) => (
-              <MenuItem
-                key={to}
-                component={RouterLink}
-                to={to}
-                onClick={closeMenu}
-                selected={isActive(to)}
-                aria-current={isActive(to) ? 'page' : undefined}
+            {/* Desktop nav */}
+            {isDesktop ? (
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                component="nav"
+                aria-label="Main navigation"
               >
-                {label}
-              </MenuItem>
-            ))}
-            {/* Auth/Admin Links */}
-            {!loading && user && (
-              <>
-                {isAdmin && (
-                  <MenuItem component={RouterLink} to="/admin" onClick={closeMenu} selected={isActive('/admin')} aria-current={isActive('/admin') ? 'page' : undefined}>
-                    Admin
-                  </MenuItem>
-                )}
-                <MenuItem disabled>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {user.displayName || user.email}
-                  </Typography>
-                </MenuItem>
-                <MenuItem onClick={() => handleLogOut()}>
-                  Log Out
-                </MenuItem>
-              </>
+                {/* Primary nav */}
+                <Stack direction="row" spacing={1}>
+                  {NAV_LINKS.map(({ label, to }) => (
+                    <Button
+                      key={to}
+                      component={RouterLink}
+                      to={to}
+                      color={isActive(to) ? 'primary' : 'inherit'}
+                      variant={isActive(to) ? 'contained' : 'text'}
+                      size="small"
+                    >
+                      {label}
+                    </Button>
+                  ))}
+                </Stack>
+
+                <Box sx={{ width: 8 }} />
+
+                {/* Auth/Admin */}
+                <Stack direction="row" spacing={1} alignItems="center">
+                  {authButtons()}
+                </Stack>
+              </Stack>
+            ) : (
+              // Mobile: hamburger
+              <IconButton
+                size="small"
+                edge="end"
+                aria-label="Open navigation menu"
+                aria-controls={open ? menuId : undefined}
+                aria-haspopup="true"
+                aria-expanded={open ? 'true' : undefined}
+                onClick={openMenu}
+              >
+                <MenuIcon />
+              </IconButton>
             )}
-          </Menu>
-        </Toolbar>
-      </Container>
-    </AppBar>
-  </header>
-);
+
+            {/* Mobile Menu (uses RouterLink in MenuItem) */}
+            <Menu
+              id={menuId}
+              anchorEl={anchorEl}
+              open={open}
+              onClose={closeMenu}
+              keepMounted
+              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+            >
+              {NAV_LINKS.map(({ label, to }) => (
+                <MenuItem
+                  key={to}
+                  component={RouterLink}
+                  to={to}
+                  onClick={closeMenu}
+                  selected={isActive(to)}
+                  aria-current={isActive(to) ? 'page' : undefined}
+                >
+                  {label}
+                </MenuItem>
+              ))}
+              {/* Auth/Admin Links */}
+              {!loading && user && (
+                <>
+                  {isAdmin && (
+                    <MenuItem
+                      component={RouterLink}
+                      to="/admin"
+                      onClick={closeMenu}
+                      selected={isActive('/admin')}
+                      aria-current={isActive('/admin') ? 'page' : undefined}
+                    >
+                      Admin
+                    </MenuItem>
+                  )}
+                  <MenuItem disabled>
+                    <Typography
+                      variant="body2"
+                      sx={{ color: 'text.secondary' }}
+                    >
+                      {user.displayName || user.email}
+                    </Typography>
+                  </MenuItem>
+                  <MenuItem onClick={() => handleLogOut()}>Log Out</MenuItem>
+                </>
+              )}
+            </Menu>
+          </Toolbar>
+        </Container>
+      </AppBar>
+    </header>
+  );
 }
