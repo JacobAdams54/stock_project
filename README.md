@@ -3,7 +3,7 @@
 [![CI](https://github.com/JacobAdams54/stock_project/actions/workflows/ci.yml/badge.svg)](https://github.com/JacobAdams54/stock_project/actions/workflows/ci.yml)
 [![Node Version](https://img.shields.io/badge/node-18%2B-brightgreen)](https://nodejs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)](https://www.typescriptlang.org/)
-[![React](https://img.shields.io/badge/React-18.2-61DAFB?logo=react)](https://reactjs.org/)
+[![React](https://img.shields.io/badge/React-19.2-61DAFB?logo=react)](https://reactjs.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-12.4-FFCA28?logo=firebase)](https://firebase.google.com/)
 
 Stalk.ai is a web application that helps investors make smarter decisions by combining **real-time market data** with **machine learning–driven predictions**. Users can build custom portfolios, explore predictive stock insights, and manage their investments through an intuitive and modern interface.
