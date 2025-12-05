@@ -8,6 +8,12 @@
 
 Stalk.ai is a web application that helps investors make smarter decisions by combining **real-time market data** with **machine learning–driven predictions**. Users can build custom portfolios, explore predictive stock insights, and manage their investments through an intuitive and modern interface.
 
+## 🌐 Live Demo
+
+👉 **https://stock-project-32dbd.web.app/**
+
+---
+
 ## 📋 Table of Contents
 
 - [Features](#-features)
@@ -428,18 +434,6 @@ Please read [CONTRIBUTING.md](./documentation/contributing.md) for detailed guid
 ```bash
 # Run TypeScript check to see detailed errors
 npm run build
-```
-
-**Port 5173 already in use**
-```bash
-# Kill process on port 5173 (Unix/Linux/Mac)
-# First try graceful shutdown
-lsof -ti:5173 | xargs kill
-
-# If that doesn't work, force kill
-lsof -ti:5173 | xargs kill -9
-
-# Or change port in vite.config.ts
 ```
 
 **Firebase connection issues**
