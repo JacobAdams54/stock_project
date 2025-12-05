@@ -278,7 +278,7 @@ stock_project/
 │   ├── App.tsx            # Root component
 │   └── main.tsx           # Application entry point
 ├── .env                    # Environment variables (not committed)
-├── .eslintrc.config.js     # ESLint configuration
+├── eslint.config.js        # ESLint configuration
 ├── .prettierrc             # Prettier configuration
 ├── babel.config.json       # Babel configuration (for Jest)
 ├── firebase.json           # Firebase hosting configuration
@@ -433,6 +433,10 @@ npm run build
 **Port 5173 already in use**
 ```bash
 # Kill process on port 5173 (Unix/Linux/Mac)
+# First try graceful shutdown
+lsof -ti:5173 | xargs kill
+
+# If that doesn't work, force kill
 lsof -ti:5173 | xargs kill -9
 
 # Or change port in vite.config.ts
