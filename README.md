@@ -67,7 +67,7 @@ Stalk.ai is a web application that helps investors make smarter decisions by com
 
 - **Frontend:** React + Tailwind CSS + Material UI
 - **Backend/Hosting:** Firebase (Authentication, Firestore, Hosting)
-- **Machine Learning:** Camber Cloud AI Server with Linear Regression Model
+- **Machine Learning:** Custom AI models created by ML team
 - **Version Control:** GitHub
 
 ---
@@ -75,7 +75,7 @@ Stalk.ai is a web application that helps investors make smarter decisions by com
 ## 📊 System Overview
 
 - **Deployment Diagram:** The app connects a React frontend with Firebase (hosting, Firestore, auth) and an AI server that handles prediction requests (_see diagram in SRS, p.8_).
-- **Data Updates:** Predictions refresh automatically at stock market open/close; users may request up to 5 manual updates per day.
+- **Data Updates:** Predictions refresh automatically at stock market open/close.
 - **Performance:** Firebase ensures real-time data sync, while the AI engine provides timely predictions with high reliability.
 
 ---
@@ -127,14 +127,13 @@ For detailed information, see our comprehensive documentation:
 
 ## License
 
-This project is developed as part of an educational program. All rights reserved by the project team.
+This project is developed as part of an educational project. All rights reserved by the project team.
 
 ---
 
 ## Acknowledgements
 
 - **Firebase** for providing the backend infrastructure
-- **Camber Cloud** for AI/ML capabilities
 - **Material UI** and **Tailwind CSS** for the design system
 - **Vite** for the blazing-fast development experience
 - **React** and the open-source community
@@ -307,14 +306,14 @@ stock_project/
 │   (Vite + TS)    │
 └────────┬────────┘
          │
-         ├─────────────────────┐
-         │                     │
-┌────────▼────────┐   ┌────────▼────────┐
-│  Firebase        │   │  AI Server      │
-│  - Auth          │   │  (Camber Cloud) │
-│  - Firestore     │   │  - Linear       │
-│  - Hosting       │   │    Regression   │
-└──────────────────┘   └─────────────────┘
+         |
+         │                     
+┌────────▼────────┐    ┌────────────────┐
+│  Firebase        │   │   AI Server    │
+│  - Auth          │   │                |
+│  - Firestore     │<--│                │
+│  - Hosting       │   │                │
+└──────────────────┘   └────────────────┘
 ```
 
 ### Data Flow
@@ -323,8 +322,7 @@ stock_project/
 2. **Stock Data:** Real-time updates via Firestore listeners
 3. **AI Predictions:** 
    - Automatic refresh at market open/close
-   - Manual refresh (5 times per day limit)
-   - Linear regression model hosted on Camber Cloud AI Server
+   - Models are updated daily and stored into firebase for user queries
 4. **Portfolio Management:** Firestore stores user portfolios and watchlists
 
 ### Technology Decisions
